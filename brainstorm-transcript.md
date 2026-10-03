@@ -3,7 +3,7 @@
 Team brainstorm for the Hack Nation × World Bank agriculture case.
 
 - **Source:** Notion AI meeting notes on the team's Hack Nation page: https://app.notion.com/p/dryftteam/Hack-Nation-3ee2073003ce80468657e08de8ba7ae3 (current meeting: "Meeting @Today")
-- **Last synced:** 2026-10-03 18:38 UTC (Notion page last edited 18:38 UTC)
+- **Last synced:** 2026-10-03 18:43 UTC (Notion page last edited 18:42 UTC)
 - **To update:** ask Claude to "sync the transcript". It pulls the latest from Notion, replaces the raw transcript below and updates the summary sections.
 
 The transcript is automatic speech-to-text, so expect errors. For example, "Cloud Code" / "Cloud MD" mean Claude Code / CLAUDE.md, "a disease on their blood" probably means on their plant or leaf, "World Health" probably means World Bank, "metamans" / "mill man" mean middlemen, "kiamas" means chamas and "eight CCOs" probably means SACCOs.
@@ -97,12 +97,12 @@ A teammate worried that a voice diary alone won't solve the problem, and that th
 - Concern raised: none of this can be verified without paper records.
 
 ### How smallholders borrow today
-- **Philippines (teammate's experience): "5-6" lending.** Borrow $5 on Monday, pay back $6 at the end of the week, about 20% interest per week. Lenders are individuals from the village, and they collect by intimidation.
-- **Kenya:** **chamas** (villagers pool money and lend to each other), **cooperative advances** before the harvest, and **SACCOs** (savings and credit cooperatives).
+- **"5-6" lending (a teammate's experience in the Philippines):** borrow $5 on Monday, pay back $6 at the end of the week, about 20% interest per week. Lenders are individuals from the village, and they collect by intimidation.
+- **Examples from Kenya mentioned in the meeting (not a setting decision):** **chamas** (villagers pool money and lend to each other), **cooperative advances** before the harvest, and **SACCOs** (savings and credit cooperatives).
 - Next step from the meeting: check how other startups do it (see the research section below).
 
-### Kenya may already have a farmer registry
-In the meeting: in Kenya, farmers registered through local officers receive an **e-voucher on their phone** to collect subsidised fertiliser, so a registry seems to exist already. *Claude's note:* this is likely Kenya's **KIAMIS** system, used for the national fertiliser subsidy programme. It weakens "we create the registry" as a use case if we set the story in Kenya, but our record could plug into it instead. To verify (see "To check").
+### Some countries already have a farmer registry
+In the meeting: in Kenya, farmers registered through local officers receive an **e-voucher on their phone** to collect subsidised fertiliser, so a registry exists there. *Claude's note:* this is likely the **KIAMIS** system behind the national fertiliser subsidy. So "we create the registry" only holds where none exists, as in the brief's fictional Ondera. Where one exists, our record plugs into it instead. To verify (see "To check").
 
 ---
 
@@ -180,6 +180,59 @@ Ordered by the team's current priority. Combines the meeting, the whiteboard, th
 
 ---
 
+## Use cases by timeframe
+
+Claude's proposal on 2026-10-03, answering "what are the use cases, first individual, then collective, immediate / mid / long term". Not yet discussed by the team.
+
+**Immediate** = next day to a few weeks · **Mid** = this season to the next harvest · **Long** = two years or more
+
+### Individual: Noor
+
+**Immediate**
+- **Read-back:** after each call, a short voice reply confirms what was recorded ("You sprayed two rows on the upper plot. Correct?"). This doubles as the human check.
+- **"Is it just me?":** the next day she hears whether neighbours reported the same problem, and that the extension officer knows. A web search can't tell her this, so it's a day-one reason to call that isn't generic advice.
+- **Memory on demand:** "When did I last apply fertiliser?" is answered from her own record.
+
+**Mid**
+- **Season summary:** activities, harvest, and what she sold, to whom and for how much, on one page (or read out) for the cooperative or a lender.
+- **Price memory:** what she was paid last time and this time, so she negotiates with the middleman with numbers.
+- **Cooperative advance or input credit** based on her record and deliveries.
+
+**Long**
+- **Credit history:** two or three seasons of consistent records mean bigger, cheaper loans.
+- **Certification:** organic needs about three years of records before the first certified harvest.
+- **Yield diagnosis:** her yield trend compared with her neighbours' separates her practices (shade, old trees, pruning) from climate.
+- **Succession and land:** a diary for her daughter; proof of land quality when she sells or leases.
+
+### Collective: cooperative, extension officer, region
+
+**Immediate**
+- **Early warning:** several reports of the same symptom in one area in one week trigger an alert to the extension officer, plus a visit list ranked by urgency.
+- **Broadcast back:** a voice message to every member in that area ("rust reported nearby, check your trees"). One farmer's report helps everyone.
+
+**Mid**
+- **Harvest forecast:** expected volume per area, so the cooperative can plan buyers, transport and pre-harvest finance.
+- **Price transparency:** anonymised prices that middlemen paid this week, so members know a fair price.
+- **Group certification:** Fairtrade, Rainforest Alliance and organic certify smallholders as groups, so the cooperative needs records for every member farm (an "internal control system"). Our record feeds that. Certification is therefore both an individual and a collective use.
+- **Registry and group loans:** a list of active farmers with records, for services, subsidies and group lending.
+
+**Long**
+- **What works here:** which practices go with better yields across farms, giving local advice that beats generic search.
+- **Climate or practice:** regional yield trends combined with rainfall and soil data by location.
+- **Insurance:** area-yield index insurance needs years of yield data per area.
+- **Bargaining power** (the whiteboard's "future"), and **local-language voice data**, used only with consent, to improve speech AI for that language. This ties into the "localizing AI" question.
+
+### How to make the record more useful
+1. **Give something back on every call** (read-back plus one useful line). Otherwise farmers stop logging and the long-term uses never arrive.
+2. **Record numbers, not just stories:** date, plot, quantity, price, buyer type and payment method. Loans, certification and forecasts all need numbers.
+3. **Tie each record to a place** (plot or geotag), so weather and soil data attach automatically.
+4. **Anchor it to something verifiable:** cooperative delivery records, mobile money with consent, receipt photos at expert visits, and regional outlier checks.
+5. **Show one record in several views:** voice for Noor, a list or map for the cooperative, a one-page summary for a lender and a practice log for certifiers. Noor decides who sees what.
+
+**For the pitch:** the immediate collective uses (alerts, "is it just me?") keep Noor calling. The long-term individual uses (loans, certification, land) make the record valuable. One needs the other.
+
+---
+
 ## Still open
 
 **Decided: the channel is a phone call with a voicemail**
@@ -208,7 +261,7 @@ The brief says Noor's own phone is used for "calls, messages, and mobile money" 
 12. Whether lenders would accept these records. See "Research: how others lend to smallholder farmers" above.
 13. Problem evidence with source, year and country: FAOSTAT coffee yields, extension officers per farmer (once we pick a country), certification premiums, smallholder access to credit.
 14. Test data without real farmer recordings: synthetic voice notes, clearly labelled as synthetic.
-15. **Does Kenya already have a working farmer registry** (KIAMIS, fertiliser e-vouchers)? If yes, the "Registry" use case (#3) changes: we feed the existing registry instead of creating one, or we set the story in the brief's fictional Ondera without a registry.
+15. **Which countries already have a working farmer registry** (e.g. Kenya's KIAMIS fertiliser e-vouchers, mentioned in the meeting)? This matters once the team picks a country: there, use case #3 becomes "feed the existing registry" instead of "create one".
 
 ---
 

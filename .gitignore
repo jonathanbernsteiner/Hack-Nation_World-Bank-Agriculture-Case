@@ -1,0 +1,20 @@
+# Secrets: keys live in .env, never in the repo. Copy .env.example to start.
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node
+node_modules/
+.next/
+.vercel/
+.vercel
+.env*
+!.env.example

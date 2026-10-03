@@ -1,8 +1,8 @@
-"""Twilio voice webhook for the farm record demo call (issue #14).
+"""Twilio voice webhook for the farm record demo call (issues #14, #15).
 
 When someone dials our Twilio number, Twilio posts to these routes. We greet the
 caller, collect their PIN on the keypad and record a spoken recap of their day.
-#15 forwards the finished recording, with the PIN, to `POST /calls` (#11).
+When the recording is ready, `forwarder` sends it with the PIN to `POST /calls` (#11).
 """
 
 import logging
@@ -10,9 +10,11 @@ import os
 import re
 import threading
 
-from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, Response
 from twilio.request_validator import RequestValidator
 from twilio.twiml.voice_response import VoiceResponse
+
+from twilio_line.forwarder import forward_recording
 
 PIN_PATTERN = re.compile(r"\d{4,8}")
 MAX_PIN_ATTEMPTS = 2
@@ -144,3 +146,19 @@ async def recap_recorded(request: Request) -> Response:
     response.say(GOODBYE)
     response.hangup()
     return _twiml(response)
+
+
+@app.post("/twilio/recording", status_code=204)
+async def recording_ready(request: Request, background_tasks: BackgroundTasks) -> Response:
+    """Twilio says the recording file is ready. Answer at once; forwarding to /calls runs afterwards."""
+    form = await _verified_form(request)
+    call_sid = form.get("CallSid", "")
+    status = form.get("RecordingStatus", "")
+    pin = pin_for_call(call_sid)
+    if status != "completed":
+        logger.info("Call %s: ignoring recording status %r", call_sid, status)
+    elif pin is None:
+        logger.error("Call %s: recording ready but no PIN was entered; nothing sent", call_sid)
+    else:
+        background_tasks.add_task(forward_recording, call_sid, form.get("RecordingUrl", ""), pin)
+    return Response(status_code=204)

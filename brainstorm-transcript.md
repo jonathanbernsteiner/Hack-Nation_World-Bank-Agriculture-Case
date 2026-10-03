@@ -97,12 +97,12 @@ A teammate worried that a voice diary alone won't solve the problem, and that th
 - Concern raised: none of this can be verified without paper records.
 
 ### How smallholders borrow today
-- **"5-6" lending (a teammate's experience in the Philippines):** borrow $5 on Monday, pay back $6 at the end of the week, about 20% interest per week. Lenders are individuals from the village, and they collect by intimidation.
-- **Examples from Kenya mentioned in the meeting (not a setting decision):** **chamas** (villagers pool money and lend to each other), **cooperative advances** before the harvest, and **SACCOs** (savings and credit cooperatives).
+- **"5-6" lending (from a teammate's experience):** borrow $5 on Monday, pay back $6 at the end of the week, about 20% interest per week. Lenders are individuals from the village, and they collect by intimidation.
+- **Other examples from the meeting:** **savings groups** such as chamas (villagers pool money and lend to each other), **cooperative advances** before the harvest, and **SACCOs** (savings and credit cooperatives).
 - Next step from the meeting: check how other startups do it (see the research section below).
 
 ### Some countries already have a farmer registry
-In the meeting: in Kenya, farmers registered through local officers receive an **e-voucher on their phone** to collect subsidised fertiliser, so a registry exists there. *Claude's note:* this is likely the **KIAMIS** system behind the national fertiliser subsidy. So "we create the registry" only holds where none exists, as in the brief's fictional Ondera. Where one exists, our record plugs into it instead. To verify (see "To check").
+In the meeting: in at least one country, farmers registered through local officers receive an **e-voucher on their phone** to collect subsidised fertiliser, so a national registry exists there. So "we create the registry" only holds where none exists, as in the brief's fictional Ondera. Where one exists, our record plugs into it instead. To verify (see "To check").
 
 ---
 
@@ -261,7 +261,7 @@ The brief says Noor's own phone is used for "calls, messages, and mobile money" 
 12. Whether lenders would accept these records. See "Research: how others lend to smallholder farmers" above.
 13. Problem evidence with source, year and country: FAOSTAT coffee yields, extension officers per farmer (once we pick a country), certification premiums, smallholder access to credit.
 14. Test data without real farmer recordings: synthetic voice notes, clearly labelled as synthetic.
-15. **Which countries already have a working farmer registry** (e.g. Kenya's KIAMIS fertiliser e-vouchers, mentioned in the meeting)? This matters once the team picks a country: there, use case #3 becomes "feed the existing registry" instead of "create one".
+15. **Which countries already have a working farmer registry** (e.g. the fertiliser e-voucher registry mentioned in the meeting)? This matters once the team picks a country: there, use case #3 becomes "feed the existing registry" instead of "create one".
 
 ---
 

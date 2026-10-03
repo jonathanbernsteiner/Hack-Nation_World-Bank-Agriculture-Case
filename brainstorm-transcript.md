@@ -3,10 +3,10 @@
 Team brainstorm for the Hack Nation × World Bank agriculture case.
 
 - **Source:** Notion AI meeting notes on the team's Hack Nation page: https://app.notion.com/p/dryftteam/Hack-Nation-3ee2073003ce80468657e08de8ba7ae3 (current meeting: "Meeting @Today")
-- **Last synced:** 2026-10-03 21:13 UTC (Notion page last edited 21:13 UTC)
+- **Last synced:** 2026-10-03 21:53 UTC (Notion page last edited 21:53 UTC)
 - **To update:** ask Claude to "sync the transcript". It pulls the latest from Notion, replaces the raw transcript below and updates the summary sections.
 
-The transcript is automatic speech-to-text, so expect errors. For example, "Cloud Code" / "Cloud MD" mean Claude Code / CLAUDE.md, "a disease on their blood" probably means on their plant or leaf, "World Health" probably means World Bank, "metamans" / "mill man" mean middlemen, "kiamas" means chamas and "eight CCOs" probably means SACCOs. "Neuer" / "Newark" mean Noor, "11 lives" / "11.1" mean ElevenLabs, "Olive Trillo" / "Julio" probably mean Twilio, "chirps" means CHIRPS and "Harvard's estimates" means harvest estimates. "Codecs" means Codex, "init scale" and "create my project" mean the team's `init` and `create-project` skills, and "trailer connection" probably means the Twilio connection.
+The transcript is automatic speech-to-text, so expect errors. For example, "Cloud Code" / "Cloud MD" mean Claude Code / CLAUDE.md, "a disease on their blood" probably means on their plant or leaf, "World Health" probably means World Bank, "metamans" / "mill man" mean middlemen, "kiamas" means chamas and "eight CCOs" probably means SACCOs. "Neuer" / "Newark" mean Noor, "11 lives" / "11.1" mean ElevenLabs, "Olive Trillo" / "Julio" / "Trillio" / "Twilly" / "Valio" mean Twilio, "Superbase" means Supabase, "Wurzel" / "for Sal" mean Vercel, "Nora" means Noor, "chirps" / "troops data" mean CHIRPS and "Harvard's estimates" means harvest estimates. "Codecs" means Codex, "init scale" / "that scale" and "create my project" mean the team's `init` and `create-project` skills, and "trailer connection" probably means the Twilio connection. "I did then care about failure that we set up the account" probably means "I'll take care of setting up the Twilio account".
 
 ---
 
@@ -103,7 +103,15 @@ Long debate in the latest part of the meeting:
 
 **Update (21:13 UTC):** for the demo, Ethan's phone runs a **Twilio agent** that sends everything to his server. The video says explicitly that production runs on a server with a GSM modem.
 
-**Can judges try it?** The brief asks for a link. The team won't run a public phone line (it costs per call and needs the Twilio set-up). Instead, the dashboard gets a **"simulate a call" button** that runs a call through the same flow (a teammate did this at a previous hackathon). Asked whether a hosted cloud version is possible for the submission, the team said "of course", it's easy, and it will be included.
+**Update (21:53 UTC): the demo call flow**
+- **Twilio runs in the cloud** for the demo ("for now, unfortunately"), so it isn't fully local. It holds the live conversation with the caller, records it, and sends the **audio or full transcript to Ethan's laptop**, which plays "the box".
+- Ethan's laptop holds the **database** and runs the model that reads the transcript and **pulls out a structured object** (see "What one call records").
+- In production, the box is a **SIM card in a GSM modem** on a server ("SIM farming": buy a SIM at the supermarket and plug it in). The demo is a "bootstrap version" of that.
+- First job for the Twilio owner: get a Twilio call into an **audio file and a full transcript**. Moving it to Ethan's laptop gets worked out together afterwards.
+- **Database:** Ethan planned to host it locally. A teammate suggested **Supabase**, since everyone needs access to the data. Ethan agreed it's an option, though it's meant to be local (he joked that saving to Supabase is "cheating").
+- **Pushback:** a teammate is still sceptical of the local set-up. They read that about **97% of Kenya has 4G**, and a local box is much more complicated than calling a server without adding value. Others replied that leaving out villages with no internet still matters. A teammate also noted Noor's daughter has internet (she watches YouTube), so the village isn't fully cut off. That supports pulling NASA weather data whenever a connection is up (e.g. an hourly job).
+
+**Can judges try it?** The brief asks for a link. The team won't run a public phone line (it costs per call and needs the Twilio set-up). Instead, the dashboard gets a **"simulate a call" button** that runs a call through the same flow (a teammate did this at a previous hackathon). Asked whether a hosted cloud version is possible for the submission, the team said "of course", it's easy, and it will be included. **At 21:53 UTC:** judges should be able to **press a button and call it**, hosted on **Vercel**.
 
 ### Who sees the data: the cooperative office
 The cooperative has a board of farmers and one person in its office, with no internet. They see the local dashboard, with warnings like "disease reported over here", so they can send people to spray before it spreads. The map of problems also goes to the expert.
@@ -184,6 +192,26 @@ A teammate's worry: this is a lot of outputs to build.
 - Local language: a teammate said we don't need to model it ourselves; giving the system a transcript is enough.
 - Someone said "I can say it works in all languages". *Claude's note:* careful here. The brief makes responsible AI pass/fail and says to expect the less-supported-language question. Claim only the languages we actually show, and say what happens for the rest (see open item 9).
 
+### What one call records (agreed at 21:53 UTC)
+Ethan needs to know which fields the model pulls out of the transcript, so the team listed them on the whiteboard.
+- **No onboarding in the demo.** The farmer is already in the database. The demo shows a **regular call**, e.g. call number 20, towards the end of the harvest season.
+- **Farmer profile** (already stored): name, ID number, location (village or county; address formats differ by country), **PIN**, cooperative name and **membership number**, crops.
+- **The data table is split by season:** start, mid and end of season. Each season asks for different things, so there are different call types per season. The demo forces one route.
+- **End of season (the demo):** **sale price**, **amount sold / yield**, **crop type**, **buyer name** if she has it, and any **disease or quality** problem.
+- Also mentioned: **weather** as she sees it (to build a regional history, e.g. flooding lower down while the upper slope is fine), approximate yield, what she planted and when.
+- Per-season figures like yield per crop come from adding up the call rows later, not from one call.
+- "That's our demo, if we're all aligned on that." Agreed; the table can be adjusted later.
+
+### The live demo screen (agreed at 21:53 UTC)
+1. The phone call runs on one side ("hello, what's your PIN? Welcome, Noor. Tell us about your day").
+2. The back end pulls up **Noor's profile**: crops, location.
+3. Her **data table**: days 1–19 are already filled. **Day 20 fills in live** as she talks (e.g. crop health, price). Season summaries sit alongside (start of season, mid-season).
+4. The AI **asks about gaps**, and the empty boxes fill in.
+5. **Advice:** a "Noor's region" panel with two maps from **NASA POWER** and **CHIRPS**, plus "we've heard this from other farmers, and the data shows X, so look out for that tomorrow".
+6. **Her questions**, e.g. what price to ask, answered with the collective data and the regional average.
+
+Example answer the team wants the AI to give: "Coffee has an on-year and an off-year. Last year was your high-yield year, so this is your low-yield year. Other farmers in your area see the same, so it isn't poor farming practice. Statistically, next year should be better." *Claude's note:* arabica does tend to alternate high and low years (biennial bearing), so this is a sound line. It needs her past calls and her neighbours' records, which is why the stored rows matter.
+
 ### A visitor's questions
 The team pitched the idea to a visitor and explained the brief's key constraint: **use AI in a way a Google search or spreadsheet can't**. Questions raised:
 - **Are these problems the same in Latin America, Africa and elsewhere?** The team aims to make it region-agnostic, which makes it scalable for the World Bank.
@@ -209,6 +237,14 @@ The team pitched the idea to a visitor and explained the brief's key constraint:
 - The **lender output** goes to the teammate with the most finance knowledge. Others took **synthetic data**, **evidence and citations** (about 15% of the score), the **demo call script**, and **design** (slides and visuals). Two teammates split the remaining technical work. The epics name owners by role (Tech 2, Tech 3, finance person, design / video person).
 - **How we work:** Ethan pushed the team skills (`skills/` in the repo) and turned the plan into **epics #1–#6** on a **GitHub Project board**. Everyone **assigns themselves** to the epic they work on, runs **`create-project`** on it to split it into issues, then lets the agent work through them. Ethan scopes each issue to at most about 400 lines of code with enough context that the agent can't invent its own solution, but said this time it will be "a little bit looser" because of time.
 - **Run `init` at the start of every new agent session**, so the agent reads the project board and all comments first.
+
+**Who does what (as of 21:53 UTC)**
+- **Goal for the 5 pm intermediate pitch:** an MVP of the phone call.
+- **Ethan:** the model that reads the transcript and fills the structured object, plus the database on his laptop ("the box").
+- **Twilio set-up** (account, webhook, PIN entry, and getting each call into an audio file and a full transcript): taken by the teammate who also took **Vercel and Supabase hosting** (*Claude's reading:* Jonathan). "We have it done in like 10 minutes"; the hard part is getting it to Ethan's laptop, which they'll work out together.
+- **Languages:** another teammate takes the local-language part. Use an existing model that already has the language rather than training one.
+- Others: the **dashboard**, the **lender / certification** output, and **synthetic datasets**.
+- The **project board is now public**, so everyone's agents can comment. When someone sets up shared infrastructure (e.g. Vercel, Supabase), they post it as a comment on the board so every agent picks it up through `init`.
 
 **Video and real users**
 - Look: **"super minimalist techy San Francisco"**, with an **animated face** speaking the local language rather than only subtitles and a voice.
@@ -358,10 +394,10 @@ The brief says Noor's own phone is used for "calls, messages, and mobile money" 
 
 **Decide now (blocks the build)**
 - **Setting: which country?** The brief uses the fictional Ondera highlands and Ondera Coffee Cooperative. Countries are named freely in the notes as examples; the team still has to pick the setting for the pitch. This also decides the demo language and the speech model.
-0. **Where the AI runs.** The meeting leaned local: in the demo, Twilio sends the call to a laptop; in the real world, a box with a SIM card at the cooperative. This matches Claude's earlier suggestion of **one small server per cooperative**. Still open: how data from many boxes reaches the people who look across villages, e.g. experts. *Claude's idea:* each box sends short anonymised summaries over SMS or a little 2G data.
+0. **Where the AI runs.** The meeting leaned local: in the demo, Twilio sends the call to a laptop; in the real world, a box with a SIM card at the cooperative. This matches Claude's earlier suggestion of **one small server per cooperative**. Still open: how data from many boxes reaches the people who look across villages, e.g. experts. *Claude's idea:* each box sends short anonymised summaries over SMS or a little 2G data. **Demo decided at 21:53 UTC:** Twilio in the cloud handles the call and sends the recording or transcript to Ethan's laptop as the box; Supabase is an option for the shared database. A teammate still questions whether the local box adds value (see "Where the AI runs").
 0c. **Who builds what:** *mostly answered* at 21:13 UTC: epics #1–#6 on the GitHub Project board, everyone assigns themselves (see "Who does what"). Still open: **who is the caller in the demo**: a synthetic voice agent playing the farmer, a teammate, or a real speaker (the teacher contact in Kenya). Either way, in the local language. If synthetic, label it in the video (see 14).
 1. **The brief's "one better agricultural decision".** Loans and certification are outcomes, not farm decisions. Frame the tool as "documenting a field observation" and "connecting evidence to a pricing, market or extension-service next step", which is the brief's own wording.
-2. **What one record contains:** the whiteboard sets the core as **activities, yield, sale price** per row, one block of rows per farmer. Still to detail: date, plot, inputs used, observations, and how she was paid (cash, mobile money). This is the "data frame" and drives the whole build.
+2. **What one record contains:** the whiteboard sets the core as **activities, yield, sale price** per row, one block of rows per farmer. *Mostly answered* at 21:53 UTC: farmer profile plus end-of-season fields for the demo (see "What one call records"). Still to detail: date, plot, inputs used, and how she was paid (cash, mobile money). This is the "data frame" and drives the whole build.
 2b. **How records become trustworthy:** regional outlier checks, the expert photographing paper receipts on visits, and mobile money history with consent. Pick which to show in the demo; outlier checks are the easiest to build.
 3. **Who sees what:** Noor owns her record; the cooperative sees it, possibly anonymised; lenders or certifiers only with her consent; buyers and middlemen never.
 4. **Leaf photo checker:** effectively dropped. The meeting said farmers won't scan leaves; they'll report symptoms on the call. A photo model on a phone stays a "maybe" for later.
@@ -385,6 +421,7 @@ The brief says Noor's own phone is used for "calls, messages, and mobile money" 
 18. **A GSM box that answers calls:** *Claude's note:* a common set-up is Asterisk with a voice-capable USB GSM modem (chan_dongle / chan_quectel). Check it works before promising it in the pitch.
 19. **Cost per call:** cloud call providers charge per minute (about 6 cents was quoted); compare with a one-off local box.
 20. **Market size:** a back-of-the-envelope number for the pitch, since the visitor asked.
+21. **"97% of Kenya has 4G":** a teammate's figure from the meeting. Check whether it's population or area coverage, and how many people actually use mobile internet. Coverage isn't use: cost and phone type still keep farmers like Noor offline, which is the case for a voice call.
 
 ---
 
@@ -2049,3 +2086,365 @@ It's open source anyway.
 I got it right. Look, you typed it before. Previously you typed in a name and the person got invited. That means we invited like a random random person. Oi oi oi.
 
 Just check your emails, then you can log in.
+
+Okay, the project, isn't it public? The extra repo, okay, give me a second.
+
+I got to get there.
+
+Nice.
+
+Have you already entered the things that you're doing? Hmm? Which of those are you building?
+
+I was waiting for it to be public before I could assign anyone to it.
+
+I just made it in public. Do also make that everybody can edit it or just-Because everyone's agents need to comment on their stuff. Oh yeah, okay, cool.
+
+And the, uh... There's a repo and there's a project. You need the project to be public. Okay Who's in the dashboard again?
+
+I can do the dashboard. So I need to ask you is it already public? It's forward now, I think. It's forward now? Okay, forward.
+
+You're going to be lender certified stuff, yes, right? Yeah.
+
+And then working on the, our little fake door. And then five o'clock, our intermediate pitches, so I think, do you think it's possible to have like a MVP of the phone call?
+
+Yeah. I'll try to think of something fast forward from here.
+
+Do you want to assign the people? Do you want to assign the people? I already did. Okay, you did? Oh God.
+
+So what else are you doing from what I see here?
+
+I mean I can create fake data sets. Had me over that one. What are you doing? What's the biggest block canal? I think I can build a lot out here but what I can't build for example is like a local host model or something like that. Yeah that's what you should build.
+
+Just getting here, I don't know why this is so fragmented and all over the place.
+
+Ticket repo?
+
+No, the... My... I don't know why my claw... It's being so slow. Maybe the skills I don't know, I think it's because I usually use codecs and I always put it on fast mode. So now going to this feels like bad. Oh yeah? I see.
+
+Do we also spill up databases in RFN? What do you mean? Should we spin up a database?
+
+We're just going to literally host it locally. It's not going to be on the cloud or anything. It's going to be all here. What do you think?
+
+I would just connect it to Superbase.
+
+Yeah, we can do that too. It's always an option. I was just thinking, well yeah, because it's supposed to be local, but we can do that.
+
+Oh, that's what you mean.
+
+I think it'd be better because we only have access to data anyway, right? Huh? We all do need to access the data anyway, so I think it would be better if we just put it to it.
+
+So that is also working so they can try it out? Yeah, yeah, yeah.
+
+Is really the case in hackathons that you may slip make it just make like a fake product what's not working? Yeah, I get it but I think it's still cool if they can press a button and can call it I think I think that's cool. I can yeah sure and I throw in a bar key and we host it on Vercel.
+
+Yeah, we can do it for Sal. Yeah, okay, I can take over this part Yeah, okay Do you have Vercel?
+
+Yes. I think I've errored the pro version.
+
+I have the pros on that.
+
+I can edit this. If I take over those parts should I directly insert into the MD file so we keep track of it?
+
+Your agents will comment. Just tell them to run that scale basically. It's the init one. Okay. So that will automatically make it comment and do everything that I kind of... All the agents will need to understand.
+
+Okay, if I for example now spin up Wurzel and Superbase, I comment it in there so every agent knows now they should push it on Wurzel. Okay.
+
+Oh, it'll kind of already know because that'll be in the-OK.
+
+Okay, let's go.
+
+I'll also throw in some music and speed it up.
+
+Yes.
+
+So you're going to be doing kind of like the code effort. Can you take over the Twilio webhook and like the pin, that sort of thing?
+
+That the call works? Yeah. So the call is connected with the LLM model?
+
+Sort of, kind of. Yeah, I can do it.
+
+Sure, that works. I will also figure out if Braille is the best option. I don't know if we can train it on a different language.
+
+Yeah. Well, it depends on the models. I was trying to remember how,Let me just see here. It is.
+
+Gosh, that's a bit more complicated. Yeah, it is. But then we would need something different.
+
+cuz waitBecause we explained it over there, it would be like on the GSM little thing on the Raspberry Pi.
+
+Twilio always runs probably over a server. On what? Valio probably always runs over a serverSorry, I'm not understanding this at all. Twilio is probably always running over a server. Yes. You're right. So then it's not fully local.
+
+That's what I'm saying. So what I explained earlier was that in a production environment we would have like a SIM card on like a GSM on a server. Yeah, right. So this is kind of like a bootstrap version of what that would be, but in real life it would be different, is what I'm saying.
+
+Yeah, right. In real life we would just do like SIM farming. Uh-huh. I agree. Basically, you buy a SIM card from the supermarket and just insert it in a box.
+
+So me and you are going to have to figure out which the schema, which means the data that we're going to be pulling from each individual person. So we're going to be asking them that sort of thing. And that ties in with your stuff as well. So I think we should all agree on that right now, and maybe get something spun up here.
+
+Yeah, I think that's important. What data are we actually collecting and also how does it impact your And if you have anything that comes in mind, what do you think it's one button just added it's super easy to spin like another tableBro. You can ride here with one of those pencils. Yeah, he's got thumbs. Just write on top what are we actually collecting.
+
+Record this as well.
+
+So the object you need to pull out. It's going to require a lot of you because I do not fully understand the business side of this, all right?
+
+OK, so for example, we're going to do customer-Turn or whatever. Turn. Boom. Okay The name first round, right? It's going to be like, it's going to be name... Do they have like addresses over there?
+
+Do you know what I mean?
+
+They're still where they live, at least in what village. Probably that one. That doesn't matter. Addresses.
+
+Name, address.
+
+County.
+
+Colony.
+
+Doesn't really matter. Count.
+
+Yeah, that's different by country.
+
+My spelling looks really bad, sorry guys.
+
+Anyway, then what they farm? Yeah, obviously. Yeah. This is going to be first call, so is that kind of it?
+
+This is also a question if we simulate the first call or if we just simulate like a random call. I don't like what you're saying. Yeah, I think also like a random call. And then we bring up the thing for example, sales. Like we say, oh I got an offer, whatever.
+
+This is dumb, this is dumb. We're just gonna, they're already gonna be in the database, already initialized, so we're not gonna do an onboarding step. So a regular call, what are they gonna have in it?
+
+Oh, regular calls. Yeah, I mean firstly we talk about the callback we mapped down here.
+
+Yes, but the structured objects that the model is going to infer on later, like what it's going to actually understand as this is that. You know what I mean? Because I have a transcript, it's going to have a raw transcript, and the model is going to have to infer, okay, that goes in that object. That's what it means. Like if there's, oh, I farm cows. Farmed. Farmed item, cows, you know what I mean?
+
+It pulls those from-Oh, yeah, yeah, yeah. I see. I see what structured objects are pulling from-Yeah.
+
+Okay, let's define it. So we want to ask about the weather, right? Yeah, let's say crops is one thing. What would be crops though? Because we already know what it is. Okay, that's already been introduced. Cool. They might have different. Okay, then, yeah, weather.
+
+We're going to have to actually combine this together.
+
+Customer, robot, and customer. Profile. Okay. Test run profile is gonna have a name, obviously, name.
+
+Name, identification number maybe. Location.
+
+And then pin for the thing. Yeah, good. And then... I don't know what's bad.
+
+What does belong to the custom profile?
+
+Like everything also tries--No, so that's gonna be their specific roles and all that sort of thing. And this is just who they are, what they do, and yeah. Okay.
+
+Co-op name and then the co-op membership number. OK. Cool.
+
+Co-op name? Co-op. Name. Membership. No. And then. They're crops, so... Crops, they do, yeah. Crops. And then where else?
+
+So then this is less on the profile and more on the data.
+
+Over here? Okay.
+
+Yield per crop per season.
+
+Yield.
+
+Hold on, this is, that's later on. This is stuff we're pulling out of the transcripts, is what I'm getting at. Yeah, right.
+
+So that's later on, 'cause I can have-When we want the call, if it's like call number 50 or call number 200, you can have the previous. Does that make sense? It's like part of their data, part of their row.
+
+No, I understand that. That's like something that the model calculates with the numbers that it's given in the rows. So this is just like a day-to-day call. OK, so what you're overseeing from the call. Yes.
+
+Oh. Let's do sales pros.
+
+You-Do they talk about that every time?
+
+Yeah. Well, not every time. Yeah, but in our demo they talk about it because we have this as feature. Sales price. And what do you mean? They're going to be asking for it. Yeah, they may ask it. Yeah, right. So ask.
+
+Yeah, are you asking what it says?
+
+Yeah, so what we want out of the call.
+
+Yeah, okay, so it's, okay, hello, what's your pin? Welcome, Nora, get out on the system. Tell us about your day, right? And so we're trying to figure out what the variables are that we're trying to get out of the day. So I think those variables are like, Take your time.
+
+If you need prompt, thought, and ask for it, the best things to get to the outputs that we need, that's totally fine.
+
+Oh, we need to ask about the weather. We're asking them for the weather? Yeah, 'cause what we're gonna infer as well, 'cause we have historical weather data and sort of current data with the past stuff, This gives more regional stuff as well. You know what I'm saying?
+
+We don't have other predictions.
+
+We kind of do. It's because it relies on how good the data is. It's obviously spotty in Africa. So this is like semi-automatic-what do you call it-semi-available data.
+
+What is them giving us the weather?
+
+Because for example, if one part of the tribe, whatever you want to call it, lives in an upper hail or whatever, but the person down here is experiencing flooding or something, then they can kind of be like, okay, this is happening down here. This area is known to be more flooded than this time of the year. We can start building on that historical data for making predictions online or whatever. What do you think about that?
+
+Depending on if it's actively flooding somewhere, us knowing that isn't going to be that helpful. Sales price. Sorry.
+
+Just a super random thing. The daughter of the mother of the person has internet. That means our village is not that remote. What do you mean? I just say that the village is not that remote because technically in the village there's also internet. Because the daughter can watch YouTube videos or something. Yeah. It doesn't matter, it doesn't impact it.
+
+Yeah, but in a village there's internet, that's what I'm saying.
+
+Yeah, that's what I'm saying. That's why it makes sense to have these sort of data, like the NASA thing, because they pull on a chrono every hour and check if there's internet, and then it'll pull. Which adds to our case of y is OK to have some of the stuff.
+
+Approximate yield.
+
+So this is tricky because you don't need the same variables in every call, right? So for some of them you want the sales price, the yield. For some of them you want just like, Quality. Oh yeah. Right, like any disease flags?
+
+Quality. It's just a sickness that I can't spell or write.
+
+Quality, sickness.
+
+You want to know what they've planted, so crop type. And then... Did they plant today? Helpful to our comms are. So these variables, as you can tell, they change based on when in the life cycle. Yeah.
+
+The farmers and--Well, that's not, we don't have to like, worry too much about that, 'cause we're forcing them once again down a specific route in the demo. You know what I'm saying? Yeah.
+
+So you're saying like, I ignore calling in pin 123. It's like, oh, you were talking about your day. OK, we're towards the end of the harvest season. This is what happened. And I noticed this. And my yield is not great.
+
+And then we can just make it-it's like, oh, can you do it in like spring? Sure. We switch it on whatever.
+
+And then it just-Can you do what in spring?
+
+Like just like we have a different call type for different season or whatever. You know what I'm saying?
+
+Oh yeah. Like one. Yeah. Then the next person talks about saves the next person talks about whatever. Sure. Sure.
+
+For this one though, it's like my plants are Right outside and they're not looking so good. Right. Then what is the AI mask mean?
+
+Oh, it says like, what does it look like? What is the issue? What do you see? That sort of thing. Then it describes it to us. And then I was thinking as well, on top of that, we could just strap on the historical data and just infer off of that as well. You know what I'm saying?
+
+Yeah, I think there's maybe we want the AI to respond back to like So I was reading that for coffee there's an on-season and an off-season. As you remember, last year was your high yield year. So this will be your low yield year. I've also triangulated that with other farmers in your area that are seeing similar results. So this is not a function of any poor farming practices. But statistically, you're most likely to have a good year next year. Maybe the AI says something like that. Right?
+
+To get to that, we need to pull structured objects. Do you know what I'm saying? Yeah.
+
+But that's not from this current call. That's from what's stored earlier. You told me to wait on what's stored earlier.
+
+Oh, do you mean like the first calls?
+
+Like if we're talking like call number 20, originally you said... The hard code. What'sTalk about what's happening in call 20. Oh, yes, yes, exactly.
+
+So I'll let you actually just guide this. What do you want here, then? What is this? So this is just what we're going to be pulling from the call that we're going to do in the demo. So where's the snow works? Give it a transcript in the model. has to infer what these different points are. It has to guess when the transfer would be like-Which--Oh, you want the--That was nice.
+
+I totally understand. Okay, this is what I would love. Now we can see what's possible. Is, okay, the phone call is happening, right? And then at the same time, we're seeing this, right? So, your floor. Then, whatever. One, two, three, okay? Then all of a sudden, this is the back end, right? And it pulls up Nora's profile. And we see stops. Great. The crops. Location. Okay, then. We also see What is here? So the Herd Data Table, right? So...
+
+This is day 20.
+
+And then maybe we can see like day 19 to 1, right? And then we can see, or actually, I don't know, but we can see like... Yeah, I'm sure that should be fine. Let's pull up our data table. And we can see for every day, The data. And then we can also get a pull-up. On the side of all of these. All the things here are on like... Start of season summary.
+
+So this is like crops, weather, et cetera. And then like mid season. And then this is maybe where we're at right now. So then as the call is going on and she's saying like, okay, this is what happened in my day. We're seeing that it's starting to fill some of this in and it's filling in. So this is already filled. but then we're actively seeing that for newer--On this day. We're filling out these boxes. We're getting more data on here. Yeah.
+
+Like on our previous stage or something?
+
+No, so this is live in the call. Boxes are being filled up. Like these are all of her previous kids. And then it's like, okay, I like noticed this about my crops, right? So maybe crop health is filled out and then price is filled out, right? Or maybe not even Christ. Maybe it's just Carl Palten. Today we'll talk about cross health. Cool. She's giving her whole recap and then we're also getting the sixth summary on this. Maybe they don't need it, but maybe just from the demo it could be nice.
+
+And then... It comes back. Maybe then there's like another one. And so we've done the recap and then after that, what's our next step here? We ask questions for gaps. So maybe there's a gap and we can get that to fill in. And then we give advice, right? So then over here we can see like, "Nor's region." And we pull in the NASA data. The troops data. And we can see like two maps. And then when we get to the advice portion of the phone call, we can say, give it like, we've heard this from other farmers and we can also see from the data XXXX. So please look out for that tomorrow.
+
+And then they ask questions. So then she's going to ask like what price? Or more like the collective data.
+
+Yeah. Because she knows her data probably.
+
+Yes. And then this is the Industry, industry average.
+
+I understand all this, but like I keep saying, I need to know what to pull out to build this.
+
+So what goes in here?
+
+Yes, this is what I'm talking about, the object. It needs to have price, whatever. I need to know what I'm pulling out of the transcript to create this data.
+
+Yeah, so I think this data table is going to be split into parts. So it's like start of season, mid-season, end of season.
+
+Let's focus on, I don't know, end season. End season. What questions are we going to be asking in the end season?
+
+Price she sold out. Okay. Yolks. Amount and then crop to. And if she has the buyer name.
+
+That'd be cool. That's our demo. If we're all aligned on that, that would be great.
+
+Crop type yield.
+
+And then any disease or whatever is like...
+
+But we can always spin up like a new table. We just throw in all those things and we can then just adjust it.
+
+No, I understand, but we're trying to get the call down. And in the call, we need to populate a row. I need to know what the rows... So there's rows and there's columns. The name of those columns has like a field. Name, crop type, I don't know, location, etc.
+
+Yeah, I know, I know.
+
+I know what I need to capture. That's it.
+
+So this is helpful? Yes. Okay. Do you need anything else? No. Cool.
+
+An additional for you guys. Is there anything else you guys need?
+
+No. For the Davis, should I spin them all up with all the information? Afterwards, you can do the stuff. Um...
+
+I would focus on getting Twilio set up, ready and actually getting the transcript. Okay, then I do this first.
+
+Yeah, yeah. Then I think that's my part, I think, yes. I mean, that's like easy. We have it done in like 10 minutes.
+
+No, yeah, yeah. That's the easy part. But getting that actually like getting into a model to do that, that's the other part.
+
+Okay, I can also take this. What? Again?
+
+So like, that's what I'm saying. So I need you to help me get the transcript ready, and then I'm gonna get a model starting to read the transcript and pulling out information into an object. Yeah, cool. That's what I need.
+
+Okay, so you did a model and reading the transcript. Yes. Okay, cool. And I did then care about failure that we set up the account.
+
+Literally, that's kind of the hard part too, because you're also the kind of engineer solution, so that it goes to my computer on the server.
+
+That it goes for your computer, okay. I have never ever figured this out But yeah.
+
+So we're going to have to figure it out together. So what's going to happen here is--Is.
+
+I think that's the most complicated part to do it for your computer. I hope it will be worth it. I'm sorry, I'm still a bit skeptical because I looked up in Kenya in 97% of the area you have 4G internet. This is over, Kevin. Yeah, Kenya is pretty developed. But almost in all countries, like, internet is quite, like... That's not, that's not. Yeah, our argumentation then will be because of price or whatever that we put this up.
+
+It's way more complicated if you set it up with local host stuff compared to just calling the server. Like and technically my point of view doesn't add extra value.
+
+And for countries where the internet is that bad that there's no internet in this village at all, probably those Those countries are not really relevant for crop buyers.
+
+I don't know. It does matter.
+
+Yeah, it does matter. because you would leave them out. Okay, but I still set up everything.
+
+So what you're going to do is have Twilio send the audio to the box, basically, which is my computer. So all you gotta do is figure out how to get a Twilio conversation into an audio file and then me, you'll figure out how to transfer it to my computer.
+
+Okay, who is talking on the Twilio? Like we have two sides. One is her computer and one is your computer.
+
+So you're going to be receiving the call for whoever?
+
+But technically we'll be like three computers. I do the call. I call your laptop, the model, and your laptop communicates with her laptop.
+
+No, so she's going to call on her laptop and then I believe Twilio is going to run on the cloud for now, unfortunately. And it's going to record the audio and then send it over to my computer. It's going to be called. It doesn't actually run on your computer locally.
+
+Oh, you just want to fake it? Yes. So we, okay, oh, and the output is on your computer? Yes. Okay, so your computer is speaking with us. No. No, like your computer is technically the AI model what speaks back to her. Yes, yes. Okay, cool. Oh yeah, I get it, I get it, cool.
+
+So Trillio sends it to both ways. Trillio sends it once to her computer and once to your computer.
+
+No, Twilly's gonna be like live talking to her cat, like just getting the transcript and then giving the audio.
+
+You're right, but we do it like that. Look. Here it is. House, here is your house. And that's it. She's sending it over to video, so here it's calling the API for the model. And then video is sending it back to here and also back to here.
+
+Why would Trulio send it back to here? because she receives it back. Oh, like, oh, yes, the live questions you're saying? Yeah. So I wouldn't put this up here because we don't get live transcription.
+
+But what's then the use case of yours? Sorry? Why do we then need to implement your computer?
+
+Because it needs to have it in a database, which is going to be the local server here.
+
+Oh, because we just need to send the transcript. Yes. Okay.
+
+And then the transcript gets sent to me. Okay, cool. So you just gotta figure out how to capture a full transcript inside of an audio file, and then we'll figure out how to do it later where it transfers. Oh yeah, that's easy.
+
+Okay, cool. And I can still save the data. But that's cheating if I just save it in Superbase.
+
+Well, I could just pull it up in super base and then Yeah, well no it's not Okay, cool Okay, relax.
+
+24 hour, I can't believe I'm in South Bend.
+
+24 hour economic sunset. 24 hour, I can find you.
+
+And keep in mind the hard part is gonna be doing the language design.
+
+Yes. Okay, who's taking care about that one? Should I take care about the languages?
+
+For your part, yes, because mine is also going to be separate from yours.
+
+Yeah, so I need to Try to train the model on the local language.
+
+I don't think train. I think use something that has it.
+
+I'm not sure what. Okay, cool.
+
+Yo, why don't you just use mine? I need your breath. Oh. I think that was a water.
+
+Oh, I'm sorry. Just do it like that.

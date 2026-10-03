@@ -3,7 +3,7 @@
 Team brainstorm for the Hack Nation × World Bank agriculture case.
 
 - **Source:** Notion AI meeting notes on the team's Hack Nation page: https://app.notion.com/p/dryftteam/Hack-Nation-3ee2073003ce80468657e08de8ba7ae3 (current meeting: "Meeting @Today")
-- **Last synced:** 2026-10-03 18:37 UTC (Notion page last edited 18:37 UTC)
+- **Last synced:** 2026-10-03 18:38 UTC (Notion page last edited 18:38 UTC)
 - **To update:** ask Claude to "sync the transcript". It pulls the latest from Notion, replaces the raw transcript below and updates the summary sections.
 
 The transcript is automatic speech-to-text, so expect errors. For example, "Cloud Code" / "Cloud MD" mean Claude Code / CLAUDE.md, "a disease on their blood" probably means on their plant or leaf, "World Health" probably means World Bank, and "metamans" / "mill man" mean middlemen.
@@ -84,6 +84,9 @@ One teammate said individual devices will break, so the data should sit somewher
 
 ### Another use: selling land
 A record of how fertile the land has been over the years helps a farmer **negotiate a better price when selling her land**. Without one, a buyer can't tell good soil from sand.
+
+### Geotagging
+Mentioned briefly: with a geotagged location for each farm, this data is easy to get. *Claude's reading:* a farm location lets us attach rainfall, temperature and soil data by coordinates (NASA POWER, CHIRPS and iSDAsoil, all listed in the brief) without the farmer reporting it.
 
 ---
 
@@ -542,4 +545,14 @@ And often like the middle man's are maybe then a bit more cut out. But yeah.
 
 What?
 
-Yes. That's pretty good. Do you have it? Yeah, you got it now. Thank you.
+Yes. That's pretty good. Do you have it?
+
+Yeah, you got it now. Thank you. What's wrong?
+
+Is this table on? Oh yeah it is.
+
+It's quite practical. Like it's connected in Notion, it's updating itself. It's quite cool. Bring forward the flag.
+
+-Like if you have a geotagged location, You're able to get this pretty easily.
+
+I'm just going to wait for the same corn pines, I've picked up some stuff from the little water we got. Okay. The nursing board. Can you talk about it, I'll do it right now.

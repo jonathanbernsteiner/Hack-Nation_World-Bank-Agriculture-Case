@@ -3,7 +3,7 @@
 Team brainstorm for the Hack Nation × World Bank agriculture case.
 
 - **Source:** Notion AI meeting notes on the team's Hack Nation page: https://app.notion.com/p/dryftteam/Hack-Nation-3ee2073003ce80468657e08de8ba7ae3 (current meeting: "Meeting @Today")
-- **Last synced:** 2026-10-03 18:43 UTC (Notion page last edited 18:42 UTC)
+- **Last synced:** 2026-10-03 19:17 UTC (Notion page last edited 19:17 UTC)
 - **To update:** ask Claude to "sync the transcript". It pulls the latest from Notion, replaces the raw transcript below and updates the summary sections.
 
 The transcript is automatic speech-to-text, so expect errors. For example, "Cloud Code" / "Cloud MD" mean Claude Code / CLAUDE.md, "a disease on their blood" probably means on their plant or leaf, "World Health" probably means World Bank, "metamans" / "mill man" mean middlemen, "kiamas" means chamas and "eight CCOs" probably means SACCOs.
@@ -103,6 +103,11 @@ A teammate worried that a voice diary alone won't solve the problem, and that th
 
 ### Kenya may already have a farmer registry
 In the meeting: in Kenya, farmers registered through local officers receive an **e-voucher on their phone** to collect subsidised fertiliser, so a registry exists there. *Claude's note:* this is likely the **KIAMIS** system behind the national fertiliser subsidy. So "we create the registry" only holds where none exists, as in the brief's fictional Ondera. Where one exists, our record plugs into it instead. To verify (see "To check").
+
+### Who pays for it?
+- Question raised: for the bigger picture, how does this become a sustainable business, and who finances it?
+- Answer in the meeting: the **World Bank** would fund it, as a public tool rather than a profit-first product.
+- Someone outside the team ("Dr. Ali") liked the idea.
 
 ---
 
@@ -261,6 +266,7 @@ The brief says Noor's own phone is used for "calls, messages, and mobile money" 
 12. Whether lenders would accept these records. See "Research: how others lend to smallholder farmers" above.
 13. Problem evidence with source, year and country: FAOSTAT coffee yields, extension officers per farmer (once we pick a country), certification premiums, smallholder access to credit.
 14. Test data without real farmer recordings: synthetic voice notes, clearly labelled as synthetic.
+16. **Who pays after the first funding?** The meeting said the World Bank would fund it. The brief scores scalability, so judges may ask who runs and pays for it afterwards. *Claude's options to discuss:* the cooperative (small fee from the price premium or advances), the government extension or registry budget, or lenders and certifiers paying per verified record with the farmer's consent.
 15. **Which countries already have a working farmer registry** (e.g. Kenya's KIAMIS fertiliser e-vouchers, mentioned in the meeting)? This matters once the team picks a country: there, use case #3 becomes "feed the existing registry" instead of "create one".
 
 ---
@@ -724,3 +730,23 @@ Okay, so villagers called kiamas in Kenya, like pool money and they lend it to e
 Let's check how other startups are doing it.
 
 Can you now run some subsidized fertilizer through a farm? Registry called. Yeah, it was. Farmers are described through local officers on receiving an e-voucher on their phone to collect subsidized fertilizer. She's right there, yeah. Do the Rook Street already exist in Kenya apparently?
+
+For the broader picture in the end we also need to think about how this can be like a profitable business. I like. Who is financing this? Like, we obviously like overlaunch people earning money. So we like...
+
+you I think this fits into the lovely. Yeah.
+
+In terms of this being aTool.
+
+No, because it's the World Bank and they'll fund it. So it's like probable for-Oh, cool.
+
+Yes, I don't know why not.
+
+This is more like a--Can I get you guys a drink?
+
+Okay, thank you.
+
+I will also get myself something. I need to stop by in a minute too.
+
+Huh? I need to stop by in a minute. What happened to him?
+
+Thank you. I think that Dr. Ali, she likes the idea. Huh? I actually liked the idea. That was huge.

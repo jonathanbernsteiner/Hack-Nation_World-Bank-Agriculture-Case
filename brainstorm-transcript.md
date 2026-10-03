@@ -3,7 +3,7 @@
 Team brainstorm for the Hack Nation × World Bank agriculture case.
 
 - **Source:** Notion AI meeting notes on the team's Hack Nation page: https://app.notion.com/p/dryftteam/Hack-Nation-3ee2073003ce80468657e08de8ba7ae3 (current meeting: "Meeting @Today")
-- **Last synced:** 2026-10-03 20:25 UTC (Notion page last edited 20:25 UTC)
+- **Last synced:** 2026-10-03 20:27 UTC (Notion page last edited 20:27 UTC)
 - **To update:** ask Claude to "sync the transcript". It pulls the latest from Notion, replaces the raw transcript below and updates the summary sections.
 
 The transcript is automatic speech-to-text, so expect errors. For example, "Cloud Code" / "Cloud MD" mean Claude Code / CLAUDE.md, "a disease on their blood" probably means on their plant or leaf, "World Health" probably means World Bank, "metamans" / "mill man" mean middlemen, "kiamas" means chamas and "eight CCOs" probably means SACCOs. "Neuer" / "Newark" mean Noor, "11 lives" / "11.1" mean ElevenLabs, "Olive Trillo" / "Julio" probably mean Twilio, "chirps" means CHIRPS and "Harvard's estimates" means harvest estimates.
@@ -196,6 +196,9 @@ The team pitched the idea to a visitor and explained the brief's key constraint:
 - **Interface:** don't design the dashboard by hand. Tell the coding AI what it must show (irregularities, farmers, financial record, prices) and polish the look later. It can be built in parallel with the call pipeline.
 - **Split:** the builder will divide the work into an "industrial" side (*Claude's reading:* cooperative and lender) and a "consumer" side (the farmer's call), then keep splitting and assign tasks. A teammate worried the builder was doing everything alone and asked to be given tasks.
 - Start building right away, in case AI credits run out.
+- **Split as of 20:27 UTC:** consumer (farmer) side and finance side, each divided again into technical and non-technical tasks.
+- Teammates are connecting Claude Code to the GitHub repo. Someone suggested a draw.io skill to turn the ideas into an architecture diagram.
+- Logistics: possibly heading to Stanford after the 5 pm pitches.
 
 ---
 
@@ -342,7 +345,7 @@ The brief says Noor's own phone is used for "calls, messages, and mobile money" 
 **Decide now (blocks the build)**
 - **Setting: which country?** The brief uses the fictional Ondera highlands and Ondera Coffee Cooperative. Countries are named freely in the notes as examples; the team still has to pick the setting for the pitch. This also decides the demo language and the speech model.
 0. **Where the AI runs.** The meeting leaned local: in the demo, Twilio sends the call to a laptop; in the real world, a box with a SIM card at the cooperative. This matches Claude's earlier suggestion of **one small server per cooperative**. Still open: how data from many boxes reaches the people who look across villages, e.g. experts. *Claude's idea:* each box sends short anonymised summaries over SMS or a little 2G data.
-0c. **Who builds what** (the builder is splitting it into a cooperative/lender side and a farmer side), and **who is the caller in the demo**: a synthetic voice agent playing the farmer, or a teammate. Either way, in the local language. If synthetic, label it in the video (see 14).
+0c. **Who builds what** (split into a consumer/farmer side and a finance side, each with technical and non-technical tasks; names not yet assigned), and **who is the caller in the demo**: a synthetic voice agent playing the farmer, or a teammate. Either way, in the local language. If synthetic, label it in the video (see 14).
 1. **The brief's "one better agricultural decision".** Loans and certification are outcomes, not farm decisions. Frame the tool as "documenting a field observation" and "connecting evidence to a pricing, market or extension-service next step", which is the brief's own wording.
 2. **What one record contains:** the whiteboard sets the core as **activities, yield, sale price** per row, one block of rows per farmer. Still to detail: date, plot, inputs used, observations, and how she was paid (cash, mobile money). This is the "data frame" and drives the whole build.
 2b. **How records become trustworthy:** regional outlier checks, the expert photographing paper receipts on visits, and mobile money history with consent. Pick which to show in the demo; outlier checks are the easiest to build.
@@ -1659,4 +1662,28 @@ So an hour for what, sorry?
 
 Let's just start running. Because I'm just worried about us running out of credits and having to wait and stuff. So I would rather get from as soon as possible. So, clinical science.
 
-Can you take it one more time? It's just like, that was like five minutes ago. Sorry. - Something's scary.
+Can you take it one more time? It's just like, that was like five minutes ago. Sorry. Something's scary. Oh, yeah, for sure. So just look it up.
+
+Are you already connected to cloud code with the GitHub repo?
+
+Oh, OK.
+
+So you just go to GitHub and just copy it, and then you just paste it into whatever here, and you talk to-Oh, you just chat within the repo.
+
+I should check in here?
+
+Oh, I was going to do it. Yeah, yeah, yeah. I like to keep it different. I don't know why. I like to keep the IDE for coding only. 'Cause, um... I'm gonna use the 20s right now. I'm weird like that. This song is freaking robot though.
+
+There is no Oh, they have extension cables as well. Oh, you can use that too. Thanks, man. Do you need to be closer? I'm good. Oh, I think we can actually connect to the team though, can't we? Thank you.  After 5 should we leave to Stanford or whatever? Hmm?
+
+For we can make that eight. Yeah.
+
+So we're going to split between the consumer and then-And finance.
+
+And then technical and non-technical, technical and non-technical.
+
+You have a gender diagram for us too?
+
+Hm? Um, you guys should get a skill on GitHub called Drawio and it will take all your ideas or whatever and actually make it into like an infrastructure that you can like copy with and talk to cloud with.
+
+Oh yeah? Can you flop this code? Yeah. Thanks man.

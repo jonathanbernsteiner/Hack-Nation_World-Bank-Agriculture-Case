@@ -1,0 +1,2204 @@
+[
+  {
+    "id": "coffee_leaf_rust",
+    "kind": "disease",
+    "common_name": "Coffee leaf rust",
+    "scientific_name": "Hemileia vastatrix",
+    "swahili_name": "kutu ya majani",
+    "plant_parts": [
+      "leaves"
+    ],
+    "symptom_categories": [
+      "powder_or_rust",
+      "leaf_spots",
+      "yellowing_leaves"
+    ],
+    "farmer_words": [
+      "orange powder under the leaves",
+      "yellow spots on top of the leaves",
+      "rusty dust on the leaves",
+      "the leaves are falling off the coffee",
+      "brown dead patches with orange edges"
+    ],
+    "key_signs": [
+      "Yellow to orange powdery spots on the UNDERSIDE of the leaf, with pale yellow patches on the upper side above them",
+      "Spots start small (2-3 mm) and grow; older spots go brown and dead in the middle with powder only at the edge",
+      "Heavy leaf drop; badly hit trees can lose almost all leaves and branch tips can die back",
+      "Worst on trees carrying a heavy crop"
+    ],
+    "look_alikes": [
+      "brown_eye_spot",
+      "phoma_leaf_blight",
+      "coffee_leaf_miner"
+    ],
+    "tell_apart_question": "When you turn the leaf over, is there orange or yellow powder on the underside of the spots?",
+    "conditions": "Warm, humid or wet weather; spores need water on the leaf to start an infection. Builds up quickly once the rains start and peaks just after the rains end. In Kenya two peaks a year follow the long and short rains. Light, broken rain favours it more than continuous rain. Most damaging below about 1500 m; historically minor above about 1700 m in the East African highlands, but now being seen higher up as the climate warms.",
+    "urgency": "soon",
+    "farmer_advice_en": "Prune and space your trees, and keep weeds down, so air moves through the bush and leaves dry quickly. Feed the trees with manure, because weak, hungry trees get rust more easily, and check the undersides of leaves often during and after the rains. Call the extension officer if about 1 in 20 leaves has orange powder around three months after flowering, or if the trees are dropping many leaves.",
+    "officer_note_en": "CABI threshold: spray when 5% (1 in 20) or more of leaves carry at least one pustule three months after flowering, or when diseased leaves average two or more pustules. Protectant copper-based fungicides go on before and early in the rainy season, aimed at the leaf underside, and must be reapplied if rain washes them off. A copper plus chlorothalonil tank mix used for coffee berry disease also controls rust. Switch to a systemic triazole if 20% or more of leaves have pustules (CABI; UCDA). KALRO-CRI programme for Kenya: first spray in mid-October before the short rains and a second three weeks later; for the long rains, first spray in late February or early March, then one or two more at three-week (copper) or four-week (other) intervals. Use systemics only twice a season, alternate chemical groups, and use only products on the PCPB registered list. Resistant varieties: Ruiru 11 (rated highly resistant by KALRO and WCR) and Batian (intermediate resistance); also Catimors. New rust races can overcome resistance. Sources disagree on whether shade helps (see note). Cultural basis: canopy management and pruning, following the CRI pruning guideline.",
+    "escalate_when": "About 1 in 20 leaves (or more) have orange powder spots, especially around three months after flowering; or trees are losing many leaves; or rust appears on a variety sold as resistant.",
+    "regions": [
+      "Worldwide; present in every coffee-growing country in Africa, including Kenya, Uganda and Tanzania"
+    ],
+    "in_bracol": true,
+    "sources": [
+      {
+        "publisher": "CABI",
+        "title": "Pests and diseases of coffee in eastern Africa: a technical and advisory manual (Rutherford & Phiri, eds.) - Coffee Leaf Rust",
+        "url": "https://assets.publishing.service.gov.uk/media/57a08c1b40f0b64974000fcc/U3071CoffeeManual.pdf",
+        "year": 2006
+      },
+      {
+        "publisher": "KALRO Coffee Research Institute (Agronomy, MDPI)",
+        "title": "Coffee Leaf Rust (Hemileia vastatrix) in Kenya - A Review (Gichuru, Alwora, Gimase, Kathurima)",
+        "url": "https://mdpi-res.com/d_attachment/agronomy/agronomy-11-02590/article_deploy/agronomy-11-02590.pdf",
+        "year": 2021
+      },
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Arabica Coffee Handbook - Chapter 7: Diseases of Arabica Coffee and their Management",
+        "url": "https://new.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      },
+      {
+        "publisher": "CABI PlantwisePlus Blog",
+        "title": "Coffee leaf rust: Spotting and managing Hemileia vastatrix",
+        "url": "https://blog.plantwise.org/2022/03/17/coffee-leaf-rust-spotting-and-managing-hemileia-vastatrix/",
+        "year": 2022
+      },
+      {
+        "publisher": "FAO Regional Office for Asia and the Pacific",
+        "title": "Arabica coffee manual for Lao PDR - Pests and diseases (Coffee leaf rust)",
+        "url": "https://www.fao.org/4/ae939e/ae939e0b.htm",
+        "year": 2005
+      },
+      {
+        "publisher": "World Coffee Research",
+        "title": "Varieties catalog: Ruiru 11",
+        "url": "https://varieties.worldcoffeeresearch.org/varieties/ruiru-11",
+        "year": null
+      },
+      {
+        "publisher": "World Coffee Research",
+        "title": "Varieties catalog: Batian",
+        "url": "https://varieties.worldcoffeeresearch.org/varieties/batian",
+        "year": null
+      },
+      {
+        "publisher": "Tanzania Coffee Research Institute (TaCRI)",
+        "title": "Taarifa ya Mwaka 2003 (Annual Report 2003, Kiswahili)",
+        "url": "https://tacri.org/fileadmin/03_uploads/03_documents/TaCRI.Reports/ANNUAL_RPT_2003_KIS_FINAL.pdf",
+        "year": 2003
+      },
+      {
+        "publisher": "BRACOL dataset (Krohling, Esgario, Ventura; Mendeley Data)",
+        "title": "BRACOL - A Brazilian Arabica Coffee Leaf images dataset to identification and quantification of coffee diseases and pests",
+        "url": "https://data.mendeley.com/datasets/yy2k5y8mxg/1",
+        "year": 2019
+      }
+    ]
+  },
+  {
+    "id": "coffee_berry_disease",
+    "kind": "disease",
+    "common_name": "Coffee berry disease (CBD)",
+    "scientific_name": "Colletotrichum kahawae",
+    "swahili_name": "chulebuni",
+    "plant_parts": [
+      "berries"
+    ],
+    "symptom_categories": [
+      "fruit_spots",
+      "rot"
+    ],
+    "farmer_words": [
+      "the berries turn black",
+      "black sunken spots on the green berries",
+      "the green berries are dropping",
+      "dry black berries stuck on the branches",
+      "pink dust on the black spots"
+    ],
+    "key_signs": [
+      "Small dark, water-soaked spots on young GREEN berries that quickly turn dark brown or black and sink in, covering the whole berry within about a week",
+      "In wet weather, pale pink spore masses on the spots",
+      "Green berries fall early, or stay on the branch black, dry and shrivelled (mummified)",
+      "Pale, corky brown 'scab' spots on young or mature green berries, which can become active again when the berry ripens"
+    ],
+    "look_alikes": [
+      "brown_eye_spot",
+      "overbearing_dieback"
+    ],
+    "tell_apart_question": "Is there a bright red ring around the dark spot on the green berry?",
+    "conditions": "Arabica only, in Africa. Needs rain or near-saturated air: rain splash spreads the spores down the tree and to nearby trees. Germination works between 12 and 30 C, best around 22 C. Berries are most at risk four to six weeks after flowering, in wet weather. A higher-altitude disease: in Kenya spore production peaks at 1700-1900 m (CABI) and farms between 1400 and 2200 m are affected (KALRO-CRI); in Uganda it is the main arabica disease above 1600 m. Where rainfall is bimodal and crops overlap, as in Kenya, inoculum stays high.",
+    "urgency": "urgent",
+    "farmer_advice_en": "At the end of the season, pick off and remove every berry left on the tree, including dry 'mbuni' berries, so they cannot infect the new crop. Prune to open up the bush so it dries quickly after rain (but do not prune compact varieties such as Catimor-type trees), and keep the shade canopy from getting too dense. Call the extension officer as soon as you see black, sunken spots on green berries during the rains.",
+    "officer_note_en": "Chemical control is considered essential in most countries. Copper-based fungicides are effective and also protect against leaf rust. Organic protectant/eradicants such as chlorothalonil and dithianon also work; CABI says the cheapest option is a tank mix of half-rate copper plus half-rate chlorothalonil. Apply every three to four weeks through the rainy season to protect developing berries. KALRO-CRI notes over 200 fungicides are registered in Kenya (strobilurins, coppers, triazoles, biopesticides); most farmers rely on strobilurins, so alternate modes of action (FRAC) to avoid resistance. CABI: using fewer sprays or lower rates than recommended can make CBD worse by killing natural antagonists, so do not spray at all if recommended rates are not affordable. Resistant varieties: Ruiru 11 and Batian (KALRO; WCR rates both resistant to CBD), Hibrido de Timor, Rume Sudan, Catimors, and TaCRI compact and tall hybrids in Tanzania. SL28 and SL34 are highly susceptible. UCDA notes shade moderates temperature and humidity and is associated with less CBD.",
+    "escalate_when": "Any dark, sunken spots on green berries, or many green berries dropping, especially during the rains.",
+    "regions": [
+      "Africa only (Kenya, Uganda, Tanzania, Ethiopia, Rwanda, Burundi, Malawi, DRC and others); not observed outside Africa"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "CABI",
+        "title": "Pests and diseases of coffee in eastern Africa: a technical and advisory manual (Rutherford & Phiri, eds.) - Coffee Berry Disease",
+        "url": "https://assets.publishing.service.gov.uk/media/57a08c1b40f0b64974000fcc/U3071CoffeeManual.pdf",
+        "year": 2006
+      },
+      {
+        "publisher": "KALRO Coffee Research Institute (Current Agriculture Research Journal)",
+        "title": "Efficacy of Two New Fungicides Against Colletotrichum kahawae Infecting Coffee in Kenya (Malaka, Alwora, Bonuke)",
+        "url": "https://agriculturejournal.org/download/10709",
+        "year": 2021
+      },
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Arabica Coffee Handbook - 7.2 Coffee Berry Disease",
+        "url": "https://new.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      },
+      {
+        "publisher": "World Coffee Research",
+        "title": "Varieties catalog: Ruiru 11",
+        "url": "https://varieties.worldcoffeeresearch.org/varieties/ruiru-11",
+        "year": null
+      },
+      {
+        "publisher": "World Coffee Research",
+        "title": "Varieties catalog: Batian",
+        "url": "https://varieties.worldcoffeeresearch.org/varieties/batian",
+        "year": null
+      },
+      {
+        "publisher": "Tanzania Coffee Research Institute (TaCRI)",
+        "title": "Taarifa ya Mwaka 2003 (Annual Report 2003, Kiswahili)",
+        "url": "https://tacri.org/fileadmin/03_uploads/03_documents/TaCRI.Reports/ANNUAL_RPT_2003_KIS_FINAL.pdf",
+        "year": 2003
+      },
+      {
+        "publisher": "Tanzania Coffee Research Institute (TaCRI)",
+        "title": "Coffee Improvement Research Programme",
+        "url": "https://tacri.org/research-programmes/coffee-improvement-research-programme/",
+        "year": null
+      },
+      {
+        "publisher": "FAO Regional Office for Asia and the Pacific",
+        "title": "Arabica coffee manual for Lao PDR - Pests and diseases (Cercospora berry blotch, Overbearing or dieback)",
+        "url": "https://www.fao.org/4/ae939e/ae939e0b.htm",
+        "year": 2005
+      }
+    ]
+  },
+  {
+    "id": "coffee_wilt_disease",
+    "kind": "disease",
+    "common_name": "Coffee wilt disease (CWD), tracheomycosis, Fusarium wilt",
+    "scientific_name": "Fusarium xylarioides (sexual stage Gibberella xylarioides)",
+    "swahili_name": "mnyauko fusari",
+    "plant_parts": [
+      "whole_tree",
+      "leaves",
+      "stem",
+      "roots"
+    ],
+    "symptom_categories": [
+      "wilting",
+      "yellowing_leaves",
+      "rot",
+      "other"
+    ],
+    "farmer_words": [
+      "the tree is drying up",
+      "the leaves turn yellow and hang limp",
+      "one side of the tree is wilting",
+      "the berries go red too early on a dying tree",
+      "the whole tree died in a few months"
+    ],
+    "key_signs": [
+      "Leaves yellow, fold and curl inward, feel limp, then dry brown and drop until the tree is bare; often starts on one side of the tree",
+      "Branches turn blackish and die back; berries on the sick tree turn red early and stay on the branches",
+      "Blue-black staining of the wood just under the bark, strongest near the base of the stem (the tell-tale sign)",
+      "A dead tree stays firmly rooted, and suckers that grow after cutting also wilt"
+    ],
+    "look_alikes": [
+      "drought_stress",
+      "armillaria_root_rot",
+      "fusarium_bark_disease",
+      "white_stem_borer"
+    ],
+    "tell_apart_question": "If you scrape away a little bark near the bottom of the stem, is the wood underneath stained blue-black?",
+    "conditions": "Can strike trees of any age. A soil-borne fungus that enters through roots and through wounds near the base of the stem, for example from hoes, machetes or livestock. Spread by wind, rain splash, flood or runoff water, moving soil, seedlings, husks and firewood from sick trees, and dirty tools. Spore-bearing bodies form on the bark towards the end of the rainy season. In East Africa the strain on arabica is found in Ethiopia; the strain in Uganda, DRC and Tanzania attacks robusta only.",
+    "urgency": "urgent",
+    "farmer_advice_en": "If the extension officer confirms coffee wilt, the tree cannot be saved: uproot and burn it where it stands, never drag it past healthy trees, and do not keep its wood for firewood, its berries, or its husks for mulch. Avoid cutting the stem base when weeding, keep livestock away from the trees, and clean cutting tools in a fire before moving from one tree to the next. Call the extension officer the same day you see any tree wilting, so it can be confirmed before you uproot it.",
+    "officer_note_en": "No chemical cure: the pathogen lives in soil and inside the plant, and systemic fungicides are unlikely to work economically. CABI also recommends uprooting and burning neighbouring trees that look healthy, because they may already be infected. Do not replant coffee in the spot for at least two years unless using a resistant cultivar (CABI 2006; UCDA). Other sources give 6 months or 1.5 years (see note). Use planting material only from official nurseries or disease-free areas. Quarantine: restrict movement of seedlings, beans and husks out of affected areas. Long-term control relies on resistant cultivars; replanting with resistant robusta eradicated earlier West and Central African outbreaks. In Uganda, NARO has released 10 CWD-resistant robusta varieties since 2009 (UCDA); TaCRI has released four robusta varieties resistant to CWD and is screening more lines. Strain host-specificity: the Ethiopian strain attacks arabica only; the Uganda/DRC/Tanzania strain attacks robusta only. CABI warns that if the Ethiopian (arabica) strain spread to other countries it could cause considerable damage to arabica.",
+    "escalate_when": "Any tree that suddenly yellows, wilts and drops its leaves, especially if berries ripen early on it; call before uprooting so the officer can check for blue-black staining.",
+    "regions": [
+      "Central and East Africa: on robusta in Uganda, DRC and NW Tanzania (Kagera); on arabica in Ethiopia; historically CAR, Cote d'Ivoire, Guinea, Cameroon"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "CABI",
+        "title": "Pests and diseases of coffee in eastern Africa: a technical and advisory manual (Rutherford & Phiri, eds.) - Coffee Wilt Disease",
+        "url": "https://assets.publishing.service.gov.uk/media/57a08c1b40f0b64974000fcc/U3071CoffeeManual.pdf",
+        "year": 2006
+      },
+      {
+        "publisher": "CABI",
+        "title": "Coffee Wilt Disease in Africa - Final Technical Report, Chapter 1 (Phiri & Baker)",
+        "url": "https://assets.publishing.service.gov.uk/media/57a08b41ed915d3cfd000c12/Coffee_CH01.pdf",
+        "year": 2009
+      },
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Robusta Coffee Handbook - 1.4 Robusta varieties; 7.1 Coffee Wilt Disease",
+        "url": "https://new.ugandacoffee.go.ug/file-download/download/public/42",
+        "year": 2019
+      },
+      {
+        "publisher": "CABI PlantwisePlus Blog",
+        "title": "Do you like your coffee wilted?",
+        "url": "https://blog.plantwise.org/2011/07/27/do-you-like-your-coffee-wilted/",
+        "year": 2011
+      },
+      {
+        "publisher": "Tanzania Coffee Research Institute (TaCRI)",
+        "title": "Taarifa ya Mwaka 2003 (Annual Report 2003, Kiswahili)",
+        "url": "https://tacri.org/fileadmin/03_uploads/03_documents/TaCRI.Reports/ANNUAL_RPT_2003_KIS_FINAL.pdf",
+        "year": 2003
+      },
+      {
+        "publisher": "Tanzania Coffee Research Institute (TaCRI)",
+        "title": "Coffee Improvement Research Programme",
+        "url": "https://tacri.org/research-programmes/coffee-improvement-research-programme/",
+        "year": null
+      }
+    ]
+  },
+  {
+    "id": "bacterial_blight",
+    "kind": "disease",
+    "common_name": "Bacterial blight of coffee (BBC), Elgon die-back, Solai die-back, bacterial halo blight",
+    "scientific_name": "Pseudomonas syringae pv. garcae",
+    "swahili_name": null,
+    "plant_parts": [
+      "leaves",
+      "stem",
+      "berries"
+    ],
+    "symptom_categories": [
+      "leaf_spots",
+      "fruit_spots",
+      "other"
+    ],
+    "farmer_words": [
+      "the tips of the branches are dying",
+      "brown spots with yellow rings on the leaves",
+      "the flowers and tiny berries go black",
+      "branches drying from the tip backwards",
+      "young shoots look burnt"
+    ],
+    "key_signs": [
+      "Irregular brown, slightly see-through spots on leaves, usually with a wide yellow ring (halo) around them",
+      "Spots on flowers and pin-head (very young) berries",
+      "Twigs and branches die back from the tip; in severe cases the whole plant can die"
+    ],
+    "look_alikes": [
+      "phoma_leaf_blight",
+      "brown_eye_spot",
+      "coffee_berry_disease"
+    ],
+    "tell_apart_question": "Do the brown patches on the young leaves have a wide yellow ring around them?",
+    "conditions": "High-altitude areas with mild temperatures, regular rainfall and cold winds. In Kenya it was long confined to areas in and west of the Rift Valley but has spread to other coffee areas. In Ethiopia it is more severe on old, neglected farms than on well-managed ones.",
+    "urgency": "urgent",
+    "farmer_advice_en": "Plant or keep windbreak trees on the windy side of the coffee, because the disease is worst where cold winds hit the trees. Keep the farm well managed: blight is more severe on old, neglected farms. Call the extension officer quickly if branch tips are dying and leaves show brown spots with yellow rings, especially at flowering.",
+    "officer_note_en": "Windbreaks are the main preventive measure, though not always possible on farms. Copper sprays have been used in the past, but chemical control is costly, environmentally undesirable and generally not very effective in the field. Resistant or tolerant cultivars are the preferred long-term option; KALRO-CRI has been developing methods to screen genotypes against Kenyan isolates. Ethiopian surveys found variation in tolerance among landraces and released cultivars. The KALRO bulletin 'Identification and Management of Bacterial Blight of Coffee (BBC) Elgon/Solai Die-Back' (Kathurima, Minai, Luusa, 2017) exists but could not be opened; obtain it for current Kenyan spray recommendations before advising chemicals.",
+    "escalate_when": "Dying shoot tips plus brown leaf spots with yellow halos, or flowers and pin-head berries blackening, especially on windy, high-altitude plots.",
+    "regions": [
+      "East Africa (Kenya, Ethiopia, Uganda), Brazil, China"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Ciencia e Agrotecnologia (SciELO)",
+        "title": "Ethiopian coffee germplasm is a valuable resistance gene pool to Brazilian Pseudomonas syringae pvs garcae and tabaci (Rodrigues et al.)",
+        "url": "https://www.scielo.br/j/cagro/a/GMCYhPZnNF6pFCd37DqNqdM/?lang=en",
+        "year": 2021
+      },
+      {
+        "publisher": "Bragantia (Redalyc)",
+        "title": "Bacterial halo blight of coffee crop: aggressiveness and genetic diversity of strains (Maciel et al.)",
+        "url": "https://www.redalyc.org/journal/908/90859320009/html/",
+        "year": 2018
+      },
+      {
+        "publisher": "Frontiers in Plant Science",
+        "title": "Genome-wide association study for resistance to Pseudomonas syringae pv. garcae in Coffea arabica (Ariyoshi et al.)",
+        "url": "https://www.frontiersin.org/journals/plant-science/articles/10.3389/fpls.2022.989847/full",
+        "year": 2022
+      },
+      {
+        "publisher": "African Journal of Agricultural Research (KALRO-CRI authors; University of Embu repository)",
+        "title": "Methods for early evaluation for resistance to bacterial blight of coffee (Gichimu et al.)",
+        "url": "https://repository.embuni.ac.ke/items/7344944e-a124-42d5-92c7-5dcfb103a30d/full",
+        "year": 2013
+      },
+      {
+        "publisher": "Ethiopian Institute of Agricultural Research, Jimma (ASIC 2021 e-poster)",
+        "title": "Significance of minor coffee diseases in Ethiopia (Demelash Teferi & Kifle Belachew)",
+        "url": "https://alphavisa.com/asic/2021/documents/eposters/S2-P-07_DEMELASH.pdf",
+        "year": 2021
+      }
+    ]
+  },
+  {
+    "id": "brown_eye_spot",
+    "kind": "disease",
+    "common_name": "Brown eye spot / Cercospora leaf spot (berry blotch; 'red blister disease' on berries in Uganda)",
+    "scientific_name": "Cercospora coffeicola",
+    "swahili_name": null,
+    "plant_parts": [
+      "leaves",
+      "berries"
+    ],
+    "symptom_categories": [
+      "leaf_spots",
+      "fruit_spots"
+    ],
+    "farmer_words": [
+      "brown spots with a grey middle on the leaves",
+      "round spots like an eye",
+      "small red spots on the berries",
+      "the seedlings in the nursery are losing leaves",
+      "the leaves have dots on them"
+    ],
+    "key_signs": [
+      "Round brown or reddish-brown leaf spots with a grey or whitish centre, often with a yellow halo, seen best on the upper side of the leaf",
+      "No orange powder under the spots",
+      "On berries: small red spots, or brown patches with a bright red ring, usually on the sunny side, that can join into dry blisters",
+      "Worst on nursery seedlings and young plants, and on stressed, poorly fed or unshaded trees"
+    ],
+    "look_alikes": [
+      "coffee_leaf_rust",
+      "phoma_leaf_blight",
+      "coffee_berry_disease",
+      "nitrogen_deficiency"
+    ],
+    "tell_apart_question": "Do the spots have a pale grey or whitish centre, like an eye?",
+    "conditions": "Warm, humid conditions; spores spread by wind and rain splash, and fallen leaves are a key source of infection at the end of the dry season. Worse on stressed plants: low nitrogen and potassium, too little shade, full sun, compacted soil, drought or poor management. More common at lower altitudes and in nurseries. Berry blotch is linked to sun scorch.",
+    "urgency": "routine",
+    "farmer_advice_en": "Give seedlings and young plants some shade (about half shade), feed the trees with manure or fertiliser, and water nursery plants regularly without waterlogging, spacing the seedling bags so air can move. Collect and destroy fallen diseased leaves and coffee debris. Call the extension officer if nursery seedlings are losing many leaves or many berries have red-ringed spots.",
+    "officer_note_en": "Control is usually not needed on mature arabica. In nurseries, a protective copper-based fungicide from the first-leaf stage can be used (CABI; FAO also lists copper sprays for severe cases). UCDA: chemical control is unnecessary with good management; use tolerant varieties, good soil fertility (NPK or organic manure), proper pruning and spacing, and at least 50% shade. Cenicafe: the disease is closely linked to nutrition; adequate nitrogen lowers it, but excess nitrogen favours it, and a balanced N-K supply helps. Berry infection reduces bean quality and pulping. Not to be confused with CBD: berry blotch lesions are generally not the sunken anthracnose type (CABI), though FAO and Cenicafe describe them as sunken with a red ring.",
+    "escalate_when": "Seedlings in the nursery are losing many leaves; or many green berries show red-ringed spots; or spots keep spreading after shade and feeding are improved.",
+    "regions": [
+      "Worldwide (all coffee-growing areas); in East Africa reported from Uganda (incl. 'red blister'), Bukoba area of Tanzania and DRC"
+    ],
+    "in_bracol": true,
+    "sources": [
+      {
+        "publisher": "CABI",
+        "title": "Pests and diseases of coffee in eastern Africa: a technical and advisory manual (Rutherford & Phiri, eds.) - Brown Eye Spot Disease",
+        "url": "https://assets.publishing.service.gov.uk/media/57a08c1b40f0b64974000fcc/U3071CoffeeManual.pdf",
+        "year": 2006
+      },
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Arabica Coffee Handbook - 7.3 Red Blister Disease",
+        "url": "https://new.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      },
+      {
+        "publisher": "FAO Regional Office for Asia and the Pacific",
+        "title": "Arabica coffee manual for Lao PDR - Cercospora leaf spot (brown eye spot) and berry blotch",
+        "url": "https://www.fao.org/4/ae939e/ae939e0b.htm",
+        "year": 2005
+      },
+      {
+        "publisher": "Cenicafe (Colombia)",
+        "title": "Enfermedades del cafeto en Colombia - Mancha de hierro (Cercospora coffeicola)",
+        "url": "https://biblioteca.cenicafe.org/jspui/bitstream/10778/993/20/18.%20Mancha%20de%20hierro.pdf",
+        "year": 2003
+      },
+      {
+        "publisher": "BRACOL dataset (Krohling, Esgario, Ventura; Mendeley Data)",
+        "title": "BRACOL - A Brazilian Arabica Coffee Leaf images dataset to identification and quantification of coffee diseases and pests",
+        "url": "https://data.mendeley.com/datasets/yy2k5y8mxg/1",
+        "year": 2019
+      },
+      {
+        "publisher": "arXiv (Esgario, Krohling, Ventura)",
+        "title": "Deep Learning for Classification and Severity Estimation of Coffee Leaf Biotic Stress",
+        "url": "https://arxiv.org/abs/1907.11561",
+        "year": 2019
+      }
+    ]
+  },
+  {
+    "id": "phoma_leaf_blight",
+    "kind": "disease",
+    "common_name": "Phoma leaf blight / Phoma leaf spot / Phoma dieback",
+    "scientific_name": "Phoma spp. (e.g. Phoma tarda, Phoma costarricensis)",
+    "swahili_name": null,
+    "plant_parts": [
+      "leaves",
+      "stem",
+      "berries"
+    ],
+    "symptom_categories": [
+      "leaf_spots",
+      "stunted_growth",
+      "fruit_spots",
+      "other"
+    ],
+    "farmer_words": [
+      "the young leaves at the top turn black",
+      "the shoot tips are dying",
+      "new leaves are curled with dark patches",
+      "many small shoots bunching at the tip",
+      "the flowers rot and drop"
+    ],
+    "key_signs": [
+      "Dark, roundish spots with uneven edges on YOUNG leaves that join up and kill the leaf; spots at the leaf edge make the leaf curl and deform",
+      "Growing tips and young shoots die back from the tip; many small new shoots then bunch together like a rosette",
+      "Dry branches, rotted flowers and fruit that fall, and shrivelled pin-head berries",
+      "Worst on exposed plots at high altitude hit by cold winds"
+    ],
+    "look_alikes": [
+      "bacterial_blight",
+      "brown_eye_spot",
+      "coffee_leaf_rust"
+    ],
+    "tell_apart_question": "Are there dark, dead (black-brown) patches on the young leaves at the shoot tip?",
+    "conditions": "High-altitude, cool, wet places: prolonged rain, low light, and minimum temperatures below about 20 C. Worst in full-sun plots exposed to cold air currents, for example from nearby rivers or streams. Shaded plots or plots with windbreaks are less affected. Leaf wetness is needed; wounds from insects or leaves rubbing in strong cold winds let the fungus in. Most infection in rainy, cold, cloudy periods.",
+    "urgency": "soon",
+    "farmer_advice_en": "On cold, windy plots, plant live windbreaks or shade trees, and prune off and remove attacked shoots and branches. Raise nursery seedlings under shade and never plant out seedlings that show the disease. Call the extension officer if shoot tips keep dying on many trees, especially during cold, rainy spells.",
+    "officer_note_en": "Cenicafe (Colombia): in affected areas produce healthy nursery plants under shade with fortnightly preventive chemical treatment; in fields, prune attacked shoots first, then spray. Start fungicides before the rainy season and repeat fortnightly or monthly depending on climate and severity. Cenicafe lists protectant and systemic fungicides used against Phoma (e.g. captan, chlorothalonil, cyproconazole, mancozeb mixtures), noting some have left the market. Brazilian research: losses of 15-43%; incidence and severity rise with altitude; no regular seasonal pattern, which complicates spray timing; foliar nutrition is being studied as an alternative. Distinguish from boron deficiency: that causes progressive yellowing from tip to centre, corky veins and leaf deformation WITHOUT dead tissue. No East African extension source was found; confirm local occurrence before advising.",
+    "escalate_when": "Shoot tips are dying on many trees, or nursery seedlings show blackened tips, especially during cold, rainy periods at high altitude.",
+    "regions": [
+      "Present in most coffee-growing countries (Cenicafe); documented at high altitude in Colombia, Brazil and Central America (Guatemala). East African occurrence not confirmed by the sources opened."
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Cenicafe (Colombia)",
+        "title": "Enfermedades del cafeto en Colombia - Muerte descendente (Phoma spp.)",
+        "url": "https://biblioteca.cenicafe.org/jspui/bitstream/10778/993/16/14.%20Muerte%20descendente.pdf",
+        "year": 2003
+      },
+      {
+        "publisher": "Revista Ceres",
+        "title": "Temporal analysis of Phoma leaf spot of coffee plants at different altitudes (Silva et al.)",
+        "url": "https://ojs.ceres.ufv.br/ceres/article/view/7708",
+        "year": 2025
+      },
+      {
+        "publisher": "Journal of Phytopathology (Embrapa repository)",
+        "title": "Foliar fertilizers for the management of phoma leaf spot on coffee seedlings (Silva Junior et al.)",
+        "url": "https://www.alice.cnptia.embrapa.br/alice/bitstream/doc/1100251/1/Pedro2018.pdf",
+        "year": 2018
+      },
+      {
+        "publisher": "BRACOL dataset (Krohling, Esgario, Ventura; Mendeley Data)",
+        "title": "BRACOL - A Brazilian Arabica Coffee Leaf images dataset to identification and quantification of coffee diseases and pests",
+        "url": "https://data.mendeley.com/datasets/yy2k5y8mxg/1",
+        "year": 2019
+      }
+    ]
+  },
+  {
+    "id": "fusarium_bark_disease",
+    "kind": "disease",
+    "common_name": "Fusarium bark disease / coffee bark disease (Storey's bark disease, scaly bark, collar rot)",
+    "scientific_name": "Fusarium stilboides (sexual stage Gibberella stilboides)",
+    "swahili_name": null,
+    "plant_parts": [
+      "stem",
+      "roots",
+      "whole_tree"
+    ],
+    "symptom_categories": [
+      "wilting",
+      "rot",
+      "yellowing_leaves",
+      "stunted_growth"
+    ],
+    "farmer_words": [
+      "the stem is pinched thin near the bottom",
+      "the bark is flaking at the old pruning cut",
+      "a sunken brown patch at the base of the stem",
+      "the tree wilts and dies from the top",
+      "the suckers are dying"
+    ],
+    "key_signs": [
+      "Slightly sunken brown lesion near the stem base that spreads around the stem, with the stem pinched in (constricted); pink spore masses in wet weather",
+      "Bark rising and flaking at pruning scars ('scaly bark') on main stems",
+      "Canker around the base of the trunk (collar rot), with leaf yellowing and dieback from the top of the tree",
+      "Foliage wilts and dies once the stem is girdled; suckers can break off at the weak point"
+    ],
+    "look_alikes": [
+      "coffee_wilt_disease",
+      "armillaria_root_rot",
+      "white_stem_borer"
+    ],
+    "tell_apart_question": "Is the stem pinched in, narrower than normal, around a dead patch of bark near the ground or at an old pruning cut?",
+    "conditions": "Arabica only. Enters through wounds from pruning, weeding tools, stem borers and livestock feeding. Favoured by humid conditions and by stressed trees: water stress where rain is marginal, temperatures above about 27 C, acid or poorly balanced soils. In Kenya, damage worsened with yellow-headed borer and hot, dry conditions. Since 2013 it has been serious in Nyeri County and more severe at higher altitudes.",
+    "urgency": "urgent",
+    "farmer_advice_en": "Do not wound the lower stem when weeding or pruning, keep livestock away from the trees, clean cutting tools in a fire before moving to the next tree, and do not mulch right up against the stem or grow dense low crops like beans around the trunk. Uproot and burn dead trees where they stand, without dragging them through the farm, keeping the wood for firewood, or handling them in wet weather. Call the extension officer when you see a pinched, dead patch of bark on the lower stem or a tree wilting.",
+    "officer_note_en": "CABI: management is mainly cultural, as for CWD. Prevent introduction by using planting material from official distributors. Uproot and burn affected trees. Before replanting arabica, leave the land fallow at least one month (preferably six) and/or plant resistant coffee or an alternative crop such as a legume cover. Disinfect pruning cuts, or preferably protect them with copper fungicide paint. Control heavy borer infestations, avoid contact herbicides near sucker bases, and correct soil pH and nutrition. Only arabica is affected, so other coffee species or inter-specific hybrids avoid it. KALRO-CRI (Alworah et al. 2023): FBD caused up to 100% crop losses in preliminary Kenyan studies. Farmers mainly uproot and replace trees, and replants often get re-infected. Resistant varieties and effective chemical control are lacking: in seedling inoculations, Ruiru 11 and Batian showed pronounced severity. Do not promote them as FBD-resistant.",
+    "escalate_when": "A sunken or cracked dead patch of bark on the lower stem, a pinched stem, flaking bark at pruning cuts, or any tree wilting or dying back from the top.",
+    "regions": [
+      "East and Southern Africa: Kenya, Tanzania, Uganda, Ethiopia, Rwanda, Burundi, Malawi, Madagascar"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "CABI",
+        "title": "Pests and diseases of coffee in eastern Africa: a technical and advisory manual (Rutherford & Phiri, eds.) - Coffee Bark Disease",
+        "url": "https://assets.publishing.service.gov.uk/media/57a08c1b40f0b64974000fcc/U3071CoffeeManual.pdf",
+        "year": 2006
+      },
+      {
+        "publisher": "KALRO Coffee Research Institute (Agronomy, MDPI)",
+        "title": "A Method for Selection of Coffee Varieties Resistant to Fusarium stilboides (Alworah et al.)",
+        "url": "https://mdpi-res.com/d_attachment/agronomy/agronomy-13-02321/article_deploy/agronomy-13-02321.pdf",
+        "year": 2023
+      },
+      {
+        "publisher": "KALRO Coffee Research Institute (ASIC 2023 e-poster)",
+        "title": "Selection of coffee varieties resistant to Fusarium stilboides (Alworah et al.)",
+        "url": "https://www.alphavisa.com/asic/2023/documents/eposters/S2/S2_Getrude_Alworah-1.pdf",
+        "year": 2023
+      }
+    ]
+  },
+  {
+    "id": "armillaria_root_rot",
+    "kind": "disease",
+    "common_name": "Armillaria root rot / collar crack disease",
+    "scientific_name": "Armillaria mellea (Armillaria spp.)",
+    "swahili_name": null,
+    "plant_parts": [
+      "roots",
+      "stem",
+      "whole_tree"
+    ],
+    "symptom_categories": [
+      "yellowing_leaves",
+      "wilting",
+      "rot",
+      "stunted_growth"
+    ],
+    "farmer_words": [
+      "the tree is yellow and slowly dying",
+      "white fungus on the roots",
+      "the dead tree falls over when I push it",
+      "cracks at the base of the stem",
+      "the roots are rotten and white"
+    ],
+    "key_signs": [
+      "Slow decline: shoots grow less, leaves become small, yellow and sparse, then wilt and fall; branches and finally the whole tree die",
+      "White fungal growth on the roots; in late stages the wood rots into a white wet mass with black lines through it",
+      "Vertical cracks at the base of the stem (collar crack)",
+      "A dying tree comes loose and topples easily when pushed"
+    ],
+    "look_alikes": [
+      "coffee_wilt_disease",
+      "fusarium_bark_disease",
+      "coffee_root_mealybug"
+    ],
+    "tell_apart_question": "If you push the dying tree, does it come loose and fall over easily?",
+    "conditions": "Mainly on land recently cleared from forest, where old tree stumps and roots stay in the soil and infect young coffee. Spreads from tree to tree by root contact and with moved soil. Above-ground signs appear only once the collar or several large roots are destroyed, so it can go unnoticed for years.",
+    "urgency": "urgent",
+    "farmer_advice_en": "When clearing forest land for coffee, remove old tree stumps and as many of their roots as possible. Dig out dead coffee trees with their whole root system and burn them, and wait at least two years before replanting in that spot. Call the extension officer if a tree slowly yellows and dies and you find white fungus on the roots, so the patch can be dealt with before it spreads to neighbouring trees.",
+    "officer_note_en": "UCDA: prevent by ring-barking unwanted forest trees at least one year before felling. This drains carbohydrate reserves from the roots, so the fungus dies with the tree. Then remove and burn stumps and roots, and delay replanting at least two years. UCDA also gives a copper fungicide soil drench to reduce infection of future transplants (dose given in the handbook). The fungus attacks many forest trees and tree crops besides coffee. Distinguish from CWD: a CWD-killed tree stays firmly rooted, while an Armillaria-infected tree topples easily (UCDA Robusta Handbook).",
+    "escalate_when": "A tree yellows and declines slowly with white fungal growth on the roots or cracks at the stem base, or several neighbouring trees decline in a patch, especially on land recently cleared from forest.",
+    "regions": [
+      "Reported on coffee in Uganda (UCDA) and in coffee-growing countries generally (Lu et al. 2022); specific East African country distribution beyond Uganda not confirmed"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Arabica Coffee Handbook - 7.4 Root Rot or Collar Crack Disease; 3.2 Clear the site",
+        "url": "https://new.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      },
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Robusta Coffee Handbook - 7.1 Coffee Wilt Disease (comparison with Armillaria)",
+        "url": "https://new.ugandacoffee.go.ug/file-download/download/public/42",
+        "year": 2019
+      },
+      {
+        "publisher": "Pathogens (MDPI), via Europe PMC",
+        "title": "Comprehensive Review of Fungi on Coffee (Lu et al.)",
+        "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9024902/fullTextXML",
+        "year": 2022
+      }
+    ]
+  },
+  {
+    "id": "american_leaf_spot",
+    "kind": "disease",
+    "common_name": "American leaf spot (ojo de gallo, gotera)",
+    "scientific_name": "Mycena citricolor",
+    "swahili_name": null,
+    "plant_parts": [
+      "leaves",
+      "berries",
+      "stem"
+    ],
+    "symptom_categories": [
+      "leaf_spots",
+      "fruit_spots"
+    ],
+    "farmer_words": [
+      "round grey spots that fall out",
+      "holes in the leaves",
+      "small round spots like a bird's eye",
+      "leaves full of little holes and dropping",
+      "round sunken spots on the berries"
+    ],
+    "key_signs": [
+      "Round or slightly oval leaf spots 6-10 mm across that start brown and turn light grey with an almost white centre, sharply edged, sometimes with a reddish rim",
+      "In advanced stages the dead spot drops out, leaving holes in the leaf (this sets it apart from other coffee leaf diseases)",
+      "Long lesions on stems and round, sunken spots on berries; heavy leaf and fruit drop",
+      "In rainy mornings, tiny yellow pin-shaped fungal heads on the spots"
+    ],
+    "look_alikes": [
+      "brown_eye_spot",
+      "coffee_leaf_rust"
+    ],
+    "tell_apart_question": "Do the round grey spots fall out and leave holes in the leaf?",
+    "conditions": "Latin America only. Dense shade, few hours of sun, relative humidity above 80% and heavy rain. Peaks in the rainiest months and drops in dry periods, when the fungus survives in leaf litter; dew can be enough for infection. In Costa Rica, epidemics come about every 14 years with high rainfall.",
+    "urgency": "soon",
+    "farmer_advice_en": "This disease is only found in Latin America. Thin out heavy shade, keep weeds down, feed the trees well and open up the plantation so light and air get in; in high-risk spots plant fewer trees per area. Call the extension officer if many leaves have round grey spots that fall out to leave holes.",
+    "officer_note_en": "Cenicafe: management in Colombia is cultural (shade regulation, weeding, removal of parasitic plants, timely fertilisation, stand renewal, lower planting density in favourable sites), and chemicals are not recommended there. Research in Central America and Colombia found copper fungicides (oxychloride, cuprous oxide) and Bordeaux mixture effective; in Costa Rica the best results came from systemic triazoles. Removing diseased leaves was historically recommended. A Costa Rican trial found leaf-litter removal had no significant effect, and initial inoculum on the plant was the main driver (Granados-Montero et al. 2020). All Colombian varieties are susceptible. Not present in East Africa: if reported there, suspect a different disease.",
+    "escalate_when": "Many leaves with round grey spots or holes and heavy leaf or fruit drop during the rains (Latin America only); any suspected case outside Latin America.",
+    "regions": [
+      "Latin America only (Central America incl. Costa Rica and Guatemala; Colombia, Venezuela; observed in all coffee zones of the Americas)"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Cenicafe (Colombia)",
+        "title": "Enfermedades del cafeto en Colombia - Gotera (Mycena citricolor)",
+        "url": "https://biblioteca.cenicafe.org/jspui/bitstream/10778/993/18/16.%20Gotera.pdf",
+        "year": 2003
+      },
+      {
+        "publisher": "Agronomia Mesoamericana (Universidad de Costa Rica)",
+        "title": "Leaf litter and Mycena citricolor inoculum on the American leaf spot epidemic (Granados-Montero et al.)",
+        "url": "https://www.redalyc.org/journal/437/43761812007/43761812007.pdf",
+        "year": 2020
+      }
+    ]
+  },
+  {
+    "id": "sooty_mould",
+    "kind": "disease",
+    "common_name": "Sooty mould",
+    "scientific_name": null,
+    "swahili_name": null,
+    "plant_parts": [
+      "leaves",
+      "stem",
+      "berries"
+    ],
+    "symptom_categories": [
+      "other",
+      "pests"
+    ],
+    "farmer_words": [
+      "black soot on the leaves",
+      "the leaves are black and sticky",
+      "black powder on the leaves and branches",
+      "ants all over the coffee",
+      "white fluffy insects and black leaves"
+    ],
+    "key_signs": [
+      "Black, powdery, soot-like coating on leaves and other parts of the plant such as stems and berries",
+      "Sticky, sugary 'honeydew' on the plant underneath the black layer",
+      "Ants running on the branches, with scale insects (small flat, often green) or white waxy mealybugs nearby"
+    ],
+    "look_alikes": [
+      "green_scale",
+      "coffee_mealybug"
+    ],
+    "tell_apart_question": "Are there ants walking on the branches, or small flat green or white waxy insects on the stems and under the leaves?",
+    "conditions": "Not an infection of the leaf itself: the black fungus grows on honeydew made by sap-sucking insects (green scales, mealybugs, aphids), and ants that feed on the honeydew protect these insects. Scales multiply fast in dry weather and are reduced by heavy rain; mealybugs are also worse in the dry season.",
+    "urgency": "routine",
+    "farmer_advice_en": "Deal with the insects, not the black mould: cut off and destroy badly infested branches and any branches or leaves trailing on the ground, remove unwanted suckers, and keep the trees well fed with mulch and manure. Check new seedlings for insects, honeydew or black mould before planting. Call the extension officer if the black coating and insects keep spreading or young trees start yellowing.",
+    "officer_note_en": "FAO: treating the mould itself is unnecessary if scale, mealybug and aphid populations are managed. CABI: keeping ants away from scales lets parasites, predators and fungal parasites control the infestation much more effectively. Historically, a grease band on greaseproof paper (not directly on bark) was used to stop ants, which fails if branches, weeds or mulch bridge to the tree. Oils and soap solutions suffocate scales and mealybugs (CABI; UCDA), applied in cool, non-sunny periods after a test branch (UCDA). Leaving prunings on the ground lets parasites emerge (CABI). UCDA warns that serious mealybug outbreaks have followed heavy insecticide spraying. Treat as a pointer to the green-scale or mealybug pest rows.",
+    "escalate_when": "The black coating and insects keep spreading after pruning, young trees are yellowing or wilting, or white waxy insects are found on the roots.",
+    "regions": [
+      "Worldwide; reported with green scales and mealybugs in East Africa (CABI; Uganda per UCDA) and in Asia (Lao PDR, FAO)"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "CABI",
+        "title": "Pests and diseases of coffee in eastern Africa: a technical and advisory manual (Rutherford & Phiri, eds.) - Green Scales; Coffee Root Mealybug",
+        "url": "https://assets.publishing.service.gov.uk/media/57a08c1b40f0b64974000fcc/U3071CoffeeManual.pdf",
+        "year": 2006
+      },
+      {
+        "publisher": "FAO Regional Office for Asia and the Pacific",
+        "title": "Arabica coffee manual for Lao PDR - Sooty mould",
+        "url": "https://www.fao.org/4/ae939e/ae939e0b.htm",
+        "year": 2005
+      },
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Arabica Coffee Handbook - 6.4 Mealybugs (damage symptoms and control)",
+        "url": "https://new.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      }
+    ]
+  },
+  {
+    "id": "coffee_leaf_miner",
+    "kind": "pest",
+    "common_name": "Coffee leaf miner",
+    "scientific_name": "Leucoptera meyricki and Leucoptera caffeina (East Africa); Leucoptera coffeella (Brazil and the Americas)",
+    "swahili_name": "kidomozi",
+    "plant_parts": [
+      "leaves"
+    ],
+    "symptom_categories": [
+      "leaf_spots",
+      "pests"
+    ],
+    "farmer_words": [
+      "brown patches on top of the leaves",
+      "the top skin of the leaf peels off and there are tiny white worms inside",
+      "the leaves have blisters or tunnels",
+      "leaves are falling off early",
+      "small white moths fly out when I shake the tree"
+    ],
+    "key_signs": [
+      "Large, irregular brown blotches on the upper side of the leaf",
+      "Rubbing or bending the leaf across the blotch lifts the upper skin and shows small, flat, whitish caterpillars in fresh mines",
+      "Mined leaves drop early",
+      "Very small white moths (3-4 mm) on the trees"
+    ],
+    "look_alikes": [
+      "brown_eye_spot",
+      "coffee_leaf_rust",
+      "coffee_leaf_skeletoniser"
+    ],
+    "tell_apart_question": "When you bend or rub the brown patch, does the top skin of the leaf lift off like a blister, showing tiny white caterpillars inside?",
+    "conditions": "Sources disagree on weather. In Brazil (L. coffeella) attacks are usually worse in the dry season and the life cycle gets shorter in hot weather. On Kilimanjaro, leaf miner numbers grew more slowly when it was hotter and sunnier. Attacks get worse when spraying kills the small wasps that feed on the leaf miner.",
+    "urgency": "routine",
+    "farmer_advice_en": "Do not use coffee prunings that carry mined leaves as mulch, because they can re-infest the trees, and do not spray on your own, because wrong sprays kill the small wasps that eat leaf miners. Ask your co-op about yellow sticky boards (plywood painted yellow and smeared with oil) that catch leaf miners. Call the extension officer if about 30 or more small white moths fly out when you shake one tree, or if many trees are losing their leaves.",
+    "officer_note_en": "Monitoring: shake the tree vigorously. Infonet (Kenya-focused) says yield can be affected above 35 moths per tree; UCDA advises spraying when about 30 moths per tree are seen and the caterpillars are still small and numerous. Natural enemies are the main regulators: parasitic wasps (in Kenya mainly Zagrammosoma variegatum, Achrysocharella ritchiei and Parahormius leucopterae) and predatory mites on eggs. Indiscriminate spraying kills natural enemies faster than moths and leads to worse attacks. TaCRI promotes yellow sticky traps against leaf miner and thrips. Infonet cites an FAO consultant reporting that intercropping Artemisia with coffee greatly reduces leaf miner incidence in East Africa.",
+    "escalate_when": "About 30 or more small white moths fly out when one tree is shaken, or many trees are dropping mined leaves.",
+    "regions": [
+      "Kenya",
+      "Tanzania (Kilimanjaro)",
+      "Uganda (minor pest of arabica)",
+      "Brazil and other Neotropical countries (L. coffeella)"
+    ],
+    "in_bracol": true,
+    "sources": [
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA) / MAAIF",
+        "title": "Arabica Coffee Handbook (Chapter 6: Insect pests of Arabica coffee)",
+        "url": "https://new.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      },
+      {
+        "publisher": "Infonet-Biovision (Biovision Foundation), archived copy",
+        "title": "Coffee: pests and diseases (plant health page)",
+        "url": "https://kolibri.teacherinabox.org.au/modules/en-infonet/export/default$ct$140$crops.html",
+        "year": 2012
+      },
+      {
+        "publisher": "Tanzania Coffee Research Institute (TaCRI)",
+        "title": "Good Agricultural Practices Research Programme",
+        "url": "https://tacri.org/research-programmes/good-agricultural-practices-research-programme/index.html",
+        "year": null
+      },
+      {
+        "publisher": "Bulletin of Entomological Research (Cambridge University Press)",
+        "title": "Field studies of insecticides against the coffee leaf-miner Leucoptera meyricki Ghesq. (Wheatley & Crowe)",
+        "url": "https://www.cambridge.org/core/journals/bulletin-of-entomological-research/article/field-studies-of-insecticides-against-the-coffee-leafminer-leucoptera-meyricki-ghesq-lepidoptera-lyonetiidae/8763C614E92A73D6B17EEDDEE1FB391F",
+        "year": 1964
+      },
+      {
+        "publisher": "Bulletin of Entomological Research (Cambridge University Press)",
+        "title": "Populations of the leaf-miner Leucoptera meyricki Ghesq. and its parasites in sprayed and unsprayed coffee in Kenya (Bess)",
+        "url": "https://www.cambridge.org/core/journals/bulletin-of-entomological-research/article/abs/populations-of-the-leafminer-leucoptera-meyricki-ghesq-and-its-parasites-in-sprayed-and-unsprayed-coffee-in-kenya1/A82A12DB4C8A58FFDDD6B4514CDC2E68",
+        "year": 1964
+      },
+      {
+        "publisher": "Bulletin of Entomological Research (Cambridge University Press)",
+        "title": "Prediction of outbreaks of coffee leaf-miners on Kilimanjaro (Bigger & Tapley)",
+        "url": "https://www.cambridge.org/core/journals/bulletin-of-entomological-research/article/abs/prediction-of-outbreaks-of-coffee-leafminers-on-kilimanjaro/C6C11FD33F4A26F9B8DD650914CDE609",
+        "year": 1969
+      },
+      {
+        "publisher": "Insects (MDPI), Embrapa authors",
+        "title": "A Comprehensive Review of the Coffee Leaf Miner Leucoptera coffeella (Dantas et al.)",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8707027/",
+        "year": 2021
+      },
+      {
+        "publisher": "Tanzania Coffee Research Institute (TaCRI)",
+        "title": "Taarifa ya Mwaka 2006/2007 (Annual Report, Kiswahili edition), matched line by line with the English edition",
+        "url": "https://www.tacri.org/fileadmin/03_uploads/03_documents/TaCRI.Reports/tacri-Taarifa_ya_Mwaka_2007.pdf",
+        "year": 2007
+      }
+    ]
+  },
+  {
+    "id": "antestia_bug",
+    "kind": "pest",
+    "common_name": "Antestia bug (variegated coffee bug)",
+    "scientific_name": "Antestiopsis spp. (e.g. A. thunbergii, A. lineaticollis, A. intricata, A. facetoides)",
+    "swahili_name": "kimatira",
+    "plant_parts": [
+      "berries",
+      "stem",
+      "leaves"
+    ],
+    "symptom_categories": [
+      "pests",
+      "rot",
+      "other"
+    ],
+    "farmer_words": [
+      "brown shield-shaped bugs with orange and white marks hiding in the berries",
+      "the flower buds turn black and no berries form",
+      "the green berries are falling",
+      "the branches grow many small shoots like a broom",
+      "the beans have black stripes or are rotten when I pulp"
+    ],
+    "key_signs": [
+      "Shield-shaped bug, 6-8 mm, dark brown with orange and white markings, hiding in berry or flower clusters",
+      "Blackened flower buds that set no fruit, and berries falling",
+      "Fan branching or 'witches broom' with short internodes on attacked branches",
+      "No marks on the outside of the berry, but zebra-striped or rotten beans show up at pulping or on the drying table"
+    ],
+    "look_alikes": [
+      "coffee_berry_borer",
+      "coffee_berry_disease"
+    ],
+    "tell_apart_question": "Can you see shield-shaped brown bugs with orange and white markings hiding among the berry or flower clusters?",
+    "conditions": "Worst in dense, unpruned bushes and under heavy shade, because the bug hides in thick foliage. On Kilimanjaro, A. thunbergii numbers were highest in the cool dry season and rose with altitude (studied from 1000 to 1700 m). It favours high-altitude arabica, while other Antestia species are more common at 1000-1600 m. Damage is linked to the 'potato taste' defect in the Great Lakes region.",
+    "urgency": "soon",
+    "farmer_advice_en": "Prune and remove extra suckers so the bush is open, because the bug hides in thick bushes. Pick the bugs off by hand and kill them, and at the end of harvest strip every leftover berry from the trees. Count the bugs on a few trees, and call the extension officer if you find on average 1 or 2 bugs per tree, or many black flower buds.",
+    "officer_note_en": "Thresholds: Infonet gives more than 3 bugs per tree in Tanzania; in Kenya, 2 bugs per tree in drier areas and more than 1 bug per tree in wetter areas. UCDA treats chemical control as a last resort, used when adults plus nymphs average more than 2 per tree in drier areas or more than 1 per tree in wetter areas. In Rwanda, pruning plus targeted pyrethrum or pyrethroid sprays killed more bugs and reduced potato taste defect more than either measure alone; pruning alone also helped (Bigirimana et al. 2018; WCR 2023). Parasitic wasps attack the eggs naturally: parasitised eggs are black, healthy eggs are white. TaCRI has developed botanical bio-pesticides against Antestia. Post-harvest: float cherries at the wet mill and hand-sort damaged beans to limit potato taste defect (WCR).",
+    "escalate_when": "On average 1 to 2 or more bugs per tree, or many flower buds turning black and green berries dropping.",
+    "regions": [
+      "Kenya",
+      "Tanzania (incl. Kilimanjaro)",
+      "Uganda",
+      "Rwanda",
+      "Burundi",
+      "DR Congo",
+      "eastern and southern Africa generally"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Infonet-Biovision (Biovision Foundation), archived copy",
+        "title": "Coffee: pests and diseases (plant health page)",
+        "url": "https://kolibri.teacherinabox.org.au/modules/en-infonet/export/default$ct$140$crops.html",
+        "year": 2012
+      },
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA) / MAAIF",
+        "title": "Arabica Coffee Handbook (Chapter 6: Insect pests of Arabica coffee)",
+        "url": "https://new.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      },
+      {
+        "publisher": "World Coffee Research",
+        "title": "Potato taste defect: Impacts of the Antestia bug and overview of mitigation efforts",
+        "url": "https://worldcoffeeresearch.org/download/a2a841cb-658e-4020-b70d-c38d3bc3f0c3",
+        "year": 2023
+      },
+      {
+        "publisher": "PLOS ONE (icipe / CIRAD authors)",
+        "title": "Prediction of insect pest distribution as influenced by elevation: the coffee stink bug, Antestiopsis thunbergii (Azrag et al.)",
+        "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0199569",
+        "year": 2018
+      },
+      {
+        "publisher": "Florida Entomologist",
+        "title": "Options for managing Antestiopsis thunbergii and the relationship of bug density to the occurrence of potato taste defect in coffee (Bigirimana et al.)",
+        "url": "https://bioone.org/journals/Florida-Entomologist/volume-101/issue-4/024.101.0418/Options-for-Managing-Antestiopsis-thunbergii-Hemiptera--Pentatomidae-and-the/10.1653/024.101.0418.full",
+        "year": 2018
+      },
+      {
+        "publisher": "Tanzania Coffee Research Institute (TaCRI)",
+        "title": "Good Agricultural Practices Research Programme",
+        "url": "https://tacri.org/research-programmes/good-agricultural-practices-research-programme/index.html",
+        "year": null
+      },
+      {
+        "publisher": "Tanzania Coffee Research Institute (TaCRI)",
+        "title": "Taarifa ya Mwaka 2006/2007 (Annual Report, Kiswahili edition), matched line by line with the English edition",
+        "url": "https://www.tacri.org/fileadmin/03_uploads/03_documents/TaCRI.Reports/tacri-Taarifa_ya_Mwaka_2007.pdf",
+        "year": 2007
+      }
+    ]
+  },
+  {
+    "id": "coffee_berry_borer",
+    "kind": "pest",
+    "common_name": "Coffee berry borer",
+    "scientific_name": "Hypothenemus hampei",
+    "swahili_name": "ruhuka",
+    "plant_parts": [
+      "berries"
+    ],
+    "symptom_categories": [
+      "fruit_spots",
+      "rot",
+      "pests",
+      "other"
+    ],
+    "farmer_words": [
+      "there are small holes in the tip of the berries",
+      "the green berries are falling off",
+      "tiny black beetles inside the berries",
+      "the beans have blue-green stains and small white worms",
+      "my coffee beans have holes and poor quality"
+    ],
+    "key_signs": [
+      "Usually one small round hole, about 1 mm, at or near the tip (navel) of large green or ripe berries",
+      "Inside: beans with blue-green staining and small white legless grubs with brown heads",
+      "Tiny black beetle, about 2 mm long",
+      "Green berries fall early; some attacked young berries rot"
+    ],
+    "look_alikes": [
+      "antestia_bug",
+      "coffee_berry_disease"
+    ],
+    "tell_apart_question": "Is there a tiny round hole, about the size of a pinhead, at the tip of the berry?",
+    "conditions": "Worst at lower and middle altitudes. It was once rare above about 1500 m, but with warming it now reaches more than 1800 m in East Africa. The beetle survives between crops in old berries left on the tree or on the ground. Females leave infested berries after rain, so the first rains after a long drought are a key risk moment. Sources disagree on shade: CABI and Infonet link it to heavy shade or damp conditions, but a Uganda study found it more common on sun-exposed farms.",
+    "urgency": "soon",
+    "farmer_advice_en": "Pick ripe berries often, about every two weeks in the peak season and monthly at other times, and spread a sack or sheet under the tree so no berries are lost. Collect every fallen and dried berry from the ground, strip old berries off the trees after harvest (especially before the rains), and burn them, bury them deep or boil them. Call the extension officer if many berries on several trees have the small hole at the tip.",
+    "officer_note_en": "Use integrated management and give sanitation top priority: do a complete strip-picking, remove old berries before the main flowering, and collect fallen berries (mbuni), especially before rains that follow a long drought, when up to 100 females per berry can be waiting. Prune coffee and shade trees to open the canopy. Parasitoids Prorops nasuta (widespread in eastern Africa), Heterospilus coffeicola, Phymastichus coffea and Cephalonomia stephanoderis reduce numbers but do not eradicate the borer. Field results with Beauveria bassiana are often disappointing (CABI 2006). Alcohol-baited traps show promise but need local testing; TaCRI has packaged an improved CBB trap baited with local brews. If chemicals are used, timing is critical: spray before the beetle enters the bean (CABI: probably no later than about 100 days after flowering; UCDA: at early fruit set). Spot application reduces risk.",
+    "escalate_when": "Many berries on several trees show the small tip hole, or large numbers of green berries are dropping.",
+    "regions": [
+      "Burundi",
+      "DR Congo",
+      "Ethiopia",
+      "Kenya",
+      "Malawi",
+      "Mozambique",
+      "Rwanda",
+      "Sudan",
+      "Uganda",
+      "Tanzania",
+      "Zimbabwe",
+      "worldwide in coffee"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "CABI (CAB International), DFID Crop Protection Programme",
+        "title": "Pests and Diseases of Coffee in Eastern Africa: A Technical and Advisory Manual (Rutherford & Phiri, eds.)",
+        "url": "https://assets.publishing.service.gov.uk/media/57a08c1b40f0b64974000fcc/U3071CoffeeManual.pdf",
+        "year": 2006
+      },
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA) / MAAIF",
+        "title": "Arabica Coffee Handbook (Chapter 6: Insect pests of Arabica coffee)",
+        "url": "https://new.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      },
+      {
+        "publisher": "Infonet-Biovision (Biovision Foundation), archived copy",
+        "title": "Coffee: pests and diseases (plant health page)",
+        "url": "https://kolibri.teacherinabox.org.au/modules/en-infonet/export/default$ct$140$crops.html",
+        "year": 2012
+      },
+      {
+        "publisher": "PLOS ONE (icipe authors)",
+        "title": "Some Like It Hot: The Influence and Implications of Climate Change on Coffee Berry Borer and Coffee Production in East Africa (Jaramillo et al.)",
+        "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0024528",
+        "year": 2011
+      },
+      {
+        "publisher": "Journal of Pest Science (record in Uganda National Research Repository)",
+        "title": "Contrasting effects of shade level and altitude on two important coffee pests (Jonsson et al.)",
+        "url": "https://nru.uncst.go.ug/handle/123456789/3480",
+        "year": 2015
+      },
+      {
+        "publisher": "Tanzania Coffee Research Institute (TaCRI)",
+        "title": "Good Agricultural Practices Research Programme",
+        "url": "https://tacri.org/research-programmes/good-agricultural-practices-research-programme/index.html",
+        "year": null
+      },
+      {
+        "publisher": "Tanzania Coffee Research Institute (TaCRI)",
+        "title": "Taarifa ya Mwaka 2006/2007 (Annual Report, Kiswahili edition), matched line by line with the English edition",
+        "url": "https://www.tacri.org/fileadmin/03_uploads/03_documents/TaCRI.Reports/tacri-Taarifa_ya_Mwaka_2007.pdf",
+        "year": 2007
+      }
+    ]
+  },
+  {
+    "id": "white_stem_borer",
+    "kind": "pest",
+    "common_name": "White coffee stem borer",
+    "scientific_name": "Monochamus leuconotus (formerly Anthores leuconotus)",
+    "swahili_name": "bungua mweupe",
+    "plant_parts": [
+      "stem",
+      "roots",
+      "leaves",
+      "whole_tree"
+    ],
+    "symptom_categories": [
+      "yellowing_leaves",
+      "wilting",
+      "pests",
+      "other"
+    ],
+    "farmer_words": [
+      "there are holes in the trunk near the ground",
+      "sawdust is coming out at the bottom of the tree",
+      "the bark is eaten in a ring around the stem",
+      "the leaves turn yellow and the tree is drying up",
+      "a big grey beetle with very long horns"
+    ],
+    "key_signs": [
+      "Round holes about 1 cm wide in the lower trunk, with wood shavings (frass) on the ground next to the stem",
+      "Rings around the stem near the base where the bark has been eaten (ring-barking)",
+      "Yellowing, wilting and die-back of the whole tree; young trees under 2 years are often killed",
+      "Adult beetle 3-3.5 cm, grey, with very long antennae"
+    ],
+    "look_alikes": [
+      "coffee_wilt_disease",
+      "drought_stress",
+      "coffee_root_mealybug"
+    ],
+    "tell_apart_question": "Are there round holes about as wide as a pencil in the lower trunk, with sawdust on the ground next to the stem?",
+    "conditions": "Most severe on arabica below about 1500-1700 m. Worst on shallow or eroded soils and near shade trees (CABI, Infonet). A Uganda study found it more common in shaded farms, especially at lower altitude, but UCDA says good shade means less damage. Adults come out of the stem one to two weeks after the rains start. Grubs live inside the wood for about two years.",
+    "urgency": "urgent",
+    "farmer_advice_en": "Rub the bark of the lower stem smooth up to about knee height (half a metre) with a rough cloth or a dry maize cob, without cutting into the wood, so the beetle cannot lay eggs, and you can also wrap the stem base with banana fibre. Push a thin wire, such as a bicycle spoke, into fresh holes to kill the grub inside. Call the extension officer as soon as you see holes with fresh sawdust, so badly attacked trees can be uprooted and burnt before the rains.",
+    "officer_note_en": "Management is now mainly cultural, because aldrin and dieldrin were withdrawn. Keep trees vigorous through good nutrition. Smooth the bark to 0.5 m, wire out larvae, wrap stems with banana fibre, and uproot and burn infested trees before the rains start, when adults emerge. Banding the lower 0.5 m of the stem with a recommended insecticide just before the rains is recommended in Kenya and Uganda (CABI, UCDA, Infonet); CABI reports a 10% lime solution as effective and more environmentally friendly. TaCRI is trialling banding chemicals and uses animal fat smeared on larval holes. Natural enemies: woodpeckers and ants attack larvae, and an Aprostocetus wasp parasitises eggs and pupae; Beauveria bassiana is only at a preliminary stage.",
+    "escalate_when": "Any fresh hole with sawdust in the trunk, or young trees turning yellow and wilting.",
+    "regions": [
+      "Angola",
+      "Burundi",
+      "Cameroon",
+      "DR Congo",
+      "Ethiopia",
+      "Kenya",
+      "Malawi",
+      "Mozambique",
+      "Rwanda",
+      "South Africa",
+      "Tanzania",
+      "Zambia",
+      "Uganda",
+      "Zimbabwe"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "CABI (CAB International), DFID Crop Protection Programme",
+        "title": "Pests and Diseases of Coffee in Eastern Africa: A Technical and Advisory Manual (Rutherford & Phiri, eds.)",
+        "url": "https://assets.publishing.service.gov.uk/media/57a08c1b40f0b64974000fcc/U3071CoffeeManual.pdf",
+        "year": 2006
+      },
+      {
+        "publisher": "Infonet-Biovision (Biovision Foundation), archived copy",
+        "title": "Coffee: pests and diseases (plant health page)",
+        "url": "https://kolibri.teacherinabox.org.au/modules/en-infonet/export/default$ct$140$crops.html",
+        "year": 2012
+      },
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA) / MAAIF",
+        "title": "Arabica Coffee Handbook (Chapter 6: Insect pests of Arabica coffee)",
+        "url": "https://new.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      },
+      {
+        "publisher": "Journal of Pest Science (record in Uganda National Research Repository)",
+        "title": "Contrasting effects of shade level and altitude on two important coffee pests (Jonsson et al.)",
+        "url": "https://nru.uncst.go.ug/handle/123456789/3480",
+        "year": 2015
+      },
+      {
+        "publisher": "Tanzania Coffee Research Institute (TaCRI)",
+        "title": "Good Agricultural Practices Research Programme",
+        "url": "https://tacri.org/research-programmes/good-agricultural-practices-research-programme/index.html",
+        "year": null
+      },
+      {
+        "publisher": "Tanzania Coffee Research Institute (TaCRI)",
+        "title": "Taarifa ya Mwaka 2006/2007 (Annual Report, Kiswahili edition), matched line by line with the English edition",
+        "url": "https://www.tacri.org/fileadmin/03_uploads/03_documents/TaCRI.Reports/tacri-Taarifa_ya_Mwaka_2007.pdf",
+        "year": 2007
+      }
+    ]
+  },
+  {
+    "id": "coffee_thrips",
+    "kind": "pest",
+    "common_name": "Coffee thrips",
+    "scientific_name": "Diarthrothrips coffeae",
+    "swahili_name": null,
+    "plant_parts": [
+      "leaves",
+      "berries",
+      "stem"
+    ],
+    "symptom_categories": [
+      "leaf_spots",
+      "pests",
+      "other"
+    ],
+    "farmer_words": [
+      "the leaves have silver or grey patches",
+      "tiny black dots all over the bad patches",
+      "very small yellow insects under the leaves",
+      "the leaves are drying and falling in the drought"
+    ],
+    "key_signs": [
+      "Irregular grey or silvery patches, mostly on the underside of leaves, covered with many tiny black dots (droppings)",
+      "Tiny insects: grey-brown adults 1-1.5 mm and wingless yellow young on the leaf underside",
+      "In heavy attacks the leaves dry up and fall, and green shoots and berries are also attacked"
+    ],
+    "look_alikes": [
+      "coffee_lace_bug",
+      "drought_stress"
+    ],
+    "tell_apart_question": "Are the damaged patches on the leaves silvery-grey rather than yellow?",
+    "conditions": "Heavy outbreaks happen during long droughts and high temperatures. In Tanzania it used to be a minor pest, but serious outbreaks have occurred in isolated areas since 2014. Mulching reduces numbers a lot.",
+    "urgency": "soon",
+    "farmer_advice_en": "Mulch under the trees, for example with napier grass, maize or banana trash, to keep the soil moist; mulching greatly reduces thrips. Ask your co-op about yellow sticky boards that catch thrips. Call the extension officer if leaves on many trees turn silvery and start falling during a dry spell.",
+    "officer_note_en": "Outbreaks are drought-driven and can cause heavy defoliation. Mulching considerably reduces populations (Infonet). TaCRI uses yellow sticky traps (plywood painted yellow and smeared with motor oil or petroleum) against thrips and leaf miner. Most of the population lives on the leaves, so sample leaves when monitoring (Le Pelley 1942). TaCRI ran insecticide efficacy trials against thrips on estates in Arusha region in 2022; any chemical use should follow current national recommendations.",
+    "escalate_when": "Silvery patches with leaf drop on many trees during a dry spell.",
+    "regions": [
+      "Kenya",
+      "Tanzania (northern, e.g. Arusha region)",
+      "East Africa"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Infonet-Biovision (Biovision Foundation), archived copy",
+        "title": "Coffee: pests and diseases (plant health page)",
+        "url": "https://kolibri.teacherinabox.org.au/modules/en-infonet/export/default$ct$140$crops.html",
+        "year": 2012
+      },
+      {
+        "publisher": "Tanzania Coffee Research Institute (TaCRI), ASIC 2023 poster",
+        "title": "Evaluation of Crotale 46 EC insecticide for management of coffee thrips (Diarthrothrips coffeae) in northern Tanzania (Magina, Mbwambo & Kilambo)",
+        "url": "https://www.alphavisa.com/asic/2023/documents/eposters/S2/S2_Fredrick_Magina_1.pdf",
+        "year": 2023
+      },
+      {
+        "publisher": "Tanzania Coffee Research Institute (TaCRI)",
+        "title": "Good Agricultural Practices Research Programme",
+        "url": "https://tacri.org/research-programmes/good-agricultural-practices-research-programme/index.html",
+        "year": null
+      },
+      {
+        "publisher": "Bulletin of Entomological Research (Cambridge University Press)",
+        "title": "A Method of sampling Thrips Populations (Le Pelley)",
+        "url": "https://www.cambridge.org/core/journals/bulletin-of-entomological-research/article/abs/method-of-sampling-thrips-populations/FC41F5595B184CFF88DB8A08DD7A943B",
+        "year": 1942
+      }
+    ]
+  },
+  {
+    "id": "coffee_mealybug",
+    "kind": "pest",
+    "common_name": "Coffee mealybug (Kenya mealybug, on branches and berries)",
+    "scientific_name": "Planococcus kenyae; other Planococcus spp. (e.g. P. citri, P. lilacinus) on above-ground parts",
+    "swahili_name": null,
+    "plant_parts": [
+      "berries",
+      "leaves",
+      "stem"
+    ],
+    "symptom_categories": [
+      "pests",
+      "powder_or_rust",
+      "yellowing_leaves"
+    ],
+    "farmer_words": [
+      "white cotton-like insects between the berries",
+      "white powdery bugs on the young shoots",
+      "black soot on the leaves",
+      "many ants running up and down the tree",
+      "the leaves are turning yellow and falling"
+    ],
+    "key_signs": [
+      "White waxy masses between berry clusters, on flower buds, sucker tops and under tender leaves",
+      "Soft insects about 3 mm with a white mealy wax cover; unlike scales they can move and their legs are visible",
+      "Ants tending the colonies, and black sooty mould on the upper leaf surface",
+      "Yellowing and leaf drop in severe attacks"
+    ],
+    "look_alikes": [
+      "green_scale",
+      "coffee_root_mealybug",
+      "coffee_leaf_rust"
+    ],
+    "tell_apart_question": "Are the insects covered in white, cotton-like wax, rather than being flat, smooth and green?",
+    "conditions": "Worse in the dry season and in dry weather, and reduced by long heavy rain. P. kenyae has occasional severe attacks in the colder months. Outbreaks follow broad-spectrum sprays that kill its natural enemies. Ants protect the colonies.",
+    "urgency": "soon",
+    "farmer_advice_en": "Cut off badly infested suckers and branches and any branches touching the ground, and destroy them instead of using them as mulch. Keep ants from climbing the tree, so that ladybirds and small wasps can eat the mealybugs. Call the extension officer if the white masses spread over many trees or the leaves turn black and yellow.",
+    "officer_note_en": "Biological control is normally enough when ants are excluded. The Kenya mealybug was brought under control by an Anagyrus parasitoid (nr. kivuensis) introduced from Uganda in 1938-41, which cut coffee losses by 92% by 1941. UCDA lists the ladybird Cryptolaemus montrouzieri, the lacewing Oligochrysa lutea and the parasitoids Leptomastix dactylopii and Anagyrus kivuensis as natural enemies. Break the ant association with stem banding (UCDA: 20 cm sticky plastic bands; Infonet: band trees). Avoid broad-spectrum organophosphate sprays, which trigger outbreaks. UCDA adds that vegetable, neem or mineral oils or soap solution can smother mealybugs: apply in cool, non-sunny periods and test on one branch for 48 h first. Infonet reports good effect from neem.",
+    "escalate_when": "White masses on many trees, or sooty black leaves with yellowing and leaf drop.",
+    "regions": [
+      "Kenya (east of the Rift, Thika history)",
+      "Uganda",
+      "Tanzania"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Infonet-Biovision (Biovision Foundation), archived copy",
+        "title": "Coffee: pests and diseases (plant health page)",
+        "url": "https://kolibri.teacherinabox.org.au/modules/en-infonet/export/default$ct$140$crops.html",
+        "year": 2012
+      },
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA) / MAAIF",
+        "title": "Arabica Coffee Handbook (Chapter 6: Insect pests of Arabica coffee)",
+        "url": "https://new.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      },
+      {
+        "publisher": "CABI (CAB International), DFID Crop Protection Programme",
+        "title": "Pests and Diseases of Coffee in Eastern Africa: A Technical and Advisory Manual (Rutherford & Phiri, eds.)",
+        "url": "https://assets.publishing.service.gov.uk/media/57a08c1b40f0b64974000fcc/U3071CoffeeManual.pdf",
+        "year": 2006
+      },
+      {
+        "publisher": "University of California, Riverside (E. F. Legner, Biological Control course notes)",
+        "title": "Biological control of coffee mealybug (Planococcus kenyae)",
+        "url": "https://faculty.ucr.edu/~legneref/biotact/ch-32.htm",
+        "year": null
+      },
+      {
+        "publisher": "HURIA Journal of the Open University of Tanzania (TaCRI author)",
+        "title": "Innovative Strategies for Control of Coffee Insect Pests in Tanzania: A Review (Magina)",
+        "url": "https://journals.out.ac.tz/index.php/huria/article/view/62",
+        "year": 2016
+      }
+    ]
+  },
+  {
+    "id": "coffee_root_mealybug",
+    "kind": "pest",
+    "common_name": "Coffee root mealybug",
+    "scientific_name": "Planococcus fungicola (long recorded as P. citri); also P. radicum and P. lilacinus on roots",
+    "swahili_name": null,
+    "plant_parts": [
+      "roots",
+      "leaves",
+      "whole_tree"
+    ],
+    "symptom_categories": [
+      "yellowing_leaves",
+      "wilting",
+      "stunted_growth",
+      "pests"
+    ],
+    "farmer_words": [
+      "the tree looks thirsty even after rain",
+      "the leaves are turning yellow and falling",
+      "when I dug up the tree the roots had a brown crust",
+      "white insects on the roots",
+      "ants at the base of the stem"
+    ],
+    "key_signs": [
+      "Wilting, yellow leaves as if the tree lacks water",
+      "Roots stunted and covered in a brown or greenish-white fungal crust; white mealybugs underneath when it is peeled off",
+      "Ants at the stem base",
+      "Part or all of the tree may die"
+    ],
+    "look_alikes": [
+      "drought_stress",
+      "coffee_wilt_disease",
+      "coffee_nematodes",
+      "white_stem_borer"
+    ],
+    "tell_apart_question": "If you scrape away the soil at the base of a sick tree, do you see white insects or a crusty fungus coating the roots?",
+    "conditions": "Worse in dry conditions. Old, weak, poorly fed or drought-stressed trees are most at risk, as are poorly established young coffee and soils low in potassium and calcium with pH below 5.0. Long heavy rain reduces numbers.",
+    "urgency": "soon",
+    "farmer_advice_en": "Feed weak trees with compost, mulch or well-rotted manure so they grow strongly, and plant only clean seedlings. Uproot trees that have been dying from root mealybug and burn them on the spot, then leave the hole empty for at least 3 months before replanting, and do not use attacked suckers as mulch. Call the extension officer if several trees wilt and you find white insects on the roots.",
+    "officer_note_en": "Inspect new planting material. Remove stem and root remnants at establishment. Improve nutrition (CABI cites MAAIF fertiliser advice for Uganda). Uproot and burn badly affected trees and leave infill holes for at least 3 months. Natural enemies such as Cephalosporium lecanii work best in humid conditions, and keeping ants away lets parasitoids act. Ants may open the way for infestation by removing bark at soil level. Soil treatment is difficult because of the protective wax and fungal casing; CABI advises selective products, applied early in the attack. Infonet reports good effect from neem. Species identification needs a specialist.",
+    "escalate_when": "Several trees wilting or yellowing with white insects or crust on the roots.",
+    "regions": [
+      "Kenya",
+      "Tanzania",
+      "Uganda",
+      "Zimbabwe",
+      "possibly DR Congo"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "CABI (CAB International), DFID Crop Protection Programme",
+        "title": "Pests and Diseases of Coffee in Eastern Africa: A Technical and Advisory Manual (Rutherford & Phiri, eds.)",
+        "url": "https://assets.publishing.service.gov.uk/media/57a08c1b40f0b64974000fcc/U3071CoffeeManual.pdf",
+        "year": 2006
+      },
+      {
+        "publisher": "Infonet-Biovision (Biovision Foundation), archived copy",
+        "title": "Coffee: pests and diseases (plant health page)",
+        "url": "https://kolibri.teacherinabox.org.au/modules/en-infonet/export/default$ct$140$crops.html",
+        "year": 2012
+      },
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA) / MAAIF",
+        "title": "Arabica Coffee Handbook (Chapter 6: Insect pests of Arabica coffee)",
+        "url": "https://new.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      }
+    ]
+  },
+  {
+    "id": "green_scale",
+    "kind": "pest",
+    "common_name": "Soft green scale",
+    "scientific_name": "Coccus alpinus, Coccus viridis, Coccus celatus",
+    "swahili_name": "vidugamba",
+    "plant_parts": [
+      "leaves",
+      "stem",
+      "berries"
+    ],
+    "symptom_categories": [
+      "pests",
+      "yellowing_leaves",
+      "other"
+    ],
+    "farmer_words": [
+      "flat green bugs stuck along the leaf veins",
+      "the leaves are black and sticky",
+      "ants all over the branches",
+      "young trees look weak and the leaves are yellow"
+    ],
+    "key_signs": [
+      "Flat, oval, pale green scales (about 2-5 mm) that do not move, in rows along the main leaf veins on the underside and near shoot tips",
+      "Sticky honeydew with black sooty mould, so the leaves look black and sticky",
+      "Ants tending the scales",
+      "Yellow, drooping leaves in heavy attacks, worst on young transplanted trees"
+    ],
+    "look_alikes": [
+      "coffee_mealybug"
+    ],
+    "tell_apart_question": "Are the insects flat, smooth and green, sitting still in rows along the leaf veins, with no white cotton-like wax?",
+    "conditions": "Multiplies fast in dry weather or a too-dry microclimate, and is reduced by long heavy rain. Most serious on seedlings in their first 2 years after transplanting. In East Africa C. alpinus occurs above 1200 m in the highlands, while C. viridis is found only below 1200 m. Severe attacks are thought to happen only when ants protect the scales.",
+    "urgency": "routine",
+    "farmer_advice_en": "Check young trees often and cut off badly infested branches and any branches lying on the ground, and remove unwanted suckers regularly. Keep ants off the tree, and make sure no weeds or branches form a bridge to the trunk, so that ladybirds and small wasps can clean up the scales. Call the extension officer if young trees are covered in scales and the leaves turn black.",
+    "officer_note_en": "Break the ant-scale link: band the stem (at least 15 cm wide, with no bridges) so natural enemies can act. Natural enemies: ladybirds (Chilocorus spp.), parasitic wasps (Coccophagus, Diversinervus, Metaphycus) and the fungus Cephalosporium (Verticillium) lecanii, which works best in rainy, humid periods. Inspect planting material, and give optimum nutrition with mulch and manure. CABI suggests leaving prunings on the ground so parasites can emerge. Infonet suggests improving shade and reports some effect from neem.",
+    "escalate_when": "Young trees heavily covered with scales and sooty mould, or yellowing and drooping.",
+    "regions": [
+      "Kenya",
+      "Tanzania",
+      "Uganda",
+      "Ethiopia",
+      "DR Congo",
+      "Malawi",
+      "Zimbabwe",
+      "Madagascar",
+      "Sudan"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "CABI (CAB International), DFID Crop Protection Programme",
+        "title": "Pests and Diseases of Coffee in Eastern Africa: A Technical and Advisory Manual (Rutherford & Phiri, eds.)",
+        "url": "https://assets.publishing.service.gov.uk/media/57a08c1b40f0b64974000fcc/U3071CoffeeManual.pdf",
+        "year": 2006
+      },
+      {
+        "publisher": "Infonet-Biovision (Biovision Foundation), archived copy",
+        "title": "Coffee: pests and diseases (plant health page)",
+        "url": "https://kolibri.teacherinabox.org.au/modules/en-infonet/export/default$ct$140$crops.html",
+        "year": 2012
+      },
+      {
+        "publisher": "HURIA Journal of the Open University of Tanzania (TaCRI author)",
+        "title": "Innovative Strategies for Control of Coffee Insect Pests in Tanzania: A Review (Magina)",
+        "url": "https://journals.out.ac.tz/index.php/huria/article/view/62",
+        "year": 2016
+      },
+      {
+        "publisher": "Tanzania Coffee Research Institute (TaCRI)",
+        "title": "Taarifa ya Mwaka 2006/2007 (Annual Report, Kiswahili edition), matched line by line with the English edition",
+        "url": "https://www.tacri.org/fileadmin/03_uploads/03_documents/TaCRI.Reports/tacri-Taarifa_ya_Mwaka_2007.pdf",
+        "year": 2007
+      }
+    ]
+  },
+  {
+    "id": "coffee_nematodes",
+    "kind": "pest",
+    "common_name": "Root-knot and root-lesion nematodes",
+    "scientific_name": "Meloidogyne spp. (e.g. M. africana, M. decalineata, M. hapla, M. javanica, M. incognita); Pratylenchus spp. (e.g. P. coffeae)",
+    "swahili_name": null,
+    "plant_parts": [
+      "roots",
+      "whole_tree"
+    ],
+    "symptom_categories": [
+      "stunted_growth",
+      "yellowing_leaves",
+      "wilting"
+    ],
+    "farmer_words": [
+      "the trees are small and weak and not growing",
+      "the leaves stay pale yellow even when I add manure",
+      "small knots or swellings on the roots",
+      "the seedlings are stunted",
+      "the roots look dark and rotten"
+    ],
+    "key_signs": [
+      "Small, round galls (1-5 mm) on the roots, mostly at the root tips (root-knot nematodes)",
+      "Stunted seedlings with many extra side roots behind infected root tips",
+      "General decline, yellowing and poor growth that looks like poor soil, nutrient shortage or drought",
+      "Root-lesion nematodes cause non-specific dead, dark patches on roots"
+    ],
+    "look_alikes": [
+      "nitrogen_deficiency",
+      "drought_stress",
+      "coffee_root_mealybug",
+      "coffee_wilt_disease"
+    ],
+    "tell_apart_question": "When you dig up a weak seedling or young tree, are there small round knots or swellings on the root tips?",
+    "conditions": "Mostly spread in infested nursery soil and seedlings. M. africana can be serious in nurseries and in the field in Kenya, and M. decalineata is dominant in the Kilimanjaro foothills and Usambara Hills. Above-ground signs are hard to tell apart from low soil fertility, nutrient shortage or drought.",
+    "urgency": "routine",
+    "farmer_advice_en": "Buy seedlings only from clean, registered nurseries, and do not move soil or plants from sick fields. Feed trees well with manure and mulch so they cope better with root damage. Call the extension officer if seedlings or young trees stay small and yellow, so the roots can be checked.",
+    "officer_note_en": "Diagnosis needs root and soil samples: above-ground symptoms are non-specific, and species identification is difficult (molecular methods are increasingly used). Prevention: plant clean rootstocks into clean ground, keep strict nursery hygiene, and heat-treat nursery soil. Infonet adds neem extract in seed beds where nematodes are known. Good husbandry and fertilisation help trees tolerate attack. Chemical control in tree crops is rarely economic for smallholders and carries water-contamination risks. Biocontrol drenches (Trichoderma asperellum, Purpureocillium lilacinum) are being evaluated in Kenya. Resistant rootstocks are not yet exploited in Africa. A 2025 survey in nine Kenyan coffee counties found Meloidogyne the most abundant genus, and Pratylenchus was also present.",
+    "escalate_when": "Seedlings or young trees stay stunted and yellow despite feeding, or knots are found on the roots.",
+    "regions": [
+      "Kenya",
+      "Tanzania (Kilimanjaro, Usambara)",
+      "Uganda",
+      "Ethiopia",
+      "DR Congo",
+      "Angola"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "CABI (CAB International), DFID Crop Protection Programme",
+        "title": "Pests and Diseases of Coffee in Eastern Africa: A Technical and Advisory Manual (Rutherford & Phiri, eds.)",
+        "url": "https://assets.publishing.service.gov.uk/media/57a08c1b40f0b64974000fcc/U3071CoffeeManual.pdf",
+        "year": 2006
+      },
+      {
+        "publisher": "Infonet-Biovision (Biovision Foundation), archived copy",
+        "title": "Coffee: pests and diseases (plant health page)",
+        "url": "https://kolibri.teacherinabox.org.au/modules/en-infonet/export/default$ct$140$crops.html",
+        "year": 2012
+      },
+      {
+        "publisher": "Frontiers in Plant Science (icipe, IITA, University of Nairobi authors)",
+        "title": "Biocontrol-based strategies for improving soil health and managing plant-parasitic nematodes in coffee production (Saikai et al.)",
+        "url": "https://www.frontiersin.org/journals/plant-science/articles/10.3389/fpls.2023.1196171/full",
+        "year": 2023
+      },
+      {
+        "publisher": "Nematology (record on CGSpace)",
+        "title": "Investigating the diversity of plant-parasitic nematodes associated with coffee in Kenya, using morphological and molecular approaches (Maosa et al.)",
+        "url": "https://cgspace.cgiar.org/items/a29ea25d-430b-43b9-8a17-779a8123820e/full",
+        "year": 2025
+      },
+      {
+        "publisher": "CIRAD / Springer",
+        "title": "Economic importance, epidemiology and management of Pratylenchus sp. in coffee plantations (Villain)",
+        "url": "https://publications.cirad.fr/une_notice.php?dk=546256",
+        "year": 2008
+      }
+    ]
+  },
+  {
+    "id": "coffee_lace_bug",
+    "kind": "pest",
+    "common_name": "Coffee lace bug",
+    "scientific_name": "Habrochila spp. (H. placida)",
+    "swahili_name": null,
+    "plant_parts": [
+      "leaves"
+    ],
+    "symptom_categories": [
+      "yellowing_leaves",
+      "leaf_spots",
+      "pests"
+    ],
+    "farmer_words": [
+      "yellow patches on the leaves",
+      "shiny black spots under the leaves",
+      "small bugs with lacy wings under the leaves",
+      "the lower leaves are yellowing and falling in the dry season"
+    ],
+    "key_signs": [
+      "Yellow patches on leaves; leaves die from the edge towards the midrib and drop",
+      "Underside of the leaf covered with shiny black spots of droppings and brown feeding marks",
+      "Groups of young bugs feeding together on the underside; adults about 4 mm with lace-patterned wings",
+      "Often starts on the lower leaves of a small group of trees"
+    ],
+    "look_alikes": [
+      "coffee_thrips",
+      "nitrogen_deficiency",
+      "drought_stress"
+    ],
+    "tell_apart_question": "Turn a yellow leaf over: are there groups of small bugs with lacy wings sitting on the underside?",
+    "conditions": "Most common in hot, dry weather and worse in the dry season, and it disappears when the rains start. Outbreaks have been linked to careless pesticide use.",
+    "urgency": "soon",
+    "farmer_advice_en": "Feed the trees with manure or fertiliser to keep them strong, and do not spray on your own, because wrong sprays kill the predator bugs that eat lace bugs. Call the extension officer if many lower leaves turn yellow and fall during the dry season.",
+    "officer_note_en": "A predatory mirid bug (Stethoconus sp.) is a voracious predator, so avoid broad-spectrum pesticides to protect it. Good plant nutrition helps control infestation (UCDA). If infestation is heavy, UCDA says a spray regime with a recommended insecticide is effective.",
+    "escalate_when": "Many trees with yellowing and dropping lower leaves and lace bugs on the leaf undersides.",
+    "regions": [
+      "Kenya",
+      "Tanzania",
+      "Uganda (a major arabica pest)"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA) / MAAIF",
+        "title": "Arabica Coffee Handbook (Chapter 6: Insect pests of Arabica coffee)",
+        "url": "https://new.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      },
+      {
+        "publisher": "Infonet-Biovision (Biovision Foundation), archived copy",
+        "title": "Coffee: pests and diseases (plant health page)",
+        "url": "https://kolibri.teacherinabox.org.au/modules/en-infonet/export/default$ct$140$crops.html",
+        "year": 2012
+      }
+    ]
+  },
+  {
+    "id": "coffee_leaf_skeletoniser",
+    "kind": "pest",
+    "common_name": "Coffee leaf skeletoniser",
+    "scientific_name": "Leucoplema dohertyi",
+    "swahili_name": null,
+    "plant_parts": [
+      "leaves"
+    ],
+    "symptom_categories": [
+      "leaf_spots",
+      "pests"
+    ],
+    "farmer_words": [
+      "the leaves have see-through windows",
+      "the leaves are eaten like lace and only the veins are left",
+      "small grey worms with bumps under the leaves",
+      "the seedlings in the nursery are being eaten"
+    ],
+    "key_signs": [
+      "Irregular lace-like or window-like patches where the leaf tissue is eaten away, leaving the veins and the thin upper skin, usually near the midrib",
+      "Greyish-white caterpillars up to about 8 mm with many pimple-like bumps, which turn red just before pupating",
+      "Small grey-brown moth resting on leaves by day with its narrow forewings held at right angles"
+    ],
+    "look_alikes": [
+      "coffee_leaf_miner"
+    ],
+    "tell_apart_question": "Is the leaf eaten from the outside, leaving a see-through lace window, rather than a brown blister you can peel open?",
+    "conditions": "Normally a minor pest in the field, but severe outbreaks can happen in coffee nurseries.",
+    "urgency": "routine",
+    "farmer_advice_en": "Check nursery seedlings often, because outbreaks are worst there. Black eggs and shiny light-brown objects stuck to the caterpillars are natural wasps at work, so leave them alone. Call the extension officer if you count more than about 20 caterpillars on one tree or the nursery seedlings are being stripped.",
+    "officer_note_en": "Threshold (Infonet): control is justified if more than 35 moths are seen when a tree is shaken, or 20-30 caterpillars per tree. Natural enemies include egg parasitoids (parasitised eggs turn black) and an external larval parasitoid. UCDA advises spraying a recommended insecticide while the caterpillars are still small and numerous.",
+    "escalate_when": "More than 20 caterpillars per tree, more than 35 moths when a tree is shaken, or a nursery being defoliated.",
+    "regions": [
+      "Uganda (arabica and robusta)",
+      "Kenya / East Africa"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA) / MAAIF",
+        "title": "Arabica Coffee Handbook (Chapter 6: Insect pests of Arabica coffee)",
+        "url": "https://new.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      },
+      {
+        "publisher": "Infonet-Biovision (Biovision Foundation), archived copy",
+        "title": "Coffee: pests and diseases (plant health page)",
+        "url": "https://kolibri.teacherinabox.org.au/modules/en-infonet/export/default$ct$140$crops.html",
+        "year": 2012
+      }
+    ]
+  },
+  {
+    "id": "nitrogen_deficiency",
+    "kind": "disorder",
+    "common_name": "Nitrogen deficiency",
+    "scientific_name": null,
+    "swahili_name": null,
+    "plant_parts": [
+      "leaves",
+      "whole_tree"
+    ],
+    "symptom_categories": [
+      "yellowing_leaves",
+      "stunted_growth"
+    ],
+    "farmer_words": [
+      "the whole tree has gone pale",
+      "my coffee leaves are turning yellow all over",
+      "the leaves fall from the branches full of berries",
+      "the tree is not making new shoots",
+      "the leaves look light green and dull"
+    ],
+    "key_signs": [
+      "Whole leaf turns evenly pale or yellow-green (not only between the veins); the whole tree looks pale with few new shoots",
+      "Leaves may roll up; yellowing and leaf drop start on older leaves and often on branches carrying many berries",
+      "Shoot tips can die back when severe",
+      "No orange powder under the leaf (orange powder means leaf rust)"
+    ],
+    "look_alikes": [
+      "coffee_leaf_rust",
+      "coffee_wilt_disease",
+      "armillaria_root_rot",
+      "coffee_mealybug"
+    ],
+    "tell_apart_question": "Is the whole leaf evenly pale or yellow, with no orange powder on its underside?",
+    "conditions": "poor or exhausted soil (e.g. one weak row); heavy crop year, when developing berries draw on the tree's nitrogen; years of harvesting without returning manure, compost or fertiliser; wet spells or porous soils where nutrients leach",
+    "urgency": "routine",
+    "farmer_advice_en": "Spread well-rotted manure or compost around the tree and keep the soil mulched, with the mulch kept off the stem. Before buying any fertiliser, ask the extension officer to arrange a soil and leaf test through the co-op.",
+    "officer_note_en": "UCDA: sample soil and leaves at least once a year (leaf sampling preferably pre-flowering) and base fertiliser on results, not blanket application; N sources listed include urea, ammonium nitrate, ammonium sulfate and NPK compounds, plus compost/manure. CTAHR: N deficiency is the most frequently seen deficiency in coffee (Hawaii); leaf N 1.45-1.90% = deficient vs 2.6-3.0% adequate (Nagao et al. 1986); tissue tests catch hidden deficiencies before symptoms. UCDA warns chlorosis/necrosis can also come from herbicide scorch, weeds, disease, pests or water stress, so confirm by soil/leaf analysis.",
+    "escalate_when": "Yellowing does not improve after a season of manure/compost, or comes with wilting, orange powder under leaves, blue-black wood under the bark, or white fungal sheets and cracks at the stem base.",
+    "regions": [
+      "Uganda arabica zones (UCDA)",
+      "Hawaii (CTAHR)"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Arabica Coffee Handbook (Table 13; sections 5.1-5.3)",
+        "url": "https://www.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      },
+      {
+        "publisher": "University of Hawaii CTAHR",
+        "title": "Growing Coffee in Hawaii, revised edition (Bittenbender & Smith), nutrient key and leaf tissue table",
+        "url": "https://www.ctahr.hawaii.edu/oc/freepubs/pdf/coffee08.pdf",
+        "year": 2008
+      },
+      {
+        "publisher": "CAB International",
+        "title": "Pests and Diseases of Coffee in Eastern Africa: A Technical and Advisory Manual (Rutherford & Phiri, eds.)",
+        "url": "https://assets.publishing.service.gov.uk/media/57a08c1b40f0b64974000fcc/U3071CoffeeManual.pdf",
+        "year": 2006
+      }
+    ]
+  },
+  {
+    "id": "magnesium_deficiency",
+    "kind": "disorder",
+    "common_name": "Magnesium deficiency",
+    "scientific_name": null,
+    "swahili_name": null,
+    "plant_parts": [
+      "leaves"
+    ],
+    "symptom_categories": [
+      "yellowing_leaves",
+      "leaf_spots"
+    ],
+    "farmer_words": [
+      "the old leaves are yellow between the veins",
+      "the veins stay green but the leaf is yellow",
+      "yellow patches with brown edges on the lower leaves",
+      "the old leaves are going bronze"
+    ],
+    "key_signs": [
+      "Starts on older leaves",
+      "Yellowing between the veins, often strongest along the midrib, while the side veins stay green",
+      "Wide band of sunken yellow-brown to light-brown dead spots along the leaf edges",
+      "Brown or bronze patches spreading from the centre of the leaf to the edges"
+    ],
+    "look_alikes": [
+      "coffee_leaf_rust",
+      "brown_eye_spot"
+    ],
+    "tell_apart_question": "On the older leaves, do the veins stay green while the leaf between them turns yellow?",
+    "conditions": "poor or very acidic soil; heavy use of potash (excess K blocks Mg uptake; also excess Na, Mn); long-term mulching (UCDA: mulches may reduce Zn and Mg availability)",
+    "urgency": "routine",
+    "farmer_advice_en": "Keep feeding the soil with compost or well-rotted manure rather than relying on one kind of fertiliser every year. Ask the extension officer for a soil and leaf test through the co-op to confirm before treating.",
+    "officer_note_en": "UCDA: Mg supplied as magnesium sulfate (Epsom salts) or NPK+TE blends according to soil-test deficiency levels; nutrient antagonism - excess K, Na or Mn suppresses Mg uptake; target soil pH 5.5-6.5. CTAHR coffee: leaf Mg 0.04-0.10% = deficient vs 0.30-0.32% adequate. CTAHR SCM-10 (general nursery/landscape guide, not coffee-specific): dolomite or Epsom salt for Mg deficiency; very acidic soils reduce Mg availability; Ca:Mg ratio of at least 2:1 suggested.",
+    "escalate_when": "Yellowing spreads to many trees or leaves start dropping early, or the yellow spots carry orange powder underneath (leaf rust).",
+    "regions": [
+      "Uganda (UCDA)",
+      "Hawaii (CTAHR)"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Arabica Coffee Handbook (Table 14; Table 21 nutrient antagonisms; mulching)",
+        "url": "https://www.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      },
+      {
+        "publisher": "University of Hawaii CTAHR",
+        "title": "Growing Coffee in Hawaii, revised edition (Bittenbender & Smith)",
+        "url": "https://www.ctahr.hawaii.edu/oc/freepubs/pdf/coffee08.pdf",
+        "year": 2008
+      },
+      {
+        "publisher": "University of Hawaii CTAHR",
+        "title": "Visual Symptoms of Plant Nutrient Deficiencies in Nursery and Landscape Plants (SCM-10, M. Wong)",
+        "url": "https://www.ctahr.hawaii.edu/oc/freepubs/pdf/scm-10.pdf",
+        "year": 2005
+      }
+    ]
+  },
+  {
+    "id": "potassium_deficiency",
+    "kind": "disorder",
+    "common_name": "Potassium deficiency",
+    "scientific_name": null,
+    "swahili_name": null,
+    "plant_parts": [
+      "leaves",
+      "berries"
+    ],
+    "symptom_categories": [
+      "yellowing_leaves",
+      "leaf_spots",
+      "other"
+    ],
+    "farmer_words": [
+      "the leaf edges look burnt",
+      "the tips of the old leaves are drying brown",
+      "the leaves have black dead edges",
+      "the berries are falling off"
+    ],
+    "key_signs": [
+      "Older leaves first; hardly seen on young leaves",
+      "Leaf tips and edges yellow, then dark-brown or black dead spots that join until the whole margin is dead",
+      "Midrib and veins stay green",
+      "When severe, leaves and berries are shed"
+    ],
+    "look_alikes": [
+      "brown_eye_spot",
+      "bacterial_blight",
+      "coffee_lace_bug"
+    ],
+    "tell_apart_question": "Do the older leaves die from the tip and edges inwards while the strip along the main vein stays green?",
+    "conditions": "poor or leached soil; heavy crop (K is needed for berry filling and ripening); soils low in K and Ca with pH below 5 (CABI: such trees are also more prone to mealybug)",
+    "urgency": "routine",
+    "farmer_advice_en": "Return coffee husks, compost and well-rotted manure to the soil and keep it mulched, because mulch adds potassium back to the soil. Ask the extension officer for a soil and leaf test through the co-op before buying fertiliser.",
+    "officer_note_en": "UCDA: K drives berry development/ripening, water regulation and healing of picking, pruning and hailstorm wounds; K sources listed include muriate of potash and NPK compounds, chosen by soil test. CTAHR: leaf K 0.35-1.10% = deficient vs 1.9-2.5% adequate; key: marginal chlorosis then dark-brown necrotic margins with midrib area green. CTAHR SCM-10 (general): high Na can cause K deficiency; high K can induce Ca, Mg and N deficiency. UCDA: tip burn/necrosis can also be herbicide scorch, pests, disease or water stress.",
+    "escalate_when": "Brown spots have a ring or yellow halo, appear on young leaves, spread fast in cool wet weather, or insects are found under the leaves.",
+    "regions": [
+      "Uganda (UCDA)",
+      "Hawaii (CTAHR)"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Arabica Coffee Handbook (Table 13; mulching; lace bug section 6.5)",
+        "url": "https://www.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      },
+      {
+        "publisher": "University of Hawaii CTAHR",
+        "title": "Growing Coffee in Hawaii, revised edition (Bittenbender & Smith)",
+        "url": "https://www.ctahr.hawaii.edu/oc/freepubs/pdf/coffee08.pdf",
+        "year": 2008
+      },
+      {
+        "publisher": "CAB International",
+        "title": "Pests and Diseases of Coffee in Eastern Africa: A Technical and Advisory Manual",
+        "url": "https://assets.publishing.service.gov.uk/media/57a08c1b40f0b64974000fcc/U3071CoffeeManual.pdf",
+        "year": 2006
+      }
+    ]
+  },
+  {
+    "id": "waterlogging",
+    "kind": "disorder",
+    "common_name": "Waterlogging / poor drainage",
+    "scientific_name": null,
+    "swahili_name": null,
+    "plant_parts": [
+      "roots",
+      "leaves",
+      "whole_tree"
+    ],
+    "symptom_categories": [
+      "yellowing_leaves",
+      "stunted_growth",
+      "other"
+    ],
+    "farmer_words": [
+      "water is standing under my coffee after the rain",
+      "the trees in the low part are turning yellow",
+      "the leaves are falling after the heavy rain",
+      "the soil stays muddy and the trees are not growing"
+    ],
+    "key_signs": [
+      "Follows heavy or long rain; worst in low spots and on heavy clay or poorly drained rows",
+      "Leaves turn yellow and drop early; growth slows",
+      "Fine feeding roots die; soil stays soggy or water stands for days",
+      "Can bring young-leaf yellowing from iron/manganese shortage on poorly drained soil"
+    ],
+    "look_alikes": [
+      "coffee_wilt_disease",
+      "armillaria_root_rot"
+    ],
+    "tell_apart_question": "Has water stood around these trees, or the soil stayed soggy, for several days after the rain?",
+    "conditions": "after heavy rain (e.g. 40 mm overnight) or prolonged rain; heavy clay, impervious subsoil or low-lying spots; seedlings planted too deep or kept too wet after transplanting",
+    "urgency": "soon",
+    "farmer_advice_en": "Open or clear drainage channels so water runs away from the trees, and avoid walking or digging on the soaked soil. Put mulch back only once the soil has drained, keeping it off the stem. If trees keep yellowing or wilting after the soil dries, call the extension officer.",
+    "officer_note_en": "UCDA: arabica will not tolerate waterlogging ('wet feet'); needs free-draining soil about 1 m deep; avoid heavy clay/poor-draining sites; heavy-rain mitigation: cover crops, mulching, trenching, windbreaks; prolonged rain favours fungal disease. CTAHR: coffee can die on heavy soils with poor drainage or continually waterlogged subsoil; sensitive to waterlogging after transplanting; planting too deep can kill seedlings. Silveira et al. 2015 (arabica seedlings): yellowing by ~2 months, premature leaf fall and death of absorbent roots. USDA-ARS storm guide: clear blocked drains first, avoid traffic on saturated soil, mulch only after soils drain; while roots are saturated foliar feeding may work better than soil fertiliser. CTAHR SCM-10 (general): poorly drained soils can induce Fe and Mn deficiency.",
+    "escalate_when": "Trees keep wilting or yellowing after the soil has drained, or there is white fungal growth or cracking at the stem base (root rot), or blue-black wood under the bark (coffee wilt).",
+    "regions": [
+      "Uganda (UCDA)",
+      "Hawaii (CTAHR; USDA-ARS)",
+      "Brazil (Silveira et al.)"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Arabica Coffee Handbook (2.1 soil requirements; Table 39 climate hazards)",
+        "url": "https://www.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      },
+      {
+        "publisher": "University of Hawaii CTAHR",
+        "title": "Growing Coffee in Hawaii, revised edition (soil; planting)",
+        "url": "https://www.ctahr.hawaii.edu/oc/freepubs/pdf/coffee08.pdf",
+        "year": 2008
+      },
+      {
+        "publisher": "Ciencia e Agrotecnologia (peer-reviewed)",
+        "title": "Gas exchange and carbohydrate partitioning in coffee seedlings under waterlogging (Silveira et al.)",
+        "url": "https://scielo.br/j/cagro/a/Y6nPvg8pDpg98THS8PGbWJP/?lang=en",
+        "year": 2015
+      },
+      {
+        "publisher": "Synergistic Hawaii Agriculture Council / USDA-ARS",
+        "title": "Post-Storm Recovery Guide for Coffee, v1.0",
+        "url": "https://konacoffeefarmers.org/wp-content/uploads/2026/03/post_storm_coffee_recovery_guide.pdf",
+        "year": 2026
+      }
+    ]
+  },
+  {
+    "id": "drought_stress",
+    "kind": "disorder",
+    "common_name": "Drought / water stress",
+    "scientific_name": null,
+    "swahili_name": null,
+    "plant_parts": [
+      "leaves",
+      "berries",
+      "whole_tree"
+    ],
+    "symptom_categories": [
+      "wilting",
+      "yellowing_leaves",
+      "other"
+    ],
+    "farmer_words": [
+      "my coffee is drooping in the afternoon",
+      "the leaves are curling and drying",
+      "the berries are dropping because there is no rain",
+      "the leaves are falling in the dry season",
+      "the young trees are dying"
+    ],
+    "key_signs": [
+      "Leaves lose stiffness, droop or fold; when severe they no longer recover overnight",
+      "Older leaves go pale, then brown and dry; leaves and berries drop",
+      "Bearing trees and young trees on shallow soils suffer most, during a dry spell",
+      "Wood under the bark looks normal (blue-black wood under the bark points to coffee wilt disease)"
+    ],
+    "look_alikes": [
+      "coffee_wilt_disease",
+      "coffee_mealybug",
+      "coffee_lace_bug"
+    ],
+    "tell_apart_question": "Are many trees on the farm drooping at the same time during the dry spell, rather than one tree or one side of a tree?",
+    "conditions": "dry season or failed rains; trees carrying a heavy crop; shallow or stony soil, no mulch, no shade, weedy ground; young, newly planted trees",
+    "urgency": "soon",
+    "farmer_advice_en": "Mulch the soil under the trees (keeping mulch off the stem), keep weeds down, and keep or plant shade trees. Water young trees if you can. If one tree wilts while its neighbours are fine, or wilting stays after rain, call the extension officer.",
+    "officer_note_en": "UCDA: arabica needs a good soaking of about 50 mm every 10 days; excessive drought causes dehydration and defoliation and raises red spider mite, leaf miner and berry borer attack; mealybug and lace bug damage (yellowing, leaf drop) is also worse in the dry season; irrigate if rains fail at flower-bud, pinhead, bean-filling or ripening stages; irrigation protects bearing trees from overbearing damage in drought; shade and mulch cut water need. CTAHR: on shallow rainfed soils bearing trees suffer leaf dieback, fruit loss and death in drought; risk falls with wide spacing, light frequent fertiliser, few verticals, mulching and weed control. CABI: CWD yellowing can be mistaken for drought; the unique CWD sign is blue-black discoloration of the wood under the bark, most marked near the stem base, and CWD often starts on one side of the tree. Tesfaye et al. 2014 (robusta): stress stages run from wilting/folding to leaves brown and dry; older leaves affected first.",
+    "escalate_when": "One tree or one side of a tree wilts while neighbours are fine, wilting does not recover after rain or watering, or the wood under the bark is blue-black.",
+    "regions": [
+      "Uganda (UCDA: dry spells cause wilting in many parts)",
+      "Hawaii (CTAHR)"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Arabica Coffee Handbook (2.4 rainfall; 3.11 mulching and irrigation; ch. 11 climate smart production)",
+        "url": "https://www.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      },
+      {
+        "publisher": "University of Hawaii CTAHR",
+        "title": "Growing Coffee in Hawaii, revised edition (soil; weed control/mulch)",
+        "url": "https://www.ctahr.hawaii.edu/oc/freepubs/pdf/coffee08.pdf",
+        "year": 2008
+      },
+      {
+        "publisher": "CAB International",
+        "title": "Pests and Diseases of Coffee in Eastern Africa: A Technical and Advisory Manual (coffee wilt disease sheet)",
+        "url": "https://assets.publishing.service.gov.uk/media/57a08c1b40f0b64974000fcc/U3071CoffeeManual.pdf",
+        "year": 2006
+      },
+      {
+        "publisher": "Experimental Agriculture (Cambridge, peer-reviewed)",
+        "title": "Effect of soil drying on rate of stress development, leaf gas exchange and proline accumulation in robusta coffee clones (Tesfaye et al.)",
+        "url": "https://www.cambridge.org/core/product/C1008695632CC79FF19E0D2ADE856BA4/core-reader",
+        "year": 2014
+      }
+    ]
+  },
+  {
+    "id": "sun_scorch",
+    "kind": "disorder",
+    "common_name": "Sun scorch / sunburn",
+    "scientific_name": null,
+    "swahili_name": null,
+    "plant_parts": [
+      "leaves",
+      "berries"
+    ],
+    "symptom_categories": [
+      "leaf_spots",
+      "fruit_spots",
+      "other"
+    ],
+    "farmer_words": [
+      "the leaves are burnt by the sun",
+      "the leaves have white bleached patches",
+      "brown dry patches came after I pruned",
+      "the berries on the sunny side have dry black marks"
+    ],
+    "key_signs": [
+      "Pale, bleached or faded patches that later turn brown and dead",
+      "Appears after sudden exposure: heavy pruning, planting out seedlings, or loss of shade; worse when the soil is dry",
+      "On berries, sun-damaged skin is prone to berry blotch, and brown eye spot on berries itself looks like sunburn (black, dried, elliptical scar)"
+    ],
+    "look_alikes": [
+      "brown_eye_spot",
+      "coffee_berry_disease"
+    ],
+    "tell_apart_question": "Did the pale or brown patches appear soon after the tree was pruned, newly planted, or lost its shade?",
+    "conditions": "no shade or shade trees removed; right after pruning or transplanting; hot spells with dry soil",
+    "urgency": "routine",
+    "farmer_advice_en": "Keep or plant shade trees, give new seedlings temporary shade (a branch or split banana stem), and mulch to keep the soil moist. Prune soon after harvest and avoid planting out in the hottest part of the year. Call the extension officer if spots spread to shaded leaves or berries show sunken dark spots.",
+    "officer_note_en": "Hawaii Coffee Ed (UH CTAHR-linked site): sunburn follows sudden exposure after pruning or planting; worse with dry soil; acclimate young trees over 3-6 months, keep soil moist, kaolin clay protectants can be considered, avoid over-fertilising and planting in peak heat; prune after harvest. CABI: berry blotch (Cercospora coffeicola) is often linked to sun scorch, and Fusarium stilboides (bark disease) acts as a secondary invader with overbearing and sun scorch. CTAHR: Cercospora spots on cherries appear as sunburn; exposed, unshaded trees are most susceptible. UCDA: shade trees limit solar radiation; provide temporary shade at planting. Procafe lists sun scald (escaldadura) and sun effect among abiotic causes of leaf and fruit lesions.",
+    "escalate_when": "Spots also appear on shaded leaves, have a grey-white centre with a brown ring (brown eye spot), or berries show sunken brown lesions with tiny black dots (possible coffee berry disease).",
+    "regions": [
+      "Hawaii (Hawaii Coffee Ed / CTAHR)",
+      "Eastern Africa (CABI)",
+      "Brazil (Procafe)"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Hawaii Coffee Education (website linked to UH CTAHR Cooperative Extension; author not named)",
+        "title": "Sunburn on Coffee",
+        "url": "https://www.hawaiicoffeeed.com/sunburn-on-coffee.html",
+        "year": null
+      },
+      {
+        "publisher": "CAB International",
+        "title": "Pests and Diseases of Coffee in Eastern Africa: A Technical and Advisory Manual (brown eye spot and coffee bark disease sheets)",
+        "url": "https://assets.publishing.service.gov.uk/media/57a08c1b40f0b64974000fcc/U3071CoffeeManual.pdf",
+        "year": 2006
+      },
+      {
+        "publisher": "University of Hawaii CTAHR",
+        "title": "Growing Coffee in Hawaii, revised edition (Cercospora leaf spot)",
+        "url": "https://www.ctahr.hawaii.edu/oc/freepubs/pdf/coffee08.pdf",
+        "year": 2008
+      },
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Arabica Coffee Handbook (shade trees; planting)",
+        "url": "https://www.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      },
+      {
+        "publisher": "Fundacao Procafe (via Noticias Agricolas)",
+        "title": "Procafe: Lesoes em cafeeiros - causas e efeitos",
+        "url": "https://www.noticiasagricolas.com.br/noticias/cafe/263491-procafe-lesoes-em-cafeeiros-causas-e-efeitos.html",
+        "year": 2020
+      }
+    ]
+  },
+  {
+    "id": "overbearing_dieback",
+    "kind": "disorder",
+    "common_name": "Overbearing dieback (with biennial bearing)",
+    "scientific_name": null,
+    "swahili_name": null,
+    "plant_parts": [
+      "stem",
+      "leaves",
+      "berries",
+      "whole_tree"
+    ],
+    "symptom_categories": [
+      "other"
+    ],
+    "farmer_words": [
+      "the tips of the branches are dying",
+      "the tree had too many berries and now it is drying",
+      "the berries turn brown before they ripen",
+      "the leaves fell and the branches are dead",
+      "big harvest last year, almost nothing this year"
+    ],
+    "key_signs": [
+      "Follows a very heavy crop: leaves, berries, side branches and sometimes main stems die before harvest",
+      "Death starts at the twig tips and moves back into older branches; severe cases kill the tree",
+      "Berries turn from green to reddish-brown, stay small and float (light, poor beans)",
+      "Biennial bearing: a heavy crop leaves little new fruiting wood, so next year's crop is light"
+    ],
+    "look_alikes": [
+      "coffee_leaf_rust",
+      "coffee_wilt_disease",
+      "coffee_berry_disease",
+      "bacterial_blight"
+    ],
+    "tell_apart_question": "Did this tree carry a much heavier crop than usual this season?",
+    "conditions": "after a big crop (the 'on' year of biennial bearing); unshaded trees in full sun; low nitrogen or poor soil fertility; drought during fruit filling; heavy leaf loss from coffee leaf rust",
+    "urgency": "soon",
+    "farmer_advice_en": "After harvest, prune out dead and exhausted branches and keep only a few healthy stems so the tree carries a crop it can feed. Feed the soil with compost or well-rotted manure, mulch, and keep some shade. Ask the extension officer for a pruning plan and a soil test through the co-op.",
+    "officer_note_en": "CTAHR: dieback occurs when leaves, fruit, laterals and sometimes verticals die before harvest from exhaustion of nutrients, particularly N, and carbohydrates due to overproduction; overbearing one year gives a small crop the next (biennial bearing); avoiding overbearing dieback is the chief aim of pruning; set fertiliser and pruning by last year's yield, current crop load and rainfall; Hawaii schedules add N (ammonium sulfate/phosphate or urea) during fruit development specifically to avoid overbearing dieback; shade reduces flowers per node and helps prevent it; affected fruit turns green to reddish-brown, is small and floats. CABI: overbearing dieback also follows rust defoliation on heavily bearing trees, starting at twig tips and spreading back to main branches. UCDA: pruning reduces die-back from over-production; irrigation protects from overbearing damage in drought. Chaves et al. 2012: heavy bearing is typical of unshaded arabica; branch dieback rose sharply as leaf-to-fruit ratio fell; strong biennial pattern over three harvests.",
+    "escalate_when": "Dieback continues after harvest, appears on trees with a light crop, wood under the bark is blue-black, berries show sunken dark lesions with black dots, or leaves are falling from heavy rust.",
+    "regions": [
+      "Hawaii (CTAHR)",
+      "Eastern Africa (CABI)",
+      "Uganda (UCDA)",
+      "Brazil (Chaves et al.)"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "University of Hawaii CTAHR",
+        "title": "Growing Coffee in Hawaii, revised edition (pruning; factors affecting yield; harvest)",
+        "url": "https://www.ctahr.hawaii.edu/oc/freepubs/pdf/coffee08.pdf",
+        "year": 2008
+      },
+      {
+        "publisher": "CAB International",
+        "title": "Pests and Diseases of Coffee in Eastern Africa: A Technical and Advisory Manual (coffee leaf rust sheet)",
+        "url": "https://assets.publishing.service.gov.uk/media/57a08c1b40f0b64974000fcc/U3071CoffeeManual.pdf",
+        "year": 2006
+      },
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Arabica Coffee Handbook (pruning; irrigation)",
+        "url": "https://www.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      },
+      {
+        "publisher": "Environmental and Experimental Botany (Embrapa repository record)",
+        "title": "Varying leaf-to-fruit ratios affect branch growth and dieback... in field-grown coffee trees (Chaves et al.)",
+        "url": "https://www.alice.cnptia.embrapa.br/handle/doc/919316?locale=en",
+        "year": 2012
+      }
+    ]
+  },
+  {
+    "id": "hail_damage",
+    "kind": "disorder",
+    "common_name": "Hail damage",
+    "scientific_name": null,
+    "swahili_name": null,
+    "plant_parts": [
+      "leaves",
+      "berries",
+      "stem"
+    ],
+    "symptom_categories": [
+      "other"
+    ],
+    "farmer_words": [
+      "the hail tore my coffee leaves",
+      "the leaves are cut and full of holes",
+      "hail knocked the berries off",
+      "the branches broke in the storm",
+      "the shoots turned black after the hail"
+    ],
+    "key_signs": [
+      "Appears suddenly after a hailstorm, on many trees at once",
+      "Leaves cut or knocked off; side branches broken, stems split; berries fall",
+      "Wounds let bacteria in: in cool highland areas watch for brown dead spots with a yellow halo and twig dieback in the following weeks"
+    ],
+    "look_alikes": [
+      "bacterial_blight"
+    ],
+    "tell_apart_question": "Was there a hailstorm just before the torn leaves and broken shoots appeared?",
+    "conditions": "hailstorms, often with heavy rain and strong wind; exposed fields without shade trees or windbreaks; cool, high-altitude areas (higher bacterial blight risk after hail)",
+    "urgency": "soon",
+    "farmer_advice_en": "Cut off broken and badly torn branches with a clean cut just above a healthy node, and feed the soil with compost or manure to help regrowth. Plant shade trees and windbreaks for future protection. Call the extension officer if dark spots or dying shoot tips spread in the weeks after the hail.",
+    "officer_note_en": "Procafe (Brazil, 2019): hail lacerates foliage, branches and fruit and causes their fall; Pseudomonas (bacterial blight) uses hail wounds as entry points, quickly and especially in cooler high-altitude areas; recommends copper-based products, windbreaks and tolerant cultivars. UCDA: heavy rain/hail/strong winds cause tree damage, fruit fall, mould and erosion (measures: windbreaks, cover crops, mulching, trenching); shade trees protect from hailstorms; K aids healing of hailstorm wounds. USDA-ARS storm guide: grade by leaf loss (<25%, 25-50%, >50%) and breakage; remove broken wood with clean cuts above a node; new flush 7-14 days after a storm is the highest leaf-rust risk window. Maciel et al. 2018: bacterial blight gives lesions on leaves, flowers and pinhead berries and twig/branch dieback; favoured by mild temperatures and wind at high altitude; reported as important in Kenya.",
+    "escalate_when": "More than half the leaves are lost, or brown/black spots and shoot-tip dieback spread in the weeks after the storm (possible bacterial blight).",
+    "regions": [
+      "Uganda (UCDA: hailstorms among extreme weather)",
+      "Brazil (Procafe)",
+      "Hawaii storms (USDA-ARS)"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Fundacao Procafe (via Noticias Agricolas)",
+        "title": "Chuva de granizo e Pseudomona, a combinacao indesejavel para o cafeeiro (Matiello et al.)",
+        "url": "https://www.noticiasagricolas.com.br/noticia/236282",
+        "year": 2019
+      },
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Arabica Coffee Handbook (Table 4 shade trees; Table 39 climate hazards; 5.3.2)",
+        "url": "https://www.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      },
+      {
+        "publisher": "Synergistic Hawaii Agriculture Council / USDA-ARS",
+        "title": "Post-Storm Recovery Guide for Coffee, v1.0",
+        "url": "https://konacoffeefarmers.org/wp-content/uploads/2026/03/post_storm_coffee_recovery_guide.pdf",
+        "year": 2026
+      },
+      {
+        "publisher": "Bragantia (peer-reviewed)",
+        "title": "Bacterial halo blight of coffee crop: aggressiveness and genetic diversity of strains (Maciel et al.)",
+        "url": "https://www.redalyc.org/journal/908/90859320009/html/",
+        "year": 2018
+      }
+    ]
+  },
+  {
+    "id": "not_sure",
+    "kind": "fallback",
+    "common_name": "Not sure",
+    "scientific_name": null,
+    "swahili_name": null,
+    "plant_parts": [],
+    "symptom_categories": [],
+    "farmer_words": [],
+    "key_signs": [],
+    "look_alikes": [],
+    "tell_apart_question": null,
+    "conditions": null,
+    "urgency": "soon",
+    "farmer_advice_en": "I'm not sure what this is, so I won't guess. I have flagged it for the extension officer, who will follow up with you. Until then, keep an eye on the affected trees and tell us on your next call if it spreads.",
+    "officer_note_en": "The matcher could not tell which problem this is (weak or unverified evidence, or several equally likely matches). Check the farmer's quote and the transcript, and visit or call if it is spreading.",
+    "escalate_when": "Always: every not_sure result goes to the review queue for the extension officer.",
+    "regions": [],
+    "in_bracol": false,
+    "sources": []
+  }
+]

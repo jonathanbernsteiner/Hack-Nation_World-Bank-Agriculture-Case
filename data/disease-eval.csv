@@ -1,0 +1,33 @@
+phrase,symptom,expected_id,not_sure_ok,is_synthetic,note
+"There is orange powder under the coffee leaves on the upper slope.",powder_or_rust,coffee_leaf_rust,false,true,clear rust sign: powder on the underside
+"The coffee leaves have yellow spots on top, and when I turn them over there is orange dust.",powder_or_rust,coffee_leaf_rust,false,true,rust described from both leaf sides
+"Some coffee leaves have dots on them.",leaf_spots,not_sure,true,true,too vague: rust / brown eye spot / leaf miner / Phoma all fit; should return a tell-apart question
+"The coffee leaves are turning yellow.",yellowing_leaves,not_sure,true,true,too vague: nitrogen / rust / root problems all fit
+"My coffee is not doing well this year.",other,not_sure,true,true,no symptom at all
+"Something is wrong with the coffee berries.",fruit_spots,not_sure,true,true,no detail
+"The green coffee berries are turning black and sinking in, and many are dropping.",fruit_spots,coffee_berry_disease,true,true,urgent; not_sure is acceptable but another urgent name is not
+"Black sunken spots on the young green berries since the rains started.",fruit_spots,coffee_berry_disease,true,true,urgent; classic CBD timing
+"There is a tiny hole at the tip of many coffee berries, and small black beetles inside.",pests,coffee_berry_borer,false,true,pinhead hole at the berry tip
+"When I bend the brown patches on the coffee leaves, the top skin lifts and there are little white worms inside.",leaf_spots,coffee_leaf_miner,false,true,blister mine with caterpillars
+"The coffee leaves have round brown spots with a grey centre, like an eye.",leaf_spots,brown_eye_spot,false,true,eye-shaped spot with grey centre
+"The new coffee seedlings in the nursery have spots and are losing leaves.",leaf_spots,brown_eye_spot,true,true,nursery is the typical setting; spots alone are weak evidence
+"One coffee tree suddenly went yellow and wilted, and the wood under the bark near the ground is blue-black.",wilting,coffee_wilt_disease,true,true,urgent; blue-black wood is the tell-tale sign
+"My coffee trees are drooping in the afternoon. It has not rained for three weeks.",wilting,drought_stress,true,true,many trees at once during a dry spell
+"The bottom of the coffee stem is pinched thin with a dead brown patch of bark, and the tree is wilting.",wilting,fusarium_bark_disease,true,true,urgent; constricted stem base
+"The coffee trees in the field we cleared from forest are slowly dying, there is white fungus on the roots, and the dead one fell over when I pushed it.",rot,armillaria_root_rot,true,true,urgent; topples easily (wilt-killed trees stay rooted)
+"The young coffee leaves near the top have brown spots with a wide yellow ring, and the shoot tips are dying. It is cold and windy here.",leaf_spots,bacterial_blight,true,true,urgent; yellow halo plus cold wind
+"Young coffee leaves at the shoot tips have black dead patches and are curled. It has been cold and rainy.",leaf_spots,phoma_leaf_blight,true,true,dead tissue on young tip leaves
+"All my coffee trees look pale yellow, the whole leaf, and there are no spots or powder.",yellowing_leaves,nitrogen_deficiency,true,true,even pale yellow with no spots
+"On the old coffee leaves the veins stay green but the leaf between them is yellow.",yellowing_leaves,magnesium_deficiency,true,true,yellow between green veins on old leaves
+"The edges of the old coffee leaves look burnt and dead, but the strip along the middle vein is still green.",leaf_spots,potassium_deficiency,true,true,burnt margins with green midrib
+"After the heavy rain last night, water is standing under the coffee in the low part, and those trees are yellowing.",yellowing_leaves,waterlogging,true,true,standing water after 40 mm-type rain
+"Pale bleached patches appeared on the coffee leaves right after we pruned and cut down the shade trees.",leaf_spots,sun_scorch,true,true,sudden sun exposure
+"The tips of the coffee branches are dying after the big harvest. The tree carried a huge crop.",other,overbearing_dieback,true,true,dieback after a heavy crop
+"The hail yesterday tore the coffee leaves and broke some branches.",other,hail_damage,false,true,clear weather cause
+"There are shield-shaped brown bugs with orange and white marks hiding in the coffee berry clusters.",pests,antestia_bug,false,true,insect described directly
+"There are round holes as wide as a pencil in the bottom of the coffee trunk, with sawdust on the ground.",pests,white_stem_borer,false,true,urgent; holes plus sawdust at the stem base
+"White cotton-like insects between the coffee berries, and lots of ants on the branches.",pests,coffee_mealybug,false,true,white waxy insects tended by ants
+"Flat green insects sit in rows along the veins under the coffee leaves, and the leaves are black and sticky.",pests,green_scale,true,true,sooty mould is the symptom; green scale is the cause
+"When I dug around a wilting coffee tree there were white insects on the roots.",pests,coffee_root_mealybug,true,true,insects on roots
+"The coffee leaves have silvery grey patches with tiny black dots, and it has been very dry.",leaf_spots,coffee_thrips,true,true,silvering in drought
+"The young coffee seedlings are small and yellow, and there are little knots on the roots.",stunted_growth,coffee_nematodes,true,true,root galls

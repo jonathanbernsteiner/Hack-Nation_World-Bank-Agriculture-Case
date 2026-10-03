@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="drawio" version="26.0.0">
+  <diagram id="overview" name="System overview">
+    <mxGraphModel dx="1400" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="&lt;b&gt;Voice farm record: system overview&lt;/b&gt;&lt;br&gt;Draft from the team brainstorm, 3 Oct 2026" style="text;html=1;align=left;verticalAlign=middle;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="800" y="40" width="440" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="noor" value="&lt;b&gt;Noor, smallholder coffee farmer&lt;/b&gt;&lt;br&gt;basic or borrowed phone, own PIN&lt;br&gt;one call each evening, in her language" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="420" y="40" width="280" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="twilio" value="&lt;b&gt;Demo: Twilio phone number&lt;/b&gt;&lt;br&gt;forwards the call to the laptop" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="80" y="190" width="240" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="gsm" value="&lt;b&gt;Real world: SIM card + GSM modem&lt;/b&gt;&lt;br&gt;local number, no internet needed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="500" y="190" width="260" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="box" value="Cooperative box: runs offline at the co-op office (demo: a laptop)" style="swimlane;startSize=30;html=1;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;swimlaneFillColor=#f7faff;align=center;" vertex="1" parent="1">
+          <mxGeometry x="40" y="330" width="1240" height="400" as="geometry" />
+        </mxCell>
+
+        <mxCell id="agent" value="&lt;b&gt;Voice agent (the call)&lt;/b&gt;&lt;br&gt;PIN → &quot;what happened today?&quot; → gap questions → advice → her questions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="box">
+          <mxGeometry x="40" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="stt" value="&lt;b&gt;Speech-to-text&lt;/b&gt;&lt;br&gt;open-source model for the local language (e.g. Meta MMS)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="box">
+          <mxGeometry x="360" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="extract" value="&lt;b&gt;Extraction (small local LLM)&lt;/b&gt;&lt;br&gt;fixed fields: date, plot, activities, yield, sale price, buyer, payment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="box">
+          <mxGeometry x="680" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="review" value="&lt;b&gt;Review queue&lt;/b&gt;&lt;br&gt;records the AI may have got wrong go to a person" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="box">
+          <mxGeometry x="1000" y="60" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="advice" value="&lt;b&gt;Advice engine&lt;/b&gt;&lt;br&gt;weather, rainfall, soil, disease reports nearby, past sale prices" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="box">
+          <mxGeometry x="40" y="250" width="240" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="db" value="&lt;b&gt;Farmer records&lt;/b&gt;&lt;br&gt;one record per farmer, tied to plot and location" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;size=15;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="box">
+          <mxGeometry x="680" y="240" width="240" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="opendata" value="&lt;b&gt;Free open data (optional add-on)&lt;/b&gt;&lt;br&gt;NASA POWER weather, CHIRPS rainfall, iSDAsoil&lt;br&gt;small download over 2G data" style="rounded=1;dashed=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="80" y="790" width="240" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dashboard" value="&lt;b&gt;Cooperative dashboard&lt;/b&gt;&lt;br&gt;data table, map of irregularities, outlier flags, harvest estimates, farmer profiles" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="400" y="790" width="240" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="consent" value="&lt;b&gt;Farmer's consent&lt;/b&gt;&lt;br&gt;she shares her own record using her PIN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="720" y="790" width="240" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="buyers" value="&lt;b&gt;Buyers / middlemen&lt;/b&gt;&lt;br&gt;no access" style="rounded=1;dashed=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="790" width="200" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="expert" value="&lt;b&gt;Expert / extension officer&lt;/b&gt;&lt;br&gt;visit priorities from the problem map" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="400" y="960" width="240" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="lender" value="&lt;b&gt;Lender&lt;/b&gt;&lt;br&gt;one-page financial record (PDF)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="680" y="960" width="200" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="certifier" value="&lt;b&gt;Certifier&lt;/b&gt;&lt;br&gt;practice log for certification" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="920" y="960" width="200" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Edges -->
+        <mxCell id="e_noor_twilio" value="voice call" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="noor" target="twilio">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_noor_gsm" value="voice call" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="noor" target="gsm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_twilio_agent" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.3;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="twilio" target="agent">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="300" />
+              <mxPoint x="152" y="300" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_gsm_agent" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="gsm" target="agent">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="630" y="300" />
+              <mxPoint x="260" y="300" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_agent_stt" value="recap audio" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;labelBackgroundColor=#f7faff;" edge="1" parent="box" source="agent" target="stt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_stt_extract" value="transcript" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;labelBackgroundColor=#f7faff;" edge="1" parent="box" source="stt" target="extract">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_extract_review" value="unsure fields" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;labelBackgroundColor=#f7faff;" edge="1" parent="box" source="extract" target="review">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_extract_db" value="structured record" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;labelBackgroundColor=#f7faff;" edge="1" parent="box" source="extract" target="db">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_review_db" value="corrected" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;labelBackgroundColor=#f7faff;" edge="1" parent="box" source="review" target="db">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_db_advice" value="her history + nearby reports" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;labelBackgroundColor=#f7faff;" edge="1" parent="box" source="db" target="advice">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_advice_agent" value="spoken advice, same call" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;labelBackgroundColor=#f7faff;" edge="1" parent="box" source="advice" target="agent">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_opendata_advice" value="forecasts" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="opendata" target="advice">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_db_dashboard" value="all records" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="db" target="dashboard">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="780" y="750" />
+              <mxPoint x="520" y="750" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_db_consent" value="her record" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="db" target="consent">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_dashboard_expert" value="problem map" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="dashboard" target="expert">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_consent_lender" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="consent" target="lender">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_consent_certifier" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="consent" target="certifier">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Legend -->
+        <mxCell id="legend" value="Legend" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;verticalAlign=top;fontStyle=1;container=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="960" width="300" height="222" as="geometry" />
+        </mxCell>
+        <mxCell id="leg1" value="" style="rounded=0;html=1;fillColor=#ffffff;strokeColor=#333333;" vertex="1" parent="legend"><mxGeometry x="10" y="30" width="30" height="16" as="geometry" /></mxCell>
+        <mxCell id="leg1t" value="People and organisations" style="text;html=1;align=left;verticalAlign=middle;" vertex="1" parent="legend"><mxGeometry x="50" y="28" width="240" height="20" as="geometry" /></mxCell>
+        <mxCell id="leg2" value="" style="rounded=0;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="legend"><mxGeometry x="10" y="54" width="30" height="16" as="geometry" /></mxCell>
+        <mxCell id="leg2t" value="Phone line" style="text;html=1;align=left;verticalAlign=middle;" vertex="1" parent="legend"><mxGeometry x="50" y="52" width="240" height="20" as="geometry" /></mxCell>
+        <mxCell id="leg3" value="" style="rounded=0;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="legend"><mxGeometry x="10" y="78" width="30" height="16" as="geometry" /></mxCell>
+        <mxCell id="leg3t" value="AI component on the box" style="text;html=1;align=left;verticalAlign=middle;" vertex="1" parent="legend"><mxGeometry x="50" y="76" width="240" height="20" as="geometry" /></mxCell>
+        <mxCell id="leg4" value="" style="rounded=0;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="legend"><mxGeometry x="10" y="102" width="30" height="16" as="geometry" /></mxCell>
+        <mxCell id="leg4t" value="Data store" style="text;html=1;align=left;verticalAlign=middle;" vertex="1" parent="legend"><mxGeometry x="50" y="100" width="240" height="20" as="geometry" /></mxCell>
+        <mxCell id="leg5" value="" style="rounded=0;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="legend"><mxGeometry x="10" y="126" width="30" height="16" as="geometry" /></mxCell>
+        <mxCell id="leg5t" value="Human check" style="text;html=1;align=left;verticalAlign=middle;" vertex="1" parent="legend"><mxGeometry x="50" y="124" width="240" height="20" as="geometry" /></mxCell>
+        <mxCell id="leg6" value="" style="rounded=0;dashed=1;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="legend"><mxGeometry x="10" y="150" width="30" height="16" as="geometry" /></mxCell>
+        <mxCell id="leg6t" value="External data (optional)" style="text;html=1;align=left;verticalAlign=middle;" vertex="1" parent="legend"><mxGeometry x="50" y="148" width="240" height="20" as="geometry" /></mxCell>
+        <mxCell id="leg7" value="" style="rounded=0;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="legend"><mxGeometry x="10" y="174" width="30" height="16" as="geometry" /></mxCell>
+        <mxCell id="leg7t" value="Consent gate" style="text;html=1;align=left;verticalAlign=middle;" vertex="1" parent="legend"><mxGeometry x="50" y="172" width="240" height="20" as="geometry" /></mxCell>
+        <mxCell id="leg8" value="" style="rounded=0;dashed=1;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="legend"><mxGeometry x="10" y="198" width="30" height="16" as="geometry" /></mxCell>
+        <mxCell id="leg8t" value="No access" style="text;html=1;align=left;verticalAlign=middle;" vertex="1" parent="legend"><mxGeometry x="50" y="196" width="240" height="20" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

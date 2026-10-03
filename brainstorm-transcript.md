@@ -3,7 +3,7 @@
 Team brainstorm for the Hack Nation × World Bank agriculture case.
 
 - **Source:** Notion AI meeting notes on the team's Hack Nation page: https://app.notion.com/p/dryftteam/Hack-Nation-3ee2073003ce80468657e08de8ba7ae3 (current meeting: "Meeting @Today")
-- **Last synced:** 2026-10-03 20:14 UTC (Notion page last edited 20:14 UTC)
+- **Last synced:** 2026-10-03 20:21 UTC (Notion page last edited 20:21 UTC)
 - **To update:** ask Claude to "sync the transcript". It pulls the latest from Notion, replaces the raw transcript below and updates the summary sections.
 
 The transcript is automatic speech-to-text, so expect errors. For example, "Cloud Code" / "Cloud MD" mean Claude Code / CLAUDE.md, "a disease on their blood" probably means on their plant or leaf, "World Health" probably means World Bank, "metamans" / "mill man" mean middlemen, "kiamas" means chamas and "eight CCOs" probably means SACCOs. "Neuer" / "Newark" mean Noor, "11 lives" / "11.1" mean ElevenLabs, "Olive Trillo" / "Julio" probably mean Twilio, "chirps" means CHIRPS and "Harvard's estimates" means harvest estimates.
@@ -56,11 +56,13 @@ A teammate's write-up, read out in the meeting:
 - But it's the **carrot** that makes a farmer call on day one, before the record is worth anything.
 - **Earlier decision:** don't spend more time on it now. Build it near the end, once the data pipeline works.
 - **Update later in the meeting:** the demo must show that the call gives advice, as the short-term benefit. Advice now comes at the end of every call, based on weather, rainfall and soil data (see "What the demo shows").
+- **What the advice covers:** weather forecast and seasons, plant diseases, sale prices, and tips such as when to use fertiliser.
 
 ### Debated but not pursued
 - **Selling the data** to large firms (e.g. commodity futures): valuable, but the World Bank is unlikely to welcome it.
 - **Cutting out the middleman / pricing power:** the list alone doesn't give pricing power; the cooperative does. Kept as a side thought.
 - **Yield drop and climate change:** needs more research (TBD). The team still wants to give input that helps farmers grow more, e.g. different planting methods.
+- **Gender** (e.g. who owns which phone): left out. The product works on a borrowed phone, so the team didn't think it was very relevant.
 
 ### Risk raised: data security
 If buyers could see the dataset, they could undercut farmers with bad yields. **Middlemen and buyers must not get access.** The cooperative can, possibly anonymised, for the collective good. Expect judges to ask about this.
@@ -156,6 +158,21 @@ In the meeting: in Kenya, farmers registered through local officers receive an *
 4. **A record for a lender:** the call history becomes a one-page financial record (e.g. a PDF). Lenders have internet, so it can be uploaded or emailed, with the farmer's PIN as consent. Another option: call the number and have the record read out. Informal lenders without internet were cut ("more like scammers").
 5. **Advice from free data:** weather from the **NASA POWER** API, **soil** data and **CHIRPS** rainfall (historical and current). A teammate said these work over a 2G connection. Lower priority than 1–4.
 
+**Confirmed at 20:21 UTC:** the call is the main part of the demo, followed by how it turns into the data table, the map of irregularities, and the financial records or **certification paperwork**. The dashboard is built from these outputs.
+
+**One output per audience:**
+- **Farmer:** advice on every call, plus her own record.
+- **Cooperative board:** the map of irregularities, i.e. community health. Collective bargaining on price is a sub-point of it. A second map could show **yield by region** from the data table.
+- **Lender:** the financial records, for better-informed loans.
+
+A teammate's worry: this is a lot of outputs to build.
+
+### Sale prices: track them over time
+- A teammate argued that historical sale prices are key. The brief names two problems: farmers don't know why yields dropped, and they don't know what price to ask. Price history tackles the second.
+- So the daily recap also covers sales ("I sold this much for this price").
+- A year later, the advice can say: "Last year around this time you sold at X. If you're selling soon, the average was Y." About once a year, it can also say what everyone else sold for.
+- Concern raised: sales data makes everything more complex.
+
 ### A visitor's questions
 The team pitched the idea to a visitor and explained the brief's key constraint: **use AI in a way a Google search or spreadsheet can't**. Questions raised:
 - **Are these problems the same in Latin America, Africa and elsewhere?** The team aims to make it region-agnostic, which makes it scalable for the World Bank.
@@ -166,6 +183,9 @@ The team pitched the idea to a visitor and explained the brief's key constraint:
 - Intermediate pitches are at **5 pm** (local time). At 12:25 the team agreed to plan a timeline from 12:45 and a development pipeline, to decide what to build first.
 - One teammate takes **slide design for the pitch and video editing**, and supports elsewhere. Another offered to help with a tutorial.
 - For the demo: "move fast". In the video, steer the caller into one specific flow rather than handling every possible input.
+- **Judges probably only watch the video** and won't try the product (from a teammate's hackathon experience). So: say what farmers can ask, run the call, show the dashboard. Answer who, why and how.
+- **Splitting tasks (in progress):** one teammate offered to build a synthetic caller, a voice agent that plays the farmer. Another would rather have one of us make the call. Either way it should be **in the local language**, which the team thinks will impress the judges.
+- Which follow-up questions to ask about gaps will be worked out in code.
 
 ---
 
@@ -305,11 +325,14 @@ The brief says Noor's own phone is used for "calls, messages, and mobile money" 
 
 **Decided: callers identify with a PIN**, set once at onboarding, so shared phones work.
 
-**Decided: the demo outputs** (see "What the demo shows"): live call, data table, map of irregularities, lender record, then advice from weather and soil data.
+**Decided: the demo outputs** (see "What the demo shows"): live call, data table, map of irregularities, financial records or certification paperwork, then advice from weather and soil data.
+
+**Decided: the recap covers sales too**, so the record builds a price history (see "Sale prices").
 
 **Decide now (blocks the build)**
 - **Setting: which country?** The brief uses the fictional Ondera highlands and Ondera Coffee Cooperative. Countries are named freely in the notes as examples; the team still has to pick the setting for the pitch. This also decides the demo language and the speech model.
 0. **Where the AI runs.** The meeting leaned local: in the demo, Twilio sends the call to a laptop; in the real world, a box with a SIM card at the cooperative. This matches Claude's earlier suggestion of **one small server per cooperative**. Still open: how data from many boxes reaches the people who look across villages, e.g. experts. *Claude's idea:* each box sends short anonymised summaries over SMS or a little 2G data.
+0c. **Who builds what** (being split now), and **who is the caller in the demo**: a synthetic voice agent playing the farmer, or a teammate. Either way, in the local language. If synthetic, label it in the video (see 14).
 1. **The brief's "one better agricultural decision".** Loans and certification are outcomes, not farm decisions. Frame the tool as "documenting a field observation" and "connecting evidence to a pricing, market or extension-service next step", which is the brief's own wording.
 2. **What one record contains:** the whiteboard sets the core as **activities, yield, sale price** per row, one block of rows per farmer. Still to detail: date, plot, inputs used, observations, and how she was paid (cash, mobile money). This is the "data frame" and drives the whole build.
 2b. **How records become trustworthy:** regional outlier checks, the expert photographing paper receipts on visits, and mobile money history with consent. Pick which to show in the demo; outlier checks are the easiest to build.
@@ -1474,4 +1497,106 @@ That's fucking awesome.
 
 And then we also have soil, it's another API as well, that doesn't change, so obviously we have local soil data as well, and then there's chirps, which is like rainfall stuff, it's historical and present, same kind of data connection as well, so we can kind of infer that and tell them with historical data as well, look out for when, which, whatever, we can infer whatever we want with that data as well, so it's helpful.
 
-Fabulous. OK, so now it's a chirps. And that's what our soil trips get. OK, do we agree that this is what we're working towards?
+Fabulous. OK, so now it's a chirps.
+
+And that's what our soil trips get.
+
+Okay, do we agree that this is what we're working towards?
+
+So the phone call is the main part of our demo. And then showing how it translates into this data table, into the map of the regularities, and then to the financial records, slash financial, or sorry, into the certification paperwork.
+
+So there's three different outcomes, whatever outcomes we're looking for. We're looking for the person's value, the farmer's value, the board's value, and then the loan's financier's value, or whatever this company is valued.
+
+What's the board value?
+
+Like the co-op board or whatever, agreement, this they're working towards or whatever in the document. I looked at where the co-op.
+
+I guess the board's value is cultural.
+
+You're right, you're right. What's the financier's--So here.
+
+This is this one, the financial records, so then they can make more informed loans. Sounds good. And then the overall community health is this map of irregularities. I guess there's one thing that we are missing here, which is the question on collective bargaining price. Actually, I think that's a sub-point of that.
+
+Of the data table? No, of the map. Because the map says how the region is growing. And obviously from this data, you can create some financial stuff.
+
+Agreed. In this case, the map is actually the diseases.
+
+Yeah, but the regularity, the diseases, a whole map for them. It could also be interesting how much is growing in this region, like all of this, the possible data.
+
+So this could be another map. It just wouldn't be this one because this is about where there's plant infections. So that won't show growing, but we can do another one using the data table. on a map of yield. Is that what you're thinking?
+
+I think the piece here on sales price is important.
+
+So then being able to have sales some sort of collection on like, historical sale prices over time. Is Really key so that they can know.
+
+How important is that we also include the sales and other things because it makes everything a bit more complicated?
+
+So the historical sales prices I think are really important because it said in the brief there were only two points. It was one, they don't know what's causing the yield and two, they don't know the sale price. All right, so this helps with the sales price.
+
+Oh, then we ask the farmers how much they actually sold it for. Yeah, so basically in the recap it's like, what'd you do today?
+
+And it's like, oh, I sold this much for this.
+
+And then when they think out like advice, right?
+
+One year later, it could say, oh, last year around this time, I knew you were about to make a sale. If you're about to make one soon, remember, this is how much average--Yeah, yeah, cool.
+
+Yeah, I think that's powerful. That's powerful. Okay.
+
+This is a lot of outputs. So it's going to be pretty-I don't know. I think it's going to be a little intensive.
+
+Do you want to now break up responsibilities and timeline and things like that?
+
+Just asking for the customer advice, what do we include in the customer advice? I mean obviously we include weather forecast, but do we also include something if the plants have a disease of the plants? So we include this. Yep. The seasons, weather forecast, what else do we include? Obviously the prices for the farmers, sales prices.
+
+Do we also include dips, for example, that they should use some fertilizer? Yeah.
+
+Are we doing anything with the gender stuff? I was talking about-I remember reading about here, but now it's pointing out more about-I don't think we have to. Just who owns what phone, if they're a woman or a man or a male. Okay.
+
+Because we're making a product that you can borrow your friend's phone.
+
+Yeah, I just don't think it's very relevant either.
+
+You have participated already in a few hackathons. Yeah. So the judges maybe just watch the video, I guess so.
+
+Yes, they don't actually go in and kind of try.
+
+Yeah, what I mean, so you just say, hey, farmers can ask for advice, they can ask whatever, how the weather is going to come, blah, blah, blah. And you just list it down. Then you run the demo and have the card. And you show the dashboard.
+
+It's kind of like the stupid stuff people taught in elementary school. It's like, who cares why and how? That's kind of it. That's literally three questions you have to answer. OK, cool.
+
+There's only four. We haven't written a dashboard down in this. Are we thinking about other components of my-or are these kind of like the components of a dashboard?
+
+Components of dashboard. We can just pull from that. So yeah. Good with this?
+
+Yeah, let's split it.
+
+How do we wanna split up?
+
+You can do some deep dives in one of those tasks in case the other... In which task? I don't know. I think...
+
+I think one piece is training a I don't know how to call it, like a fake voice assistant to pretend to be the farmer from Africa who's calling in. I can do that.
+
+I can talk to her.
+
+Personally, I would just do that we do the phone call. But it needs to be in the local language. I think that'll be hugely impressive to them.
+
+Ah, boy. So, okay, local language.
+
+What else? I think one gap we have is what-or sorry, one place we need to think about is what we ask for the gaps.
+
+So when theyI think that could be infertile code. We can figure that out when we get to the coding part. I think that part. Oh, great. What else?
+
+What do you think are some of the bigger tasks?
+
+Just technical stuff. On the dashboard side, are we trying to also like just tell them and warn them about stuff that's going on, like fires, whatever, I don't know. We're supposed to like give these warnings out on the dashboard as well, so pulling from NASA, whatever, all this sort of stuff as well? Or is that the immediate issue for like, are we supposed to provide value to... Towards the pricing side or the consumer side as well?
+
+I think about it as like once every year. Okay.
+
+At one point, you're going to call in and they're going to be like, hey, by the way, this is what you sold last year.
+
+This is what everyone else sold last year.
+
+I think more Interesting will be like, It was recording, by the way, is it?
+
+Yeah, it is recording. I just pushed it. Let's try to really simulate this like a big fart. I love that you use the persona and say like, Yeah.

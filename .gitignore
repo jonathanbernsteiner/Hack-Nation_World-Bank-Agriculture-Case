@@ -18,3 +18,7 @@ node_modules/
 .vercel
 .env*
 !.env.example
+
+# Local ledger database (server/)
+server/data/
+*.db

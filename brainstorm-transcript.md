@@ -3,7 +3,7 @@
 Team brainstorm for the Hack Nation × World Bank agriculture case.
 
 - **Source:** Notion AI meeting notes on the team's Hack Nation page: https://app.notion.com/p/dryftteam/Hack-Nation-3ee2073003ce80468657e08de8ba7ae3 (current meeting: "Meeting @Today")
-- **Last synced:** 2026-10-03 20:21 UTC (Notion page last edited 20:21 UTC)
+- **Last synced:** 2026-10-03 20:25 UTC (Notion page last edited 20:25 UTC)
 - **To update:** ask Claude to "sync the transcript". It pulls the latest from Notion, replaces the raw transcript below and updates the summary sections.
 
 The transcript is automatic speech-to-text, so expect errors. For example, "Cloud Code" / "Cloud MD" mean Claude Code / CLAUDE.md, "a disease on their blood" probably means on their plant or leaf, "World Health" probably means World Bank, "metamans" / "mill man" mean middlemen, "kiamas" means chamas and "eight CCOs" probably means SACCOs. "Neuer" / "Newark" mean Noor, "11 lives" / "11.1" mean ElevenLabs, "Olive Trillo" / "Julio" probably mean Twilio, "chirps" means CHIRPS and "Harvard's estimates" means harvest estimates.
@@ -173,6 +173,13 @@ A teammate's worry: this is a lot of outputs to build.
 - A year later, the advice can say: "Last year around this time you sold at X. If you're selling soon, the average was Y." About once a year, it can also say what everyone else sold for.
 - Concern raised: sales data makes everything more complex.
 
+### Demo scenario: low yield, low price
+- The caller plays the persona: "Here's my PIN. This is what I did today. My coffee yield is really low, and someone is coming tomorrow to buy."
+- That covers the brief's two problems, **low yield and the sale price**, so the call should answer on price and give advice.
+- **Scope:** don't build every feature fully. Force the demo into one or two scripted inputs, since nobody will stress-test it. No need to handle open-ended answers and questions.
+- Local language: a teammate said we don't need to model it ourselves; giving the system a transcript is enough.
+- Someone said "I can say it works in all languages". *Claude's note:* careful here. The brief makes responsible AI pass/fail and says to expect the less-supported-language question. Claim only the languages we actually show, and say what happens for the rest (see open item 9).
+
 ### A visitor's questions
 The team pitched the idea to a visitor and explained the brief's key constraint: **use AI in a way a Google search or spreadsheet can't**. Questions raised:
 - **Are these problems the same in Latin America, Africa and elsewhere?** The team aims to make it region-agnostic, which makes it scalable for the World Bank.
@@ -186,6 +193,9 @@ The team pitched the idea to a visitor and explained the brief's key constraint:
 - **Judges probably only watch the video** and won't try the product (from a teammate's hackathon experience). So: say what farmers can ask, run the call, show the dashboard. Answer who, why and how.
 - **Splitting tasks (in progress):** one teammate offered to build a synthetic caller, a voice agent that plays the farmer. Another would rather have one of us make the call. Either way it should be **in the local language**, which the team thinks will impress the judges.
 - Which follow-up questions to ask about gaps will be worked out in code.
+- **Interface:** don't design the dashboard by hand. Tell the coding AI what it must show (irregularities, farmers, financial record, prices) and polish the look later. It can be built in parallel with the call pipeline.
+- **Split:** the builder will divide the work into an "industrial" side (*Claude's reading:* cooperative and lender) and a "consumer" side (the farmer's call), then keep splitting and assign tasks. A teammate worried the builder was doing everything alone and asked to be given tasks.
+- Start building right away, in case AI credits run out.
 
 ---
 
@@ -332,7 +342,7 @@ The brief says Noor's own phone is used for "calls, messages, and mobile money" 
 **Decide now (blocks the build)**
 - **Setting: which country?** The brief uses the fictional Ondera highlands and Ondera Coffee Cooperative. Countries are named freely in the notes as examples; the team still has to pick the setting for the pitch. This also decides the demo language and the speech model.
 0. **Where the AI runs.** The meeting leaned local: in the demo, Twilio sends the call to a laptop; in the real world, a box with a SIM card at the cooperative. This matches Claude's earlier suggestion of **one small server per cooperative**. Still open: how data from many boxes reaches the people who look across villages, e.g. experts. *Claude's idea:* each box sends short anonymised summaries over SMS or a little 2G data.
-0c. **Who builds what** (being split now), and **who is the caller in the demo**: a synthetic voice agent playing the farmer, or a teammate. Either way, in the local language. If synthetic, label it in the video (see 14).
+0c. **Who builds what** (the builder is splitting it into a cooperative/lender side and a farmer side), and **who is the caller in the demo**: a synthetic voice agent playing the farmer, or a teammate. Either way, in the local language. If synthetic, label it in the video (see 14).
 1. **The brief's "one better agricultural decision".** Loans and certification are outcomes, not farm decisions. Frame the tool as "documenting a field observation" and "connecting evidence to a pricing, market or extension-service next step", which is the brief's own wording.
 2. **What one record contains:** the whiteboard sets the core as **activities, yield, sale price** per row, one block of rows per farmer. Still to detail: date, plot, inputs used, observations, and how she was paid (cash, mobile money). This is the "data frame" and drives the whole build.
 2b. **How records become trustworthy:** regional outlier checks, the expert photographing paper receipts on visits, and mobile money history with consent. Pick which to show in the demo; outlier checks are the easiest to build.
@@ -1599,4 +1609,54 @@ This is what everyone else sold last year.
 
 I think more Interesting will be like, It was recording, by the way, is it?
 
-Yeah, it is recording. I just pushed it. Let's try to really simulate this like a big fart. I love that you use the persona and say like, Yeah.
+Yeah, it is recording. I just pushed it.
+
+Let's try to really simulate this like a big fart.
+
+I love that you use the persona and say like, Yeah, the coffee yield is low. What do I, maybe that's the whole demo, right? Like low yield.
+
+And why? And what price, right? This is what they're calling in for. Because these were the three components of the brief. Are two components of the brief, low yield and low price.
+
+And so let's have this caller call in and say, this is my pin, this is what I did today, but the yield is really low and somebody's coming tomorrow.
+
+We gotta remember as well that people aren't actually using this right now. So we can only build that, we can just talk. How do I say this? We don't need to build out every single feature completely. We can say it's like there, you know what I mean? It kind of works, but for only specific input because people aren't going to actually go in and stress test this. You know what I mean? We can just force it into specific inputs. So we don't need to build it for dynamic answers and questions. That's where we're at.
+
+Oh, yeah. Cool.
+
+Yeah, there is a whole local language. You don't need to go in and model. You can just give it a transcript and it's all in.
+
+You can talk about one or two inputs. Literally, that's it. And if they ask, oh, is there more? Yeah, sure. Here's another one. You know what I mean? There's two examples. That's what I'm saying.
+
+Yeah, yeah, yeah.
+
+Sorry.
+
+I can say it works in all languages. Sorry, sorry, sorry.
+
+To answer your question, though, I think it should address sales price in our demo, and then it should also give advice. Okay. So I need to prioritize this. Um.
+
+I think so totally agree. Like this is just like technical build out. I think these pieces, you tell me what makes the most sense here. I see a world where somebody is by coding or like creating the interface of what this looks like.
+
+That's the last part, honestly.
+
+But like, can we do, can we run that in parallel?
+
+100%. Yeah, I run like eight agents at the same time. Right. Yeah.
+
+So I mean, like maybe one of us can take on like what these look like. And then once this is built out, we can put them together.
+
+We don't need to specify what it looks like, honestly. Let's just give it the office of what it wants and let it build whatever it wants. All we're going to do is tell it, this is what we want to show. We want to show how many cell towers there are. We want to show the price, this sort of thing, this sort of thing. Don't care about how it looks right now. We'll figure that out later. Just care that it actually shows what we want it to show, which is the regularities, farmers, financial record, whatever.
+
+Okay.
+
+I hear you. I just worry in that case that you're doing all this alone, as I'm trying to figure it out.
+
+I'm going to split it up for you guys. We're going to have one of us, for example. The industrial side and the consumer side and then we split tasks up in between there just keep splitting and splitting and splitting it up one person takes this one person takes this. It'll become more bespoke once we keep splitting it up I think.
+
+Can you then assign us tasks? So we can like run it over.
+
+So an hour for what, sorry?
+
+Let's just start running. Because I'm just worried about us running out of credits and having to wait and stuff. So I would rather get from as soon as possible. So, clinical science.
+
+Can you take it one more time? It's just like, that was like five minutes ago. Sorry. - Something's scary.

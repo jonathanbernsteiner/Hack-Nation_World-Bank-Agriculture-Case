@@ -3,10 +3,10 @@
 Team brainstorm for the Hack Nation × World Bank agriculture case.
 
 - **Source:** Notion AI meeting notes on the team's Hack Nation page: https://app.notion.com/p/dryftteam/Hack-Nation-3ee2073003ce80468657e08de8ba7ae3 (current meeting: "Meeting @Today")
-- **Last synced:** 2026-10-03 20:27 UTC (Notion page last edited 20:27 UTC)
+- **Last synced:** 2026-10-03 21:13 UTC (Notion page last edited 21:13 UTC)
 - **To update:** ask Claude to "sync the transcript". It pulls the latest from Notion, replaces the raw transcript below and updates the summary sections.
 
-The transcript is automatic speech-to-text, so expect errors. For example, "Cloud Code" / "Cloud MD" mean Claude Code / CLAUDE.md, "a disease on their blood" probably means on their plant or leaf, "World Health" probably means World Bank, "metamans" / "mill man" mean middlemen, "kiamas" means chamas and "eight CCOs" probably means SACCOs. "Neuer" / "Newark" mean Noor, "11 lives" / "11.1" mean ElevenLabs, "Olive Trillo" / "Julio" probably mean Twilio, "chirps" means CHIRPS and "Harvard's estimates" means harvest estimates.
+The transcript is automatic speech-to-text, so expect errors. For example, "Cloud Code" / "Cloud MD" mean Claude Code / CLAUDE.md, "a disease on their blood" probably means on their plant or leaf, "World Health" probably means World Bank, "metamans" / "mill man" mean middlemen, "kiamas" means chamas and "eight CCOs" probably means SACCOs. "Neuer" / "Newark" mean Noor, "11 lives" / "11.1" mean ElevenLabs, "Olive Trillo" / "Julio" probably mean Twilio, "chirps" means CHIRPS and "Harvard's estimates" means harvest estimates. "Codecs" means Codex, "init scale" and "create my project" mean the team's `init` and `create-project` skills, and "trailer connection" probably means the Twilio connection.
 
 ---
 
@@ -100,6 +100,10 @@ Long debate in the latest part of the meeting:
 - Asked whether the choice changes what we build, the team said no, so it shouldn't hold up the build.
 
 **Plan for the demo (from the builder):** Twilio routes the call to a laptop, which transcribes it, extracts the data into a local database and shows a dashboard. In the real world, the laptop would be a **box with a SIM card and a GSM adapter** that takes the calls and does everything locally ("buy a SIM card at the supermarket, plug it in, and it runs").
+
+**Update (21:13 UTC):** for the demo, Ethan's phone runs a **Twilio agent** that sends everything to his server. The video says explicitly that production runs on a server with a GSM modem.
+
+**Can judges try it?** The brief asks for a link. The team won't run a public phone line (it costs per call and needs the Twilio set-up). Instead, the dashboard gets a **"simulate a call" button** that runs a call through the same flow (a teammate did this at a previous hackathon). Asked whether a hosted cloud version is possible for the submission, the team said "of course", it's easy, and it will be included.
 
 ### Who sees the data: the cooperative office
 The cooperative has a board of farmers and one person in its office, with no internet. They see the local dashboard, with warnings like "disease reported over here", so they can send people to spray before it spreads. The map of problems also goes to the expert.
@@ -199,6 +203,16 @@ The team pitched the idea to a visitor and explained the brief's key constraint:
 - **Split as of 20:27 UTC:** consumer (farmer) side and finance side, each divided again into technical and non-technical tasks.
 - Teammates are connecting Claude Code to the GitHub repo. Someone suggested a draw.io skill to turn the ideas into an architecture diagram.
 - Logistics: possibly heading to Stanford after the 5 pm pitches.
+
+**Who does what (as of 21:13 UTC)**
+- **Ethan** owns the **call pipeline** and "probably" the **extraction** into fixed fields. A teammate offered to take **Swahili speech-to-text** but asked how it works; it is deprioritised for now so the other pieces can start.
+- The **lender output** goes to the teammate with the most finance knowledge. Others took **synthetic data**, **evidence and citations** (about 15% of the score), the **demo call script**, and **design** (slides and visuals). Two teammates split the remaining technical work. The epics name owners by role (Tech 2, Tech 3, finance person, design / video person).
+- **How we work:** Ethan pushed the team skills (`skills/` in the repo) and turned the plan into **epics #1–#6** on a **GitHub Project board**. Everyone **assigns themselves** to the epic they work on, runs **`create-project`** on it to split it into issues, then lets the agent work through them. Ethan scopes each issue to at most about 400 lines of code with enough context that the agent can't invent its own solution, but said this time it will be "a little bit looser" because of time.
+- **Run `init` at the start of every new agent session**, so the agent reads the project board and all comments first.
+
+**Video and real users**
+- Look: **"super minimalist techy San Francisco"**, with an **animated face** speaking the local language rather than only subtitles and a voice.
+- A teammate suggested **interviewing real users**, as strong entries at other hackathons do. One teammate knows a **teacher in a remote village in Kenya** and will call him around **7 am Kenya time** (it was midnight there); he could try it or speak the language in the demo. Another teammate may reach more people through a brother who lived in **South Africa**. "Let's put in the real faces."
 
 ---
 
@@ -345,7 +359,7 @@ The brief says Noor's own phone is used for "calls, messages, and mobile money" 
 **Decide now (blocks the build)**
 - **Setting: which country?** The brief uses the fictional Ondera highlands and Ondera Coffee Cooperative. Countries are named freely in the notes as examples; the team still has to pick the setting for the pitch. This also decides the demo language and the speech model.
 0. **Where the AI runs.** The meeting leaned local: in the demo, Twilio sends the call to a laptop; in the real world, a box with a SIM card at the cooperative. This matches Claude's earlier suggestion of **one small server per cooperative**. Still open: how data from many boxes reaches the people who look across villages, e.g. experts. *Claude's idea:* each box sends short anonymised summaries over SMS or a little 2G data.
-0c. **Who builds what** (split into a consumer/farmer side and a finance side, each with technical and non-technical tasks; names not yet assigned), and **who is the caller in the demo**: a synthetic voice agent playing the farmer, or a teammate. Either way, in the local language. If synthetic, label it in the video (see 14).
+0c. **Who builds what:** *mostly answered* at 21:13 UTC: epics #1–#6 on the GitHub Project board, everyone assigns themselves (see "Who does what"). Still open: **who is the caller in the demo**: a synthetic voice agent playing the farmer, a teammate, or a real speaker (the teacher contact in Kenya). Either way, in the local language. If synthetic, label it in the video (see 14).
 1. **The brief's "one better agricultural decision".** Loans and certification are outcomes, not farm decisions. Frame the tool as "documenting a field observation" and "connecting evidence to a pricing, market or extension-service next step", which is the brief's own wording.
 2. **What one record contains:** the whiteboard sets the core as **activities, yield, sale price** per row, one block of rows per farmer. Still to detail: date, plot, inputs used, observations, and how she was paid (cash, mobile money). This is the "data frame" and drives the whole build.
 2b. **How records become trustworthy:** regional outlier checks, the expert photographing paper receipts on visits, and mobile money history with consent. Pick which to show in the demo; outlier checks are the easiest to build.
@@ -1687,3 +1701,351 @@ You have a gender diagram for us too?
 Hm? Um, you guys should get a skill on GitHub called Drawio and it will take all your ideas or whatever and actually make it into like an infrastructure that you can like copy with and talk to cloud with.
 
 Oh yeah? Can you flop this code? Yeah. Thanks man.
+
+Okay, um...
+
+I was going to agree on this is kind of the scope of what's going on right now. So, first. There's a phone call pipeline, whatever. I do that. The speech is going to be-I'm going to put this in GitHub so you guys will be able to do it in a second. And then record the-oh, you can't record. It's going to fall probably.
+
+Like that? You see? Yes. Um...
+
+The extraction, yeah, I do that probably. And then synthetic data, 40 farmers, one season. We kind of got to all kind of figure out, because we're going to be building different things, to make sure that it aligns with what we are all building so that we don't have something, a route that it's not actually coded or built yet in this demo. The dashboard, whatever. Lender correction output. This is your thing for sure, because you probably have the most knowledge on that, the finance stuff.
+
+So you want me to look up what a lender is? Yeah.
+
+Which will all be in the GitHub. You don't have to remember any of this right now.
+
+Evidence and citations.
+
+I understand this part. If you want to explain, maybe. I'm just gonna hit the TV too, honestly.
+
+I don't know, you're asking. I'm not sure.
+
+I'm not sure if I'm not the theory.
+
+Do you want to connect? Yeah, this is pretty straightforward. Yeah, OK.
+
+It was worth about 15% of the score that they did grounding.
+
+Okay, yeah. Do you understand this part? I can do that.
+
+And up here as well, maybe?
+
+Sorry, over there?
+
+Okay, so you're gonna own, let's see, so you're gonna own the speech text in Swahili or whatever?
+
+So that's the demo? Yeah. Yeah.
+
+And then that's going to be the record schema extraction and transferring into fixed outputs. Same with the pipeline thing. That's going to be synthetic data. And then you want to--Wanna do synthetic data? What is involved? I don't quite understand it. Oh, it is these clusters and outliers and labels.
+
+It's basically like make a fake dataset. Oh God, yeah, cool.
+
+Yeah. And then under-Okay.
+
+I just did that.
+
+Yeah, you got that as well, okay. I'll do this row as well. Bad thing about the digs I'm off done. Well sure, sweet. Me and you can split up the technical, then if she knows what she's doing that's fine.
+
+So I'm doing this demo call script. And so can you explain the speech to text? I'm happy to do it. I just don't know how to do it.
+
+Yeah, for sure. We don't actually need that local, so yeah. So what I'm envisioning you're doing right now is you're going to basically make a model speak a different language? Okay. Let's see what we have in the... Here we have some stuff. They listed some sources. Let me take a look.
+
+Awesome.
+
+So what I'm going to do for this demo is it's just going to, we're going to say explicitly how it will work in like a production environment, which is like on a server with like a GSM thing. But we're going to have my phone with like a Twilio agent on it. I'll put it on here. And then it's going to submit everything onto my server. And it's going to run like that.
+
+Okay, so basically, I'm not sure I'm understanding it. It's like my laptop is going to be the fake caller onto your phone.
+
+And then your phone is going to show online.
+
+Super, okay. In that case though, The speech-to-text will need to be still on this laptop, right?
+
+Because you're ingesting from the-That's a good question.
+
+Because we're going to need to train this model on outputs in that language. I'm just gonna figure out first how to translate this real quick. Cool.
+
+Maybe we deprioritize that for right now and then we start on the other pieces.
+
+Do you have enough to do?
+
+I can take over more.
+
+No, I just want to be sure I can't remember what you're up to. Oh, I'm gonna get you the--Or you're splitting actually, so--Yeah, we can split a lot of things, yeah. Okay, I'm gonna just start. Just a quick question.
+
+They mentioned you should work in production and we should also send them the link. Should we also make it in a way that they technically can test it out? Yes or no? No. No. I mean, yeah, that they can do it in it.
+
+Are we actually doing that? Because I mean, no, we don't have to.
+
+Yeah, that's what I thought. Yeah, okay.
+
+Okay, so it's a good excuse.
+
+Exactly.
+
+I bet this then will lack a lot of bullshit with me too.
+
+Yeah, it's kind of what it is, honestly. Because it's possible to build it in whatever-Oh, sorry.
+
+Yeah, but they can't call it AI.
+
+Well, no, I'm not going to put it on like a server and make it incur actual costs, so I can just make that excuse as well. like, oh, sure, if you want to call it on my phone, you can go ahead and do that. Okay.
+
+Hey, but it wouldn't be a problemLike somebody actually called her. But that cost like a few bucks. I mean, I can also throw in my API. Okay, that doesn't matter.
+
+No, I'm just like, just let me ask you this. I don't know. Let's see.
+
+Still though, it doesn't matter if we don't build it, but I think it would be more powerful if it would also work in case they would open it, that it also works. It would be more powerful if our tool actually would work. Yeah, so technically they can open it up. They don't do the call, but they just put a button in the dashboard and can simulate a call. They obviously don't call over their personal phone because it needs the trailer connection and the whole setup was a bit more...
+
+That's what I did for my demo last hackathon. I just literally made like a fake live call in here and just made it go down one road.
+
+Yeah, but I could talk to the platform and just talk with the large language model. Exactly right.
+
+Is there a way for us to, when we submit, create basically like a cloud version of it?
+
+Yeah, of course it's possible. Or you can just talk to cloud. Yeah, of course.
+
+That's easy. Yeah, I can do it like last time as well. I had it where I could just talk to the model as well.
+
+Yeah, cool. That's easy, yeah. Yeah, so I would still include that one.
+
+You made this weird sound.
+
+Huh? You made like the, have underscores and dash ones and uppercases.
+
+It's funny, like, Actually, Claude made it. Really? No, I just said make the GitHub repo and throw in the name and then Claude renamed it. I'm hanging the telephone. How do you usually do it? Would you just give like a huge whisper throw prompt to Claude? And then we let it build out or should we directly build feature by feature?
+
+Also if you wanna come here.
+
+So this is how I do it for work. What are we at here?
+
+Repos. Projects, again, projects. So for example, this is a good one.
+
+Full request issues. So in here, there's going to be a project board. Okay, apparently there isn't. Nice. There we go, okay. So yeah, these are like huge issues and then inside of it has some issues inside some issues So what I do is I have a prompt like in my computer here that scopes each issue down to 400 lines of code at max because if it goes over that it kind of starts hallucinating and just the code quality drops and then it Specifically scopes it out tiny like each one is tiny like the scope of this is tiny But it has so much context so that it literally can't invent its own solution.
+
+I talked through everything It re-educates everything with the model beforehand and then it writes comments to itself. This is all agents, this is not me. And it has all the context of everything that we're talking about inside GitHub so any one person can just prompt the issue and have the scope already there. So they're making something up.
+
+Can you share the skills? Oh yeah, for sure. So we all have it. That's great.
+
+And that would be a CD, correct. Oh, is that going to be sexy? Thanks, David. C-G-O-R-I.
+
+And then skills.
+
+Automatic project, close issue, contact, standoff. I'm gonna put that one in there too for you guys. Oh, whatever. Bye. Copy that. Good.
+
+But probably we still have sprung, clad with the whole program and whole structure and then probably split it up.
+
+I might have to go a little bit looser on this one, not so structured because of just time. Yeah, that's good.
+
+I can also do a lot of them like this design thing. The which one? Design part. I can do it.
+
+Oh, that'd be great. Yeah. Can they go with this part?
+
+That's cool. Would you also like to do designs? Which one? Do you like to do designs? Are you good in visuals? Okay, yeah.
+
+But if you want to.
+
+Yeah, I think I'll take all of those. I think for the rest we'll spin up a few agents now. On what plan are you on board? Thank you.
+
+They'll share their $20 a month.
+
+I think you're going to max it out easily today. That's why I don't sell stuff, sorry. That's my usage of my fiber.
+
+Let's fucking go Hold on, don't leave your email in a little bit.
+
+Sweet.
+
+That's for the scales? Yes. Can't you upload it in our GitHub repo?
+
+It's just not really supposed to do that. Huh? It's just kind of weird. It's weird. It's only meant to be that code. You know what I mean? You know what I mean?
+
+It has to be clean if I'm done. You can't but I'm the guy who didn't just clean it up.
+
+Okay? No, it's like it's all the purpose for it. It's kind of like Okay, just send it over to me.
+
+It's like texting you over an email. It's like, "I'm gonna text your number." You know what I mean? It's like weird. Yeah, yeah, just send it over. Cool. Cool, cool, cool. What would be even more powerful, I've seen it in some other hackathons or like videos, where people actually interviewed people like users. where they actually called like some users and they really then crushed that yeah For example, even if you have a product and you try to sell it or you, I don't know, you make an app for restaurants, then you get the restaurant owner.
+
+I just say it, I think it's a bit complicated. I know one guy in Kenya who we could actually call. He's like in a remote village. I've already looked up, it's like late night at the moment, Kenya time. It's like midnight. Um...
+
+I mean, see if they're free to call the tempio tonight and have them double for us. But he's a teacher. It's okay. All we need is somebody to speak the language. Huh? Oh gosh, she could do the real demo. What the fuck? I will do it. I will do it. Okay, it's now midnight, but I can call him at like 7 a.m. Like in 7, 8, 9 hours. Okay. Okay, I'm gonna do it.
+
+I'm just putting them in the github so you'll have them in a second.
+
+Or you spin up like a separate repo for the skills. No, it's fine. I'll just throw it in like a subfolder and we delete the subfolder afterwards.
+
+Oh yeah, it's not a big deal. I'm just being stupid for no reason.
+
+How many hackathons have you done? What about you?
+
+Let's fucking go. That's also my first one.
+
+I have to go to you, my friend.
+
+Okay, let's go.
+
+Bro, why is it taking like two minutes bro? What the hell?
+
+Okay, what does anything to sweet ass time in your water?
+
+I can also call my brother. He lived sometimes in South Africa. He might also know more people.
+
+Okay, I pushed them to github if you guys want to downloadthose to your skill library.
+
+And I'm going to put the stuff on GitHub.
+
+But every single time you guys make a new agent, make it run the init scale, because that forces it to go read the project board and all the comments and everything to understand all the context of the project.
+
+All good. I write it in my MD file Wait, it's just a skill folder? Yeah.
+
+The full skill folder? There's one inside of it though. Okay.
+
+OhYour skill? Which one? That's just good.
+
+Yeah, that one's the one for-And we should always run it before each one. No, it's just in case you have any visual issues, you don't understand what's going on, and like, oh my gosh, I'm so wrong, or whatever. Thanks, Mom.
+
+Okay, have you already thrown a huge prompt in the cloud to build that core thing?
+
+I'm waiting for it to freaking finish. I don't know why it's taking so long.
+
+But probably I would also just spin it out with this flow. What do you mean? Because probably there's a lot of not useful stuff in the prompt.
+
+So what it is, I'm making epics, which is like the actual thing, the goal we're trying to accomplish. Yeah, cool. And they're all going to be assigned to whatever person is going to do them. And then each of you is going to go into your specific one and then go with the agent to tell what you're assigned to or whatever. And then you're going to talk through it each step or whatever. And then you're going to run that skill called create my project. And then it's going to list each issue out for you. And you can kind of let your agent run recursively through them if you've narrowed the scope enough.
+
+But I'll imagine that, I mean, we're kind of short on time. We don't have enough time to narrow it down that much. You kind of got to watch a little bit, but just go, Go through that and talk through your steps and what you want to achieve and it'll give you the tech stack and stuff.
+
+Okay, I don't totally know what you just said. Oh, hold on a second. Okay. I'm just starting with one.
+
+100%. Do you have the Dart code app on your computer? Are you connected with GitHub? You can just ask it to connect to GitHub. Yeah, there's a lot.
+
+I'll explain it to you.
+
+What's the thing that, yeah, Yes, it's kind of like, I don't know, how do you use this? It's like a Google Drive of files. Yeah.
+
+And you can show it. And just ask, please sign me in in GitHub and then probably you can open it and can sign in over Chrome. And afterwards you can just insert the repo that we just created and say to clone it on your computer.
+
+Model is wrong.
+
+How did your work let you have off today bro? Hmm? How did your work let you have off today?
+
+Yeah, I mean it's the same for you. I asked like way in advance though.
+
+I asked like super in advance.
+
+Okay, but we usually don't work on Saturdays.
+
+Oh, you told me yes. But Sunday you do work. Yeah. So you're gonna pull on later than work tomorrow?
+
+Yeah, I mean we usually start like at 9 a.m. So I would go straight to the office. You can join us, I can show you the office if you're interested because you also go to SF. Yeah, yeah, yeah. So we can go there together. You can also have breakfast with us one minute. Oh yeah, that's awesome, yeah, sweet. That would be awesome, man. As we always do, eating breakfast on Sundays.
+
+I can obviously structure this better, but just for time's sake, I'm going to have to tell this to go.
+
+Nice, nice.
+
+Let's get the working on your side Yeah, I just need an account.
+
+Nice. Nice, nice, nice.
+
+I'm surprised more people from Stanford didn't come. Me too. Mm-hmm.
+
+None of your MBA colleagues. Yeah, I guess not.
+
+You should try to get into Cal Hacks. People like, like engineers like me, people like you, the three of us, it's so hard to talk. I don't know how you do it. I was like surprised. I was like, oh my. We're leaving. Like every meeting I have at work, I have to like take about 10 minutes before it and like spin on my thoughts so I don't sound like an idiot.
+
+This is taking so long.
+
+I should have just bought Codex again.
+
+What are you, like, do we need this while you're doing it?
+
+Kind of, yeah.
+
+You're trying to like break out all of our tasks, right? Yeah. But if I know what I'm supposed to work on.
+
+Yeah, go for it, yeah. It's just to keep, well, it's to keep my agents in line too. I just don't like to fluff you. That's fine. There we go.
+
+Can you make a project in the repo and just add me to the admin on it?
+
+Oh, you're not an admin? Yeah, I'm not. All right, let's just make yours admin And then make her a contributor too on the project.
+
+But it doesn't work with the write access because otherwise I just need to spin up a new organization. Oh, did you make an organization? No, I did not. But technically you have the write access.
+
+It's weird. Just make a new project like this to show you. Like, I'll just link a project, see if I can link a project. I literally can't, just...
+
+If you add me to the new project, I can just also push it there?
+
+Yeah, I can just add you to the new project if you want.
+
+What are you saying? Yeah, I could also technically push it to the new project. Yeah, yeah, yeah. Okay?
+
+Do you want an animated face on the dumb mouth that's speaking the African language, or do you find it just subtitles and a voice?
+
+Whatever, honestly. I think it was overkill. I don't know. That's alright. What do you think? What do you think?
+
+I don't know.
+
+It's your thing. What do you think is most appealing?
+
+For a demo video, we're just trying to impress them with a face. Okay, sounds good.
+
+Make it look like super minimalist techy San Francisco. Yes.
+
+Hey, let's try to get real people in there who would like to try it. I can call some of my colleagues. I like one guy who I know in Kenya. If you could do it, that would be cool.
+
+Yeah, I'm just doing this like if...
+
+Yeah, yeah, yeah, still, yeah, yeah. But let's put in the real faces, yes.
+
+Okay.
+
+You're admin of the project. In a second it's also pushed out.
+
+You sure? Are you sure? Yeah. I'm in. Just creating it I have no clue how to grade. Oh, okay, I got you. Oh, it's a crumb. Yeah, ah. Man, this place is so freaking interesting. Huh? This place is so interesting, bro. In what sense? It's nice here, dude. Yeah.
+
+I'm still impressed that you fly over from Canada. Yeah.
+
+Oh, because it's not freaking, it's private, the project.
+
+Yeah.
+
+You gotta, like, make it open.
+
+No, this project?
+
+Yeah, look, it's private. We'll wait after. I'm going to use the bathroom.
+
+Check it out. What are we checking out?
+
+What are we doing now? Oh yeah, check it out if it works. Oh, okay, okay.
+
+Okay, now they're all finally in the project board.
+
+So now you can go into your specific one and do it, I guess.
+
+It's just ridiculous. I don't know why the inverse is taking so fricking long, blah.
+
+You can cancel it if it's like--I'm just gonna use my company plan, bro.
+
+I got codecs. Oh crap, I'm not doing this. Damn.
+
+Can we stop building? Yeah.
+
+Just assign yourself to whatever you're working on. Okay. Cool.
+
+How do I access it in GitHub?
+
+You don't really need to, but you just ask the internal. You're using-you just use the total. Is it able to access right now through it?
+
+Yeah. I don't see what you heard.
+
+Oh, did you add her to the repo? Yeah, I did.
+
+But you mentioned you just created your account? Yeah. Okay, if you can send again your username. I don't know. Is it still the same person? Was it the name that you previously typed in?
+
+For Discord. Oh. Oh yeah. Okay.
+
+Oh gosh, I'm laughing by the wrong person. I didn't remove the argument.
+
+It's open source anyway.
+
+I got it right. Look, you typed it before. Previously you typed in a name and the person got invited. That means we invited like a random random person. Oi oi oi.
+
+Just check your emails, then you can log in.

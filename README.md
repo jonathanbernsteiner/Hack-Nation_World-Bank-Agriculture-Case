@@ -6,13 +6,17 @@ Our team's project for the Hack Nation hackathon (3 October 2026), working on th
 
 Keys live in `.env`, which is never committed. Copy `.env.example` to `.env` and ask Jonathan for the values.
 
-Status as of 3 Oct, 22:26 UTC:
+Status as of 3 Oct, 22:31 UTC:
 
 | Service | What it's for | Status | Owner |
 |---|---|---|---|
 | Twilio | the phone number Noor calls in the demo | Ready: trial account and number **+1 628 272 9173** (voice + SMS). Until the webhook (#14) is live, calls play Twilio's demo message | Jonathan |
-| Supabase | shared database, project `hack-nation-farm-record` (East US) | Project created and linked (`supabase/config.toml`) | Jonathan |
-| Vercel | hosting, project `hack-nation-world-bank-agriculture-case` | Project linked | Jonathan |
+| Supabase | a hosted copy of the data, later | **On hold (backlog, #19).** Project `hack-nation-farm-record` exists (`supabase/config.toml`) but isn't used | Jonathan |
+| Vercel | hosting the dashboard, later | **On hold.** Set up and linked to this repo with keys (#28); the dashboard runs locally for now | Jonathan |
+
+### Where the data lives
+
+All data is saved **locally on the laptop** (the co-op box) in the SQLite ledger (#7), and the co-op dashboard (#3) runs on the same laptop and only reads it. Nothing goes to the cloud, so it works with Wi-Fi off. Decision: [comment on #1](https://github.com/jonathanbernsteiner/Hack-Nation_World-Bank-Agriculture-Case/issues/1#issuecomment-5974150277).
 
 ### Twilio
 

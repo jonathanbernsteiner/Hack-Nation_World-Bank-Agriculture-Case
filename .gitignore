@@ -3,6 +3,9 @@
 .env.*
 !.env.example
 
+# Call recordings: callers' voices, never commit
+recordings/
+
 # OS / editor
 .DS_Store
 

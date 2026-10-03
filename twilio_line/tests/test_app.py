@@ -3,26 +3,12 @@
 import xml.etree.ElementTree as ET
 
 import pytest
-from fastapi.testclient import TestClient
 from twilio.request_validator import RequestValidator
 
 from twilio_line import app as line
+from twilio_line.tests.signing import AUTH_TOKEN, PUBLIC_BASE_URL, post_signed
 
-AUTH_TOKEN = "test-auth-token"
-PUBLIC_BASE_URL = "https://farm-line.example.ngrok.app"
 CALL_SID = "CA" + "0" * 32
-
-
-@pytest.fixture
-def client(monkeypatch):
-    monkeypatch.setenv("TWILIO_AUTH_TOKEN", AUTH_TOKEN)
-    monkeypatch.setenv("PUBLIC_BASE_URL", PUBLIC_BASE_URL)
-    return TestClient(line.app)
-
-
-def post_signed(client, path, form, base_url=PUBLIC_BASE_URL):
-    signature = RequestValidator(AUTH_TOKEN).compute_signature(base_url + path, form)
-    return client.post(path, data=form, headers={"X-Twilio-Signature": signature})
 
 
 def twiml(response):
@@ -81,7 +67,9 @@ def test_finished_recording_says_goodbye_and_hangs_up(client):
     assert root.find("Hangup") is not None
 
 
-@pytest.mark.parametrize("path", ["/twilio/voice", "/twilio/pin?attempt=1", "/twilio/recorded"])
+@pytest.mark.parametrize(
+    "path", ["/twilio/voice", "/twilio/pin?attempt=1", "/twilio/recorded", "/twilio/recording"]
+)
 def test_rejects_missing_or_wrong_signature(client, path):
     form = {"CallSid": CALL_SID, "Digits": "4821"}
 

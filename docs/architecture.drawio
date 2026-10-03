@@ -6,7 +6,7 @@
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
 
-        <mxCell id="title" value="&lt;b&gt;Voice farm record: system overview&lt;/b&gt;&lt;br&gt;Draft from the team brainstorm, 3 Oct 2026 (21:53 UTC)" style="text;html=1;align=left;verticalAlign=middle;fontSize=16;" vertex="1" parent="1">
+        <mxCell id="title" value="&lt;b&gt;Voice farm record: system overview&lt;/b&gt;&lt;br&gt;Cloud version, 3 Oct 2026 (23:45 UTC). Draft: which model runs which step is still being agreed (#1)" style="text;html=1;align=left;verticalAlign=middle;fontSize=16;" vertex="1" parent="1">
           <mxGeometry x="800" y="40" width="440" height="60" as="geometry" />
         </mxCell>
 
@@ -14,27 +14,27 @@
           <mxGeometry x="420" y="40" width="280" height="80" as="geometry" />
         </mxCell>
 
-        <mxCell id="twilio" value="&lt;b&gt;Demo: Twilio number (cloud)&lt;/b&gt;&lt;br&gt;webhook asks for the PIN, records the call, sends the audio to the laptop" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+        <mxCell id="twilio" value="&lt;b&gt;Demo: Twilio number&lt;/b&gt;&lt;br&gt;connected to the ElevenLabs agent (planned);&lt;br&gt;fallback: our Twilio webhook on Vercel" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
           <mxGeometry x="80" y="190" width="240" height="80" as="geometry" />
         </mxCell>
 
-        <mxCell id="gsm" value="&lt;b&gt;Real world: SIM card + GSM modem&lt;/b&gt;&lt;br&gt;local number, no internet needed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+        <mxCell id="gsm" value="&lt;b&gt;Real world: local phone number&lt;/b&gt;&lt;br&gt;telecom line (SIP trunk) into the same agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
           <mxGeometry x="500" y="190" width="260" height="80" as="geometry" />
         </mxCell>
 
-        <mxCell id="box" value="Cooperative box: runs offline at the co-op office (demo: a laptop)" style="swimlane;startSize=30;html=1;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;swimlaneFillColor=#f7faff;align=center;" vertex="1" parent="1">
+        <mxCell id="box" value="Cloud: Vercel (app + API) · Supabase (data) · ElevenLabs + Anthropic (models)" style="swimlane;startSize=30;html=1;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;swimlaneFillColor=#f7faff;align=center;" vertex="1" parent="1">
           <mxGeometry x="40" y="330" width="1240" height="560" as="geometry" />
         </mxCell>
 
-        <mxCell id="agent" value="&lt;b&gt;Voice agent (the call)&lt;/b&gt;&lt;br&gt;PIN → &quot;what happened today?&quot; → gap questions → advice → her questions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="box">
+        <mxCell id="agent" value="&lt;b&gt;Voice agent: ElevenLabs&lt;/b&gt;&lt;br&gt;Swahili call: PIN → &quot;what happened today?&quot; → gap questions → advice → her questions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="box">
           <mxGeometry x="40" y="60" width="240" height="100" as="geometry" />
         </mxCell>
 
-        <mxCell id="stt" value="&lt;b&gt;Speech-to-text&lt;/b&gt;&lt;br&gt;open-source model for the local language (e.g. Meta MMS)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="box">
+        <mxCell id="stt" value="&lt;b&gt;Speech-to-text: ElevenLabs Scribe&lt;/b&gt;&lt;br&gt;Swahili transcript of the call" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="box">
           <mxGeometry x="360" y="60" width="240" height="100" as="geometry" />
         </mxCell>
 
-        <mxCell id="extract" value="&lt;b&gt;Extraction (small local LLM)&lt;/b&gt;&lt;br&gt;fixed fields: date, plot, activities, yield, sale price, buyer, payment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="box">
+        <mxCell id="extract" value="&lt;b&gt;Extraction: Claude (Anthropic)&lt;/b&gt;&lt;br&gt;Swahili → English, then fixed fields: date, plot, activities, yield, sale price, buyer, payment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="box">
           <mxGeometry x="680" y="60" width="240" height="100" as="geometry" />
         </mxCell>
 
@@ -46,7 +46,7 @@
           <mxGeometry x="40" y="410" width="240" height="100" as="geometry" />
         </mxCell>
 
-        <mxCell id="db" value="&lt;b&gt;Farmer records&lt;/b&gt;&lt;br&gt;one record per farmer, tied to plot and location" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;size=15;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="box">
+        <mxCell id="db" value="&lt;b&gt;Farmer records: Supabase&lt;/b&gt;&lt;br&gt;Postgres: farmers, calls, entries&lt;br&gt;call audio in private storage" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;size=15;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="box">
           <mxGeometry x="680" y="400" width="240" height="120" as="geometry" />
         </mxCell>
 
@@ -54,15 +54,15 @@
           <mxGeometry x="340" y="220" width="220" height="120" as="geometry" />
         </mxCell>
 
-        <mxCell id="matcher" value="&lt;b&gt;Disease matcher (local LLM)&lt;/b&gt;&lt;br&gt;coffee observations only: picks a likely disease from the reference, or &amp;quot;not sure&amp;quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="box">
+        <mxCell id="matcher" value="&lt;b&gt;Disease matcher: Claude&lt;/b&gt;&lt;br&gt;coffee observations only: picks a likely disease from the reference, or &quot;not sure&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="box">
           <mxGeometry x="680" y="230" width="240" height="100" as="geometry" />
         </mxCell>
 
-        <mxCell id="opendata" value="&lt;b&gt;Free open data (optional add-on)&lt;/b&gt;&lt;br&gt;NASA POWER weather, CHIRPS rainfall, iSDAsoil&lt;br&gt;small download over 2G data" style="rounded=1;dashed=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+        <mxCell id="opendata" value="&lt;b&gt;Free open data (optional add-on)&lt;/b&gt;&lt;br&gt;NASA POWER weather, CHIRPS rainfall, iSDAsoil&lt;br&gt;free APIs, fetched by the server" style="rounded=1;dashed=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
           <mxGeometry x="80" y="950" width="240" height="90" as="geometry" />
         </mxCell>
 
-        <mxCell id="dashboard" value="&lt;b&gt;Cooperative dashboard&lt;/b&gt;&lt;br&gt;data table, map of irregularities, outlier flags, harvest estimates, farmer profiles" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;" vertex="1" parent="1">
+        <mxCell id="dashboard" value="&lt;b&gt;Cooperative dashboard (Vercel)&lt;/b&gt;&lt;br&gt;data table, map of irregularities, outlier flags, harvest estimates, farmer profiles" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;" vertex="1" parent="1">
           <mxGeometry x="400" y="950" width="240" height="100" as="geometry" />
         </mxCell>
 
@@ -93,7 +93,7 @@
         <mxCell id="e_noor_gsm" value="voice call" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="noor" target="gsm">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e_twilio_agent" value="call recording" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.3;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="twilio" target="agent">
+        <mxCell id="e_twilio_agent" value="live call" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.3;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="twilio" target="agent">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="200" y="300" />
@@ -176,7 +176,7 @@
         <mxCell id="leg2" value="" style="rounded=0;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="legend"><mxGeometry x="10" y="54" width="30" height="16" as="geometry" /></mxCell>
         <mxCell id="leg2t" value="Phone line" style="text;html=1;align=left;verticalAlign=middle;" vertex="1" parent="legend"><mxGeometry x="50" y="52" width="240" height="20" as="geometry" /></mxCell>
         <mxCell id="leg3" value="" style="rounded=0;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="legend"><mxGeometry x="10" y="78" width="30" height="16" as="geometry" /></mxCell>
-        <mxCell id="leg3t" value="AI component on the box" style="text;html=1;align=left;verticalAlign=middle;" vertex="1" parent="legend"><mxGeometry x="50" y="76" width="240" height="20" as="geometry" /></mxCell>
+        <mxCell id="leg3t" value="AI model (cloud API)" style="text;html=1;align=left;verticalAlign=middle;" vertex="1" parent="legend"><mxGeometry x="50" y="76" width="240" height="20" as="geometry" /></mxCell>
         <mxCell id="leg4" value="" style="rounded=0;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="legend"><mxGeometry x="10" y="102" width="30" height="16" as="geometry" /></mxCell>
         <mxCell id="leg4t" value="Data store" style="text;html=1;align=left;verticalAlign=middle;" vertex="1" parent="legend"><mxGeometry x="50" y="100" width="240" height="20" as="geometry" /></mxCell>
         <mxCell id="leg5" value="" style="rounded=0;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="legend"><mxGeometry x="10" y="126" width="30" height="16" as="geometry" /></mxCell>

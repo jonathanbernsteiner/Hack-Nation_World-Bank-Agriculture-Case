@@ -1,5 +1,7 @@
 # Twilio line
 
+> **Status after the move to the cloud** ([decision on #1](https://github.com/jonathanbernsteiner/Hack-Nation_World-Bank-Agriculture-Case/issues/1#issuecomment-5974664966)): the plan is to import the Twilio number into an ElevenLabs agent, which then answers the calls instead of this service. This service stays as the **fallback** if the agent can't hold a Swahili call. In that case it runs on Vercel (not ngrok), and `CALLS_API_URL` points at the Vercel API. The ngrok steps below are for local testing.
+
 The webhook Twilio calls when someone dials our demo number (+1 628 272 9173). It greets the caller, asks for their PIN on the keypad and records a recap of their day (#14). When the recording is ready, it downloads the WAV, keeps it in `recordings/` and sends it with the PIN to the laptop's `POST /calls` (#15).
 
 Call flow: greeting → "enter your PIN, then press #" → beep → recap (up to 2 minutes, # to finish) → goodbye. A wrong or empty PIN gets one retry, then the call ends. On the free trial, Twilio first plays its trial notice and waits for any key.

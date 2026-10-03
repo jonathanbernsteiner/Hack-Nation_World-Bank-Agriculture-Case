@@ -1,0 +1,4 @@
+interface:
+  display_name: "Init"
+  short_description: "Coordinate agents through GitHub issue boards"
+  default_prompt: "Use $init for this GitHub issue: traverse its issue tree, establish the parent coordination board, and follow the decision-recording and handoff workflow."

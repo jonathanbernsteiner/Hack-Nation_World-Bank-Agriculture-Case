@@ -1,0 +1,4 @@
+interface:
+  display_name: "Create Project"
+  short_description: "Create issue trees with single-purpose leaves"
+  default_prompt: "Use $create-project to turn this project into a right-sized GitHub issue tree where every executable leaf handles exactly one thing, ready for $init."

@@ -6,7 +6,7 @@
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
 
-        <mxCell id="title" value="&lt;b&gt;Voice farm record: system overview&lt;/b&gt;&lt;br&gt;Draft from the team brainstorm, 3 Oct 2026" style="text;html=1;align=left;verticalAlign=middle;fontSize=16;" vertex="1" parent="1">
+        <mxCell id="title" value="&lt;b&gt;Voice farm record: system overview&lt;/b&gt;&lt;br&gt;Draft from the team brainstorm, 3 Oct 2026 (21:53 UTC)" style="text;html=1;align=left;verticalAlign=middle;fontSize=16;" vertex="1" parent="1">
           <mxGeometry x="800" y="40" width="440" height="60" as="geometry" />
         </mxCell>
 
@@ -14,7 +14,7 @@
           <mxGeometry x="420" y="40" width="280" height="80" as="geometry" />
         </mxCell>
 
-        <mxCell id="twilio" value="&lt;b&gt;Demo: Twilio phone number&lt;/b&gt;&lt;br&gt;forwards the call to the laptop" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+        <mxCell id="twilio" value="&lt;b&gt;Demo: Twilio number (cloud)&lt;/b&gt;&lt;br&gt;webhook asks for the PIN, records the call, sends the audio to the laptop" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
           <mxGeometry x="80" y="190" width="240" height="80" as="geometry" />
         </mxCell>
 
@@ -85,7 +85,7 @@
         <mxCell id="e_noor_gsm" value="voice call" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="noor" target="gsm">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e_twilio_agent" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.3;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="twilio" target="agent">
+        <mxCell id="e_twilio_agent" value="call recording" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.3;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="twilio" target="agent">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="200" y="300" />

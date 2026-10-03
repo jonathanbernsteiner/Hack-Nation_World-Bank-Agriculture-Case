@@ -31,7 +31,7 @@ Create a **record for each farmer** of what they do and see on their farm, captu
 
 **For everyone together (collective record)**
 - **Smarter expert visits:** the expert who comes twice a year can prioritise. For example, if three farmers in region 1 report the same issue, go to region 1 first. Concern raised: farmers are remote, so a visit may still come late. Region-level priorities help with that.
-- **Registry:** farmers become known, so they can reach government services and loans. The brief's example: a registry reached 150,000 farmers.
+- **Registry:** farmers become known, so they can reach government services and loans. Ukraine example (from the brief): a registry reached 150,000 farmers.
 - **Group loans:** lend to all farmers of a region at once, which gives them bargaining power.
 - **Collective knowledge:** what works and what doesn't across farms. "Is it just me?": if everyone's yield dropped, it may be climate; if only mine did, it may be my practices (planting day, too much shade).
 
@@ -71,8 +71,8 @@ One teammate said individual devices will break, so the data should sit somewher
 ### For loans, the record needs sales and payments too
 - Lenders care most about **what you sold, for how much, and what you were paid**. Farm activities alone aren't a credit history.
 - So the record should have **more layers**: farm activities plus sales and payments.
-- The hard part: many farmers are paid **in cash** and have no bank account. Some use e-wallets (GCash was given as an example).
-- *Claude's note:* the brief says Noor already uses **mobile money**. With her consent, her payment history is a digital record that already exists.
+- The hard part: many farmers are paid **in cash** and have no bank account. Some use e-wallets (GCash in the Philippines was given as an example).
+- *Claude's note:* the brief says Noor already uses **mobile money** (in Kenya that's M-Pesa). With her consent, her payment history is a digital record that already exists.
 
 ### Can the record be trusted?
 - Concern: a farmer could simply say or write false numbers.
@@ -97,12 +97,12 @@ A teammate worried that a voice diary alone won't solve the problem, and that th
 - Concern raised: none of this can be verified without paper records.
 
 ### How smallholders borrow today
-- **"5-6" lending (from a teammate's experience):** borrow $5 on Monday, pay back $6 at the end of the week, about 20% interest per week. Lenders are individuals from the village, and they collect by intimidation.
-- **Other examples from the meeting:** **savings groups** such as chamas (villagers pool money and lend to each other), **cooperative advances** before the harvest, and **SACCOs** (savings and credit cooperatives).
+- **"5-6" lending (a teammate's experience in the Philippines):** borrow $5 on Monday, pay back $6 at the end of the week, about 20% interest per week. Lenders are individuals from the village, and they collect by intimidation.
+- **Kenya:** **chamas** (villagers pool money and lend to each other), **cooperative advances** before the harvest, and **SACCOs** (savings and credit cooperatives).
 - Next step from the meeting: check how other startups do it (see the research section below).
 
-### Some countries already have a farmer registry
-In the meeting: in at least one country, farmers registered through local officers receive an **e-voucher on their phone** to collect subsidised fertiliser, so a national registry exists there. So "we create the registry" only holds where none exists, as in the brief's fictional Ondera. Where one exists, our record plugs into it instead. To verify (see "To check").
+### Kenya may already have a farmer registry
+In the meeting: in Kenya, farmers registered through local officers receive an **e-voucher on their phone** to collect subsidised fertiliser, so a registry exists there. *Claude's note:* this is likely the **KIAMIS** system behind the national fertiliser subsidy. So "we create the registry" only holds where none exists, as in the brief's fictional Ondera. Where one exists, our record plugs into it instead. To verify (see "To check").
 
 ---
 
@@ -144,12 +144,12 @@ Compiled by Claude from web sources on 2026-10-03.
 
 | Model | Example | What they base the loan on | How it's repaid |
 |---|---|---|---|
-| Farmer self-tracking + score | **FarmDrive** (founded 2014) | Farmers log revenues and expenses by SMS/USSD on basic phones, combined with satellite, soil, weather and phone data | Via mobile phone |
-| Field data + satellite + ML | **Apollo Agriculture** | Field officers collect farm data in an app, a verification team checks it, then ML adds satellite yield estimates and credit bureau data | Inputs on credit, automated decisions |
-| Buyer payment history | **Safaricom DigiFarm** | Repayment history plus **payment history from the factory/buyer**; limit up to 100% of average earnings | Deducted from produce sales before the farmer is paid, or via mobile money |
-| Cooperative delivery records | **Coffee Cherry Advance Revolving Fund** (government fund) | Cooperative membership + coffee cherry delivered (advance of 40% of the expected price, or a fixed amount per kg) | Deducted when the coffee is sold |
+| Farmer self-tracking + score | **FarmDrive** (Kenya, founded 2014) | Farmers log revenues and expenses by SMS/USSD on basic phones, combined with satellite, soil, weather and phone data | Via mobile phone |
+| Field data + satellite + ML | **Apollo Agriculture** (Kenya, Zambia) | Field officers collect farm data in an app, a verification team checks it, then ML adds satellite yield estimates and credit bureau data | Inputs on credit, automated decisions |
+| Buyer payment history | **Safaricom DigiFarm** (Kenya) | Repayment history plus **payment history from the factory/buyer**; limit up to 100% of average earnings | Deducted from produce sales before the farmer is paid, or via M-Pesa |
+| Cooperative delivery records | **Coffee Cherry Advance Revolving Fund** (Kenya, government) | Cooperative membership + coffee cherry delivered (advance of 40% of the expected price, or KSh 20/kg cherry) | Deducted when the coffee is sold |
 | Group liability | **One Acre Fund** | Farmers in groups are jointly liable; inputs only | Flexible instalments before season end; ~99% repaid |
-| Lend + buy the harvest | **Babban Gona, ThriveAgric** | Inputs, training and credit as one package | Repaid from the harvest they buy (offtake) |
+| Lend + buy the harvest | **Babban Gona, ThriveAgric** (Nigeria) | Inputs, training and credit as one package | Repaid from the harvest they buy (offtake) |
 | Lend to the cooperative | **Root Capital** | The cooperative's future sales contracts with buyers act as collateral | The cooperative repays from export sales |
 
 **What this means for our idea**
@@ -239,7 +239,7 @@ Claude's proposal on 2026-10-03, answering "what are the use cases, first indivi
 The brief says Noor's own phone is used for "calls, messages, and mobile money" (a basic phone), and her daughter's smartphone is only around on weekends. Voice calls work on any phone and use no mobile data. The meeting confirmed: calls or SMS only, and voicemail is fine.
 
 **Decide now (blocks the build)**
-- **Setting: no country named for now.** The brief uses the fictional Ondera highlands and Ondera Coffee Cooperative; the notes stay country-neutral until the team decides.
+- **Setting: which country?** The brief uses the fictional Ondera highlands and Ondera Coffee Cooperative. Countries are named freely in the notes as examples; the team still has to pick the setting for the pitch.
 0. **Where the data lives.** Claude's suggestion, which reconciles the two views: **one small server per cooperative** (e.g. a laptop at the cooperative office). It's decentralised across cooperatives and central within one. The PIN idea works within each cooperative, the data stays with the cooperative rather than a foreign cloud, and the laptop is the visible "product" for the demo. Calls still need a phone line or provider that forwards voicemails to that laptop.
 0b. **Identifying callers on shared phones:** a PIN, saying your name, or the caller's number by default?
 1. **The brief's "one better agricultural decision".** Loans and certification are outcomes, not farm decisions. Frame the tool as "documenting a field observation" and "connecting evidence to a pricing, market or extension-service next step", which is the brief's own wording.
@@ -256,12 +256,12 @@ The brief says Noor's own phone is used for "calls, messages, and mobile money" 
 9. **A less-supported language:** what happens there? The brief says to expect this question.
 
 **To check (facts we're relying on)**
-10. **The brief's registry example:** it says a working farmer registry "unlocked advisory services, insurance, and grants for 150,000 farmers". It doesn't say loans, so quote it as written.
+10. **The Ukraine example:** the brief says a working farmer registry "unlocked advisory services, insurance, and grants for 150,000 farmers". It doesn't say loans, so quote it as written.
 11. Which records each certification really requires, and whether voice-based logs would be accepted.
 12. Whether lenders would accept these records. See "Research: how others lend to smallholder farmers" above.
 13. Problem evidence with source, year and country: FAOSTAT coffee yields, extension officers per farmer (once we pick a country), certification premiums, smallholder access to credit.
 14. Test data without real farmer recordings: synthetic voice notes, clearly labelled as synthetic.
-15. **Which countries already have a working farmer registry** (e.g. the fertiliser e-voucher registry mentioned in the meeting)? This matters once the team picks a country: there, use case #3 becomes "feed the existing registry" instead of "create one".
+15. **Which countries already have a working farmer registry** (e.g. Kenya's KIAMIS fertiliser e-vouchers, mentioned in the meeting)? This matters once the team picks a country: there, use case #3 becomes "feed the existing registry" instead of "create one".
 
 ---
 

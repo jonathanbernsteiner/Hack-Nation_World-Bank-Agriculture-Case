@@ -41,3 +41,9 @@ def test_row_level_security_is_on_for_every_table(sql):
     for table in ("farmers", "calls", "entries"):
         assert f"alter table public.{table} enable row level security;" in sql
     assert "create policy" not in sql
+
+
+def test_migration_version_matches_remote_name():
+    """The version is already applied live; renaming the file would break `supabase db push`."""
+    (path,) = MIGRATIONS.glob("*_ledger_tables.sql")
+    assert path.name == "20261003234752_ledger_tables.sql"

@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 for _dependency in ("prices", "history", "places"):  # still in open PRs: keep this PR green
     pytest.importorskip(f"hotline.{_dependency}")
 
-from hotline import calls_repo, config, db as hotline_db, pins, places  # noqa: E402
+from hotline import calls_repo, config, db as hotline_db, pins, places, profile  # noqa: E402
 from hotline.main import app  # noqa: E402
 from hotline.routes.tools import find, identify, register  # noqa: E402
 
@@ -258,3 +258,52 @@ def test_register_failure_after_insert_leaves_no_farmer(db, monkeypatch):
         with db.transaction():  # stands in for db.transaction(): everything rolls back together
             _register(db)
     assert db.execute("select count(*) from farmers").fetchone()[0] == before
+
+
+# ---- review regression tests ----
+
+@pytest.mark.parametrize("spoken", ["tisa sifuri sifuri moja", "Tisa, sifuri, sifuri, moja", "9 sifuri 0-1", "9001"])
+def test_kiswahili_digit_words_become_pin(spoken):
+    assert identify.pin_from_speech(spoken) == "9001"
+
+
+@pytest.mark.parametrize("spoken", ["", "tisa sifuri moja", "tisa sifuri sifuri moja mbili", "nine zero zero one"])
+def test_unparseable_spoken_pin_is_rejected(spoken):
+    assert identify.pin_from_speech(spoken) is None
+
+
+@pytest.mark.supabase
+def test_pin_spoken_as_kiswahili_words_is_found(db):
+    farmer = _farmer(db, _village(db), "Nakato", "9001")
+    assert identify.identify(db, "conv-words", "tisa sifuri sifuri moja")["status"] == "found"
+    assert _call(db, "conv-words")[:2] == (farmer, "pin")
+
+
+@pytest.mark.supabase
+def test_register_same_name_villages_asks_parish_and_writes_nothing(db):
+    for parish in ("Kitovu", "Nyendo"):
+        db.execute(
+            "insert into villages (region, district, sub_county, parish, village) values"
+            " ('Central','Masaka','Kyanamukaaka',%s,%s)", (parish, VILLAGE))
+    before = db.execute("select count(*) from farmers").fetchone()[0]
+    result = _register(db)
+    assert result["status"] == "ambiguous" and result["ask"] == "parish"
+    assert {c["parish"] for c in result["candidates"]} == {"Kitovu", "Nyendo"}
+    assert_no_leak(result)
+    assert db.execute("select count(*) from farmers").fetchone()[0] == before
+    assert _call(db, "conv-reg") is None
+    # once the caller names the parish, registration goes ahead in that village
+    chosen = _register(db, parish="Nyendo")
+    assert chosen["status"] == "registered" and chosen["farmer"]["parish"] == "Nyendo"
+
+
+@pytest.mark.supabase
+def test_arabica_farmer_without_sales_defaults_to_parchment(db):
+    village = db.execute(
+        "insert into villages (region, district, sub_county, parish, village, coffee_type)"
+        " values ('Eastern', 'Mbale', 'Bungokho', %s, %s, 'arabica') returning id",
+        (PARISH, VILLAGE),
+    ).fetchone()[0]
+    farmer = _farmer(db, village, "Wanyera", "9002")
+    built = profile.build_profile(db, farmer, as_of=profile.kampala_today(), identified_by="pin")
+    assert built["farmer"]["main_form"] == "parchment"

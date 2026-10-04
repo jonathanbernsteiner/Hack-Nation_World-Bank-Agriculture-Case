@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { AlertTriangle, LayoutDashboard, LogOut, Map as MapIcon, Search, Settings, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, Database, LayoutDashboard, LogOut, Map as MapIcon, Search, TrendingUp, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface NavItem {
@@ -18,7 +18,7 @@ export const NAV: NavItem[] = [
   { href: "/farmers", label: "Farmers", icon: Users },
   { href: "/prices", label: "Prices", icon: TrendingUp },
   { href: "/warnings", label: "Warnings", icon: AlertTriangle },
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/settings", label: "Data & limits", icon: Database },
 ];
 
 const MAIN_NAV = NAV.filter((item) => item.href !== "/settings");
@@ -42,7 +42,7 @@ function SearchPill() {
   return (
     <form
       role="search"
-      className="absolute left-1/2 -translate-x-1/2 w-48 sm:w-72 md:w-96 h-10 rounded-3xl border border-[#CBD5E1] bg-white flex items-center gap-2 px-4 focus-within:border-accent"
+      className="absolute left-1/2 -translate-x-1/2 w-48 sm:w-72 md:w-96 h-10 rounded-3xl border border-[#CBD5E1] bg-white hidden sm:flex items-center gap-2 px-4 focus-within:border-accent"
       onSubmit={(e) => {
         e.preventDefault();
         const q = inputRef.current?.value.trim() ?? "";
@@ -112,7 +112,7 @@ export default function AppShell({ children, hasSynthetic }: { children: React.R
 
       <header className="fixed top-0 left-0 md:left-14 right-0 h-14 z-50 bg-white border-b border-line px-4 md:px-6 flex items-center justify-between">
         <div className="flex items-baseline gap-3 min-w-0 max-w-[30%] lg:max-w-none">
-          <h1 className="text-lg font-semibold text-ink truncate">{current?.label ?? "Coffee hotline"}</h1>
+          <p className="text-lg font-semibold text-ink truncate">{current?.label ?? "Coffee hotline"}</p>
           <span className="text-sm text-faint hidden 2xl:inline">Uganda · Kiswahili coffee hotline</span>
         </div>
         <SearchPill />
@@ -150,7 +150,16 @@ export default function AppShell({ children, hasSynthetic }: { children: React.R
         })}
       </nav>
 
-      <main className="min-h-screen bg-surface pt-14 pb-16 md:pb-0 md:ml-14">{children}</main>
+      <main className="min-h-screen bg-surface pt-14 pb-16 md:pb-0 md:ml-14">
+        {hasSynthetic && (
+          <div className="px-4 sm:px-6 pt-4 sm:pt-6 -mb-2 sm:-mb-3">
+            <p role="note" className="px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800">
+              Demo data: most records are synthetic and labelled. The Kayunga low-price district and the Ibanda coffee wilt cluster were planted to show the warning rules working.
+            </p>
+          </div>
+        )}
+        {children}
+      </main>
     </>
   );
 }

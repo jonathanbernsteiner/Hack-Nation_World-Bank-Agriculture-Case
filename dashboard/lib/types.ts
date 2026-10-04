@@ -87,7 +87,7 @@ export interface DashboardData {
 export interface FormPrice {
   form: CoffeeForm;
   median: number | null; // UGX/kg, last 12 months; null when < MIN_SALES sales or < MIN_FARMERS farmers
-  national: number | null; // latest national reference for this form
+  national: number | null; // median of the month-matched national reference over the same sales (comparable with `median`)
   sales: number;
 }
 
@@ -178,6 +178,6 @@ export const MIN_SALES = 3; // a median needs at least 3 sales ...
 export const MIN_FARMERS = 3; // ... from at least 3 different farmers
 export const PROBLEM_WINDOW_DAYS = 30; // problem warning: same problem, same parish, within 30 days
 export const PROBLEM_MIN_FARMERS = 3; // ... reported by at least 3 different farmers
-export const PROBLEM_BASELINE_WEEKS = 12; // "unusual": at most 1 such report in the 12 weeks before
+export const PROBLEM_BASELINE_WEEKS = 12; // "unusual": more farms in the window than reported it in the 12 weeks before
 export const PRICE_WINDOW_DAYS = 90; // price warning: district median over the last 90 days ...
 export const PRICE_LOW_INDEX = 0.85; // ... at least 15% below the national reference

@@ -1,6 +1,6 @@
 "use client";
 
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { AreaSummary } from "@/lib/types";
 import { formatMonth, formatUgx, labelForm } from "@/lib/format";
 
@@ -17,7 +17,7 @@ export default function PriceChart({ area }: PriceChartProps) {
 
   return (
     <div>
-      <h2 className="text-base font-semibold text-ink mb-3">
+      <h2 className="text-base font-semibold text-ink mb-4">
         {mainForm ? `Price per kg: ${labelForm(mainForm)}` : "Price per kg"}
       </h2>
       {!hasData ? (
@@ -25,7 +25,7 @@ export default function PriceChart({ area }: PriceChartProps) {
       ) : (
         <div style={{ height: CHART_HEIGHT }}>
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={monthly} margin={{ top: 15, right: 10, left: 0, bottom: 0 }}>
+            <LineChart data={monthly} margin={{ top: 15, right: 20, left: 20, bottom: 0 }}>
               <CartesianGrid stroke="#F1F5F9" vertical={false} />
               <XAxis dataKey="month" tickFormatter={formatMonth} axisLine={false} tickLine={false} tick={TICK} />
               <YAxis
@@ -40,6 +40,7 @@ export default function PriceChart({ area }: PriceChartProps) {
                 formatter={(value, name) => [`${formatUgx(typeof value === "number" ? value : null)}/kg`, String(name)]}
                 contentStyle={{ background: "#fff", border: "1px solid #E2E8F0", borderRadius: 8, fontSize: 13 }}
               />
+              <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
               <Line
                 type="monotone"
                 dataKey="median"

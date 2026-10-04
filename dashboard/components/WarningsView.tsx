@@ -26,10 +26,7 @@ const TABLE_DAYS = 90;
 const TABLE_ROWS = 50;
 const AXIS_TICK = { fontSize: 12, fill: "#94A3B8" };
 
-const SEVERITY_BADGE: Record<Warning["severity"], string> = {
-  high: "bg-red-50 text-red-700",
-  medium: "bg-amber-50 text-amber-700",
-};
+const WARNING_PILL = "bg-[#FFFBEB] text-[#F59E0B] border-[#FDE68A]";
 
 function shortDate(iso: string): string {
   return formatDate(iso).slice(0, -5);
@@ -45,12 +42,13 @@ function WarningRow({ warning }: { warning: Warning }) {
         <div className="text-sm font-semibold text-gray-900">{warning.title}</div>
         <div className="text-sm text-muted">{warning.detail}</div>
         <div className="text-xs text-gray-400 mt-0.5">{warning.path.join(" › ")}</div>
+        <div className="text-xs text-gray-400 mt-0.5">Suspected from phone reports; not confirmed in the field.</div>
       </div>
       <div className="flex flex-col items-end gap-2 shrink-0">
-        <span className={`inline-flex items-center text-xs font-medium rounded-full px-2 py-0.5 ${SEVERITY_BADGE[warning.severity]}`}>
-          {warning.severity === "high" ? "High" : "Medium"}
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${WARNING_PILL}`}>
+          Needs officer check
         </span>
-        <Link href="/map" className="text-xs font-medium text-accent hover:underline whitespace-nowrap">
+        <Link href={`/map?path=${encodeURIComponent(warning.path.join("|"))}`} className="text-xs font-medium text-accent hover:underline whitespace-nowrap">
           Show on map
         </Link>
       </div>
@@ -72,26 +70,14 @@ export default function WarningsView({ data }: { data: DashboardData }) {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Warnings</h1>
         <p className="text-sm text-muted mt-1">
-          Unusual patterns in what farmers report. A warning is a prompt for an extension officer to check, not an automatic action.
+          {warnings.length === 0
+            ? "No unusual patterns right now."
+            : `${warnings.length} unusual ${warnings.length === 1 ? "pattern needs" : "patterns need"} an extension officer's check.`}
         </p>
       </div>
 
-      <div className="bg-white border border-line rounded-xl p-6">
-        <h2 className="text-base font-semibold text-gray-900 mb-3">How warnings are raised</h2>
-        <ul className="list-disc pl-5 space-y-2 text-sm text-gray-600">
-          <li>
-            <span className="font-medium text-gray-900">Problem:</span> the same problem is reported by at least {PROBLEM_MIN_FARMERS} different
-            farms in one parish within {PROBLEM_WINDOW_DAYS} days, when there were at most 1 such reports in the {PROBLEM_BASELINE_WEEKS} weeks before.
-          </li>
-          <li>
-            <span className="font-medium text-gray-900">Price:</span> a district&apos;s median sale price over {PRICE_WINDOW_DAYS} days is at least{" "}
-            {Math.round((1 - PRICE_LOW_INDEX) * 100)}% below the national reference (needs {MIN_SALES} sales from {MIN_FARMERS} farmers).
-          </li>
-        </ul>
-      </div>
-
       <section>
-        <h2 className="text-base font-semibold text-gray-900 mb-3">Active warnings ({warnings.length})</h2>
+        <h2 className="text-base font-semibold text-ink mb-4">Active warnings ({warnings.length})</h2>
         <div className="bg-white border border-line rounded-xl max-h-[480px] overflow-y-auto">
           {warnings.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-gray-400">
@@ -109,7 +95,21 @@ export default function WarningsView({ data }: { data: DashboardData }) {
       </section>
 
       <div className="bg-white border border-line rounded-xl p-6">
-        <h2 className="text-base font-semibold text-gray-900 mb-4">Problem reports per week ({WEEKS} weeks)</h2>
+        <h2 className="text-base font-semibold text-ink mb-4">How warnings are raised</h2>
+        <ul className="list-disc pl-5 space-y-2 text-sm text-gray-600">
+          <li>
+            <span className="font-medium text-gray-900">Problem:</span> same problem reported by at least {PROBLEM_MIN_FARMERS} different farms in
+            one parish within {PROBLEM_WINDOW_DAYS} days, and by more farms than in the {PROBLEM_BASELINE_WEEKS} weeks before.
+          </li>
+          <li>
+            <span className="font-medium text-gray-900">Price:</span> a district&apos;s median sale price over {PRICE_WINDOW_DAYS} days is at least{" "}
+            {Math.round((1 - PRICE_LOW_INDEX) * 100)}% below the national reference (needs {MIN_SALES} sales from {MIN_FARMERS} farmers).
+          </li>
+        </ul>
+      </div>
+
+      <div className="bg-white border border-line rounded-xl p-6">
+        <h2 className="text-base font-semibold text-ink mb-4">Problem reports per week ({WEEKS} weeks)</h2>
         {weekly.keys.length === 0 ? (
           <div className="h-[280px] flex items-center justify-center text-sm text-gray-400">
             Problem reports will appear here once farmers report them.
@@ -124,7 +124,7 @@ export default function WarningsView({ data }: { data: DashboardData }) {
                 <Tooltip
                   cursor={{ fill: "#F8FAFC" }}
                   labelFormatter={(_, payload) => `Week of ${formatDate(payload?.[0]?.payload?.weekStart ?? null)}`}
-                  contentStyle={{ background: "#fff", border: "1px solid #E2E8F0", borderRadius: 8, fontSize: 12 }}
+                  contentStyle={{ background: "#fff", border: "1px solid #E2E8F0", borderRadius: 8, fontSize: 13 }}
                 />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
                 {weekly.keys.map((key, i) => (
@@ -137,7 +137,7 @@ export default function WarningsView({ data }: { data: DashboardData }) {
       </div>
 
       <section>
-        <h2 className="text-base font-semibold text-gray-900 mb-3">Problems by district, last {TABLE_DAYS} days</h2>
+        <h2 className="text-base font-semibold text-ink mb-4">Problems by district, last {TABLE_DAYS} days</h2>
         <div className="bg-white border border-line rounded-[14px] overflow-hidden">
           {rows.length === 0 ? (
             <div className="py-12 text-center text-sm text-gray-400">No problems reported in the last {TABLE_DAYS} days.</div>

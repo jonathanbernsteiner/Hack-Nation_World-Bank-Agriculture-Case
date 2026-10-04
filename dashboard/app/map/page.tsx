@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import LoadError from "@/components/LoadError";
 import MapExplorer from "@/components/MapExplorer";
 import { loadDashboardData } from "@/lib/queries";
@@ -13,5 +14,9 @@ export default async function Page() {
     data = null;
   }
   if (!data) return <LoadError />;
-  return <MapExplorer data={data} />;
+  return (
+    <Suspense fallback={null}>
+      <MapExplorer data={data} />
+    </Suspense>
+  );
 }

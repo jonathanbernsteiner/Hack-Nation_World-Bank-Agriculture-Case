@@ -21,16 +21,16 @@ const makeData = (sales: Sale[]): DashboardData => ({
 describe("prices", () => {
   it("gates medians on 3 sales from 3 farmers", () => {
     const two = makeData([sale(1, 8000, "middleman"), sale(2, 8000, "middleman")]);
-    expect(districtPrices(two)[0].index).toBeNull();
+    expect(districtPrices(two)[0].index90d).toBeNull();
     const enough = makeData([1, 2, 3].map((f) => sale(f, 8000, "middleman")));
-    expect(districtPrices(enough)[0].index).toBeCloseTo(0.8);
+    expect(districtPrices(enough)[0].index90d).toBeCloseTo(0.8);
   });
 
-  it("gap sign follows cooperative minus middleman", () => {
+  it("gap is middleman index over cooperative index minus 1", () => {
     const sales = [1, 2, 3].map((f) => sale(f, 8000, "middleman")).concat([4, 5, 6].map((f) => sale(f, 9400, "cooperative")));
-    expect(buyerComparison(makeData(sales)).gapPct).toBe(14);
-    const reversed = [1, 2, 3].map((f) => sale(f, 9400, "middleman")).concat([4, 5, 6].map((f) => sale(f, 8000, "cooperative")));
-    expect(buyerComparison(makeData(reversed)).gapPct).toBe(-14);
+    expect(buyerComparison(makeData(sales)).gapPct).toBe(-15);
+    const reversed = [1, 2, 3].map((f) => sale(f, 9600, "middleman")).concat([4, 5, 6].map((f) => sale(f, 8000, "cooperative")));
+    expect(buyerComparison(makeData(reversed)).gapPct).toBe(20);
   });
 
   it("flags districts at or below the low index", () => {

@@ -60,21 +60,46 @@ describe("minimum-sales gating", () => {
 });
 
 describe("problem warnings", () => {
-  it("fires for 3 farmers in 30 days", () => {
+  it("fires for 3 farmers in 30 days with no baseline", () => {
     const data = makeData({ problems: [report(1, "2026-09-12"), report(2, "2026-09-20"), report(3, "2026-09-26")] });
     const warnings = computeWarnings(data);
     expect(warnings).toHaveLength(1);
-    expect(warnings[0].title).toBe("Coffee leaf rust: 3 farms in P1 parish");
-    expect(warnings[0].detail).toContain("none in the 12 weeks before");
+    expect(warnings[0].title).toBe("Suspected coffee leaf rust: 3 farms in P1 parish");
+    expect(warnings[0].detail).toBe("Reported 12–26 Sep 2026 · 0 farms in the 12 weeks before");
   });
   it("does not fire for 2 farmers", () => {
     expect(computeWarnings(makeData({ problems: [report(1, "2026-09-12"), report(2, "2026-09-20")] }))).toHaveLength(0);
   });
-  it("is suppressed when the baseline had 2 reports", () => {
+  it("fires when growing: baseline 2 farms, window 3 farms", () => {
     const data = makeData({
       problems: [report(1, "2026-09-12"), report(2, "2026-09-20"), report(3, "2026-09-26"), report(4, "2026-08-01"), report(5, "2026-07-20")],
     });
+    const warnings = computeWarnings(data);
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0].detail).toContain("2 farms in the 12 weeks before");
+  });
+  it("does not fire when window farms do not exceed baseline farms (3 vs 3)", () => {
+    const data = makeData({
+      problems: [
+        report(1, "2026-09-12"), report(2, "2026-09-20"), report(3, "2026-09-26"),
+        report(4, "2026-08-01"), report(5, "2026-07-20"), report(6, "2026-07-10"),
+      ],
+    });
     expect(computeWarnings(data)).toHaveLength(0);
+  });
+});
+
+describe("national reference", () => {
+  it("is the month-matched median over the same sales", () => {
+    const ref: ReferencePrice[] = [
+      { month: "2026-08", kiboko: 5000, faq: 9000, parchment: 15000, source: "t" },
+      { month: "2026-09", kiboko: 5000, faq: 11000, parchment: 15000, source: "t" },
+    ];
+    const data = makeData({
+      reference: ref,
+      sales: [sale(1, 1, 9000, "2026-08-10"), sale(2, 1, 9000, "2026-08-11"), sale(3, 1, 11000, "2026-09-10")],
+    });
+    expect(summarize(data, []).priceByForm[1].national).toBe(9000);
   });
 });
 

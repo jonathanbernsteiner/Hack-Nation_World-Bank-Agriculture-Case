@@ -21,6 +21,19 @@ const SERIES = [
   { key: "all", name: "All buyers", color: "#3B82F6", dashed: false },
 ] as const;
 
+function buildHeadline(gapPct: number | null, lowCount: number): string {
+  const districtPart =
+    lowCount === 0
+      ? "no district is 15% or more below the national price."
+      : `${lowCount} ${lowCount === 1 ? "district is" : "districts are"} 15% or more below the national price.`;
+  if (gapPct === null) return `Not enough sales yet to compare buyers; ${districtPart}`;
+  const gapPart =
+    gapPct === 0
+      ? "Middlemen paid the same as cooperatives"
+      : `Middlemen paid ${Math.abs(gapPct)}% ${gapPct < 0 ? "less" : "more"} than cooperatives`;
+  return `${gapPart} over the last 12 months; ${districtPart}`;
+}
+
 function Dash() {
   return <span className="text-gray-300">—</span>;
 }
@@ -58,31 +71,16 @@ export default function PricesView({ data }: { data: DashboardData }) {
   const range = useMemo(() => spread(data, form), [data, form]);
   const lowCount = districts.filter((d) => d.low).length;
   const hasChart = monthly.some((p) => p.middleman !== null || p.cooperative !== null || p.all !== null);
-  const gapLabel = buyers.gapPct === null ? "—" : formatIndex(1 - buyers.gapPct / 100);
+  const gapLabel = buyers.gapPct === null ? "—" : formatIndex(1 + buyers.gapPct / 100);
+  const headline = buildHeadline(buyers.gapPct, lowCount);
 
   return (
     <div className="p-4 sm:p-6 flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Prices</h1>
         <p className="text-sm text-gray-500 mt-1">
-          What farmers report they were paid, compared with the national farm-gate reference. The ministry publishes
-          one national price per month; these are local.
+          {headline}
         </p>
-      </div>
-
-      <div className="flex gap-1 border-b border-line">
-        {FORMS.map((f) => (
-          <button
-            key={f}
-            type="button"
-            onClick={() => setForm(f)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              f === form ? "border-accent text-accent" : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            {TAB_LABEL[f]}
-          </button>
-        ))}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -95,7 +93,7 @@ export default function PricesView({ data }: { data: DashboardData }) {
         <Tile
           icon={<TrendingDown size={20} color="#3B82F6" />}
           value={range ? `${formatNumber(range.p10)}–${formatNumber(range.p90)}` : "—"}
-          label="Price range (90 days)"
+          label={`Price range (90 days) · ${TAB_LABEL[form]}`}
           sub={range ? `UGX/kg, ${TAB_LABEL[form]}, middle ${formatNumber(range.median)}` : `UGX/kg, ${TAB_LABEL[form]}`}
         />
         <Tile
@@ -107,13 +105,29 @@ export default function PricesView({ data }: { data: DashboardData }) {
       </div>
 
       <div className="bg-white border border-line rounded-xl p-6">
-        <h2 className="text-base font-semibold text-ink mb-3">Price per kg by buyer: {TAB_LABEL[form]}</h2>
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <h2 className="text-base font-semibold text-ink">Price per kg by buyer: {TAB_LABEL[form]}</h2>
+          <div className="flex gap-1">
+            {FORMS.map((f) => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setForm(f)}
+                className={`px-3 py-1.5 text-sm font-medium border-b-2 transition-colors ${
+                  f === form ? "border-accent text-accent" : "border-transparent text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                {TAB_LABEL[f]}
+              </button>
+            ))}
+          </div>
+        </div>
         {!hasChart ? (
           <p className="text-sm text-faint text-center py-10">Price history appears once farmers report sales.</p>
         ) : (
           <div style={{ height: CHART_HEIGHT }}>
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={monthly} margin={{ top: 15, right: 20, left: 0, bottom: 0 }}>
+              <LineChart data={monthly} margin={{ top: 15, right: 20, left: 20, bottom: 0 }}>
                 <CartesianGrid stroke="#F1F5F9" vertical={false} />
                 <XAxis dataKey="month" tickFormatter={formatMonth} axisLine={false} tickLine={false} tick={TICK} />
                 <YAxis
@@ -128,7 +142,7 @@ export default function PricesView({ data }: { data: DashboardData }) {
                   formatter={(value, name) => [`${formatUgx(typeof value === "number" ? value : null)}/kg`, String(name)]}
                   contentStyle={{ background: "#fff", border: "1px solid #E2E8F0", borderRadius: 8, fontSize: 13 }}
                 />
-                <Legend iconType="plainline" wrapperStyle={{ fontSize: 12 }} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
                 {SERIES.map((s) => (
                   <Line
                     key={s.key}
@@ -149,7 +163,7 @@ export default function PricesView({ data }: { data: DashboardData }) {
       </div>
 
       <div>
-        <h2 className="text-base font-semibold text-ink mb-3">By district</h2>
+        <h2 className="text-base font-semibold text-ink mb-4">By district</h2>
         <div className="bg-white border border-line rounded-[14px] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -158,7 +172,7 @@ export default function PricesView({ data }: { data: DashboardData }) {
                   <th className="text-left font-medium text-muted px-4 py-3 whitespace-nowrap">District</th>
                   <th className="text-left font-medium text-muted px-4 py-3 whitespace-nowrap hidden sm:table-cell">Region</th>
                   <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap">Sales</th>
-                  <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap">vs national</th>
+                  <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap">vs national (90 days)</th>
                   <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap">Kiboko (UGX/kg)</th>
                   <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap hidden md:table-cell">FAQ (UGX/kg)</th>
                   <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap hidden md:table-cell">Parchment (UGX/kg)</th>
@@ -180,7 +194,7 @@ export default function PricesView({ data }: { data: DashboardData }) {
                     <td className="px-4 py-3 text-gray-600 hidden sm:table-cell">{d.region}</td>
                     <td className="px-4 py-3 text-right font-mono text-gray-700">{d.sales}</td>
                     <td className="px-4 py-3 text-right">
-                      {d.index === null ? <Dash /> : <span className={indexPillClass(d.index)}>{formatIndex(d.index)}</span>}
+                      {d.index90d === null ? <Dash /> : <span className={indexPillClass(d.index90d)}>{formatIndex(d.index90d)}</span>}
                     </td>
                     <FormCell values={d.byForm} form="kiboko" />
                     <FormCell values={d.byForm} form="faq" className="hidden md:table-cell" />

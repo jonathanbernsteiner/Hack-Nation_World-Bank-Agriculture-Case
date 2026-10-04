@@ -20,14 +20,14 @@ export interface BuyerRow {
 }
 export interface BuyerComparison {
   rows: BuyerRow[];
-  gapPct: number | null; // (cooperative index − middleman index) × 100; negative = middlemen paid less
+  gapPct: number | null; // (middleman index ÷ cooperative index − 1) × 100; negative = middlemen paid less
   sales: number; // sales with a known buyer type in the window
 }
 export interface DistrictRow {
   district: string;
   region: string;
   sales: number;
-  index: number | null;
+  index90d: number | null; // vs national, same 90-day window as `low`
   byForm: PriceByForm;
   middlemanShare: number | null; // % of sales
   low: boolean;
@@ -102,7 +102,7 @@ export function buyerComparison(data: DashboardData): BuyerComparison {
   const mid = rows.find((r) => r.buyer === "middleman")?.index ?? null;
   return {
     rows,
-    gapPct: coop !== null && mid !== null ? Math.round((coop - mid) * 100) : null,
+    gapPct: coop !== null && mid !== null && coop > 0 ? Math.round((mid / coop - 1) * 100) : null,
     sales: sales.filter((s) => s.buyerType !== null).length,
   };
 }
@@ -123,7 +123,7 @@ export function districtPrices(data: DashboardData): DistrictRow[] {
       district,
       region: villages[0].region,
       sales: own.length,
-      index: indexOf(own, data),
+      index90d: recentIndex,
       byForm: pricesByForm(own),
       middlemanShare:
         own.length === 0 ? null : Math.round((own.filter((s) => s.buyerType === "middleman").length / own.length) * 100),
@@ -132,7 +132,7 @@ export function districtPrices(data: DashboardData): DistrictRow[] {
   });
   return rows
     .filter((r) => r.sales > 0)
-    .sort((a, b) => (a.index ?? Infinity) - (b.index ?? Infinity) || a.district.localeCompare(b.district));
+    .sort((a, b) => (a.index90d ?? Infinity) - (b.index90d ?? Infinity) || a.district.localeCompare(b.district));
 }
 
 export function monthlyByBuyer(data: DashboardData, form: CoffeeForm): MonthlyBuyerPoint[] {

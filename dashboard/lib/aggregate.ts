@@ -91,10 +91,14 @@ export function referenceFor(reference: ReferencePrice[], form: CoffeeForm, mont
   return row[form];
 }
 
-function latestReference(reference: ReferencePrice[], form: CoffeeForm): number | null {
-  if (reference.length === 0) return null;
-  const latest = [...reference].sort((a, b) => a.month.localeCompare(b.month))[reference.length - 1];
-  return latest[form];
+/** Median of the month-matched reference over these sales, comparable with their median price. */
+function nationalFor(sales: Sale[], reference: ReferencePrice[], form: CoffeeForm): number | null {
+  const refs: number[] = [];
+  for (const sale of sales) {
+    const ref = referenceFor(reference, form, monthOf(sale.date));
+    if (ref !== null) refs.push(ref);
+  }
+  return median(refs);
 }
 
 // ---------- area paths ----------
@@ -188,7 +192,7 @@ export function summarize(data: DashboardData, path: AreaPath, allWarnings?: War
     return {
       form,
       median: medianPrice(formSales),
-      national: latestReference(data.reference, form),
+      national: nationalFor(formSales, data.reference, form),
       sales: formSales.length,
     };
   });
@@ -216,7 +220,8 @@ export function summarize(data: DashboardData, path: AreaPath, allWarnings?: War
     monthly: mainForm ? monthlySeries(sales, mainForm, data) : [],
     problems90d: problemsByFarmers(problemsRecent),
     warnings,
-    isSynthetic: farmers.length > 0 ? farmers.every((f) => f.isSynthetic) : villages.every((v) => v.isSynthetic),
+    // contains synthetic records
+    isSynthetic: farmers.length > 0 ? farmers.some((f) => f.isSynthetic) : villages.some((v) => v.isSynthetic),
   };
 }
 
@@ -247,22 +252,22 @@ function problemWarnings(data: DashboardData): Warning[] {
   const baselineStart = addDays(windowStart, -PROBLEM_BASELINE_WEEKS * 7);
   const villageById = new Map(data.villages.map((v) => [v.id, v]));
 
-  const groups = new Map<string, { parish: AreaPath; problem: string; recent: ProblemReport[]; baseline: number }>();
+  const groups = new Map<string, { parish: AreaPath; problem: string; recent: ProblemReport[]; baseline: Set<number> }>();
   for (const report of data.problems) {
     const village = villageById.get(report.villageId);
     if (!village || report.date < baselineStart || report.date > data.today) continue;
     const parish = areaPathOf(village).slice(0, 3);
     const key = `${parish.join("/")}:${report.problem}`;
-    const group = groups.get(key) ?? { parish, problem: report.problem, recent: [], baseline: 0 };
+    const group = groups.get(key) ?? { parish, problem: report.problem, recent: [], baseline: new Set<number>() };
     if (report.date >= windowStart) group.recent.push(report);
-    else group.baseline += 1;
+    else group.baseline.add(report.farmerId);
     groups.set(key, group);
   }
 
   const warnings: Warning[] = [];
   for (const [key, group] of groups) {
     const farmerIds = new Set(group.recent.map((r) => r.farmerId));
-    if (farmerIds.size < PROBLEM_MIN_FARMERS || group.baseline > 1) continue;
+    if (farmerIds.size < PROBLEM_MIN_FARMERS || farmerIds.size <= group.baseline.size) continue;
     const dates = group.recent.map((r) => r.date).sort();
     const reporting = [...new Set(group.recent.map((r) => r.villageId))]
       .map((id) => villageById.get(id))
@@ -275,10 +280,10 @@ function problemWarnings(data: DashboardData): Warning[] {
       path: group.parish,
       level: "parish",
       areaName: parishName,
-      title: `${labelProblem(group.problem)}: ${farmerIds.size} farms in ${parishName} parish`,
+      title: `Suspected ${labelProblem(group.problem).toLowerCase()}: ${farmerIds.size} farms in ${parishName} parish`,
       detail: `Reported ${formatRange(dates[0], dates[dates.length - 1])} · ${
-        group.baseline === 0 ? "none" : "1"
-      } in the ${PROBLEM_BASELINE_WEEKS} weeks before`,
+        group.baseline.size
+      } ${group.baseline.size === 1 ? "farm" : "farms"} in the ${PROBLEM_BASELINE_WEEKS} weeks before`,
       ...centreOf(reporting),
     });
   }

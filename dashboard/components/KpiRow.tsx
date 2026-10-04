@@ -26,7 +26,7 @@ function Tile({ icon, value, label, sub }: TileProps) {
   );
 }
 
-export default function KpiRow({ kpis }: { kpis: Kpis }) {
+export default function KpiRow({ kpis, farmerSplit }: { kpis: Kpis; farmerSplit?: { live: number; synthetic: number } }) {
   const icon = (Icon: typeof Users) => <Icon size={20} color="#3B82F6" />;
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -34,7 +34,11 @@ export default function KpiRow({ kpis }: { kpis: Kpis }) {
         icon={icon(Users)}
         value={formatNumber(kpis.farmers)}
         label="Registered farmers"
-        sub={`in ${kpis.villages} villages, ${kpis.districts} districts · +${kpis.newFarmers30d} in 30 days`}
+        sub={
+          farmerSplit
+            ? `${formatNumber(farmerSplit.live)} live · ${formatNumber(farmerSplit.synthetic)} synthetic · ${kpis.districts} districts`
+            : `in ${kpis.villages} villages, ${kpis.districts} districts · +${kpis.newFarmers30d} in 30 days`
+        }
       />
       <Tile
         icon={icon(Phone)}

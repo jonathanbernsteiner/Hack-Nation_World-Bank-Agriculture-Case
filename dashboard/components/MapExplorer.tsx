@@ -1,8 +1,9 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import { childrenOf, computeWarnings, farmersIn, summarize } from "@/lib/aggregate";
+import { childrenOf, computeWarnings, farmersIn, inArea, summarize } from "@/lib/aggregate";
 import type { AreaPath, DashboardData, MapLayer } from "@/lib/types";
 import AreaPanel from "./AreaPanel";
 import MapToolbar from "./MapToolbar";
@@ -14,8 +15,17 @@ const MapView = dynamic(() => import("./MapView"), {
 
 const VILLAGE_DEPTH = 4;
 
+/** Parse "A|B|C" into an area path; [] unless every segment exists in the data. */
+function pathFromParam(param: string | null, data: DashboardData): AreaPath {
+  if (!param) return [];
+  const segments = param.split("|").slice(0, VILLAGE_DEPTH);
+  const isValid = data.villages.some((v) => inArea(v, segments));
+  return isValid ? segments : [];
+}
+
 export default function MapExplorer({ data }: { data: DashboardData }) {
-  const [path, setPath] = useState<AreaPath>([]);
+  const searchParams = useSearchParams();
+  const [path, setPath] = useState<AreaPath>(() => pathFromParam(searchParams.get("path"), data));
   const [layer, setLayer] = useState<MapLayer>("farmers");
 
   const warnings = useMemo(() => computeWarnings(data), [data]);
@@ -27,11 +37,11 @@ export default function MapExplorer({ data }: { data: DashboardData }) {
   );
 
   return (
-    <div className="p-4 sm:p-6 flex flex-col gap-4">
+    <div className="p-4 sm:p-6 flex flex-col gap-6">
       <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_420px] gap-6">
         <div className="bg-white border border-line rounded-xl overflow-hidden flex flex-col">
           <MapToolbar path={path} layer={layer} onLayer={setLayer} onSelect={setPath} />
-          <div className="h-[560px] xl:h-[calc(100vh-140px)] xl:min-h-[520px]">
+          <div className="h-[60vh] min-h-[420px] xl:h-[calc(100vh-140px)] xl:min-h-[520px]">
             <MapView areas={children} selected={area} layer={layer} warnings={area.warnings} onSelect={setPath} />
           </div>
         </div>

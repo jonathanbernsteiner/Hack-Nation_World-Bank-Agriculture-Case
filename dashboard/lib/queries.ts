@@ -80,7 +80,8 @@ export async function loadDashboardData(): Promise<DashboardData> {
         join calls c on c.id = e.call_id
         join farmers f on f.id = e.farmer_id
         where e.kind = 'observation' and f.village_id is not null
-          and coalesce(e.likely_disease, e.symptom) is not null`,
+          and coalesce(e.likely_disease, e.symptom) is not null
+          and coalesce(e.confidence, 1) >= 0.6 and e.quote_verified is not false`,
     sql`select count(*)::int as total,
                count(*) filter (where received_at >= now() - interval '30 days')::int as last30
         from calls`,

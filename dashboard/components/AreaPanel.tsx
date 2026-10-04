@@ -2,14 +2,19 @@
 
 import { AlertTriangle, TrendingDown } from "lucide-react";
 import type { AreaPath, AreaSummary, BuyerPrice, FarmerRow, FormPrice, Level, Warning } from "@/lib/types";
-import { formatIndex, formatNumber, formatUgx, labelBuyer, labelForm, labelLevel, labelProblem } from "@/lib/format";
-import FarmersTable, { SyntheticTag, indexPillClass } from "./FarmersTable";
+import { formatIndex, formatNumber, labelBuyer, labelForm, labelLevel, labelProblem } from "@/lib/format";
+import FarmersTable, { indexPillClass } from "./FarmersTable";
 import PriceChart from "./PriceChart";
 import WeatherCard from "./WeatherCard";
 
 const CARD = "bg-white border border-line rounded-xl p-5";
 const HEADING = "text-base font-semibold text-ink";
 const TABLE_WRAP = "border border-line rounded-[14px] overflow-hidden";
+const TABLE_SCROLL = "overflow-x-auto";
+const SEVERITY_PILL: Record<Warning["severity"], string> = {
+  high: "bg-red-50 text-red-700 border-red-200",
+  medium: "bg-[#FFFBEB] text-[#F59E0B] border-[#FDE68A]",
+};
 const TH = "font-medium text-muted px-3 py-2 whitespace-nowrap";
 
 const CHILD_HEADINGS: Record<Level, string> = {
@@ -42,7 +47,11 @@ function HeaderCard({ area }: { area: AreaSummary }) {
     <div className={CARD}>
       <div className="flex items-center gap-2 flex-wrap">
         <h2 className="text-xl font-bold text-ink">{area.name}</h2>
-        {area.isSynthetic && <SyntheticTag />}
+        {area.isSynthetic && (
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold border bg-purple-50 text-purple-700 border-purple-200">
+            Includes synthetic
+          </span>
+        )}
       </div>
       <div className="text-sm text-muted">{subtitle}</div>
       <div className="grid grid-cols-2 gap-4 mt-4">
@@ -57,8 +66,8 @@ function HeaderCard({ area }: { area: AreaSummary }) {
 
 function WarningRow({ warning, onSelect }: { warning: Warning; onSelect: (path: AreaPath) => void }) {
   const isProblem = warning.kind === "problem";
-  const Icon = isProblem && warning.severity === "high" ? AlertTriangle : TrendingDown;
-  const color = isProblem && warning.severity === "high" ? "text-red-600" : "text-amber-500";
+  const Icon = isProblem ? AlertTriangle : TrendingDown;
+  const color = isProblem ? "text-red-600" : "text-amber-500";
   return (
     <li>
       <button
@@ -67,9 +76,19 @@ function WarningRow({ warning, onSelect }: { warning: Warning; onSelect: (path: 
         className="w-full flex items-start gap-3 py-3 text-left border-b border-divider last:border-b-0 hover:bg-gray-50 transition-colors"
       >
         <Icon size={16} className={`${color} mt-0.5 shrink-0`} />
-        <span className="min-w-0">
+        <span className="min-w-0 flex-1">
           <span className="block text-sm font-semibold text-ink">{warning.title}</span>
           <span className="block text-[13px] text-muted">{warning.detail}</span>
+        </span>
+        <span className="flex flex-col items-end gap-1 shrink-0">
+          <span
+            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${SEVERITY_PILL[warning.severity]}`}
+          >
+            {warning.severity === "high" ? "High" : "Medium"}
+          </span>
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-[#FFFBEB] text-[#F59E0B] border-[#FDE68A]">
+            Needs officer check
+          </span>
         </span>
       </button>
     </li>
@@ -81,7 +100,7 @@ function WarningsCard({ warnings, onSelect }: { warnings: Warning[]; onSelect: (
     <div className={CARD}>
       <div className="flex items-center gap-2 mb-1">
         <h2 className={HEADING}>Warnings</h2>
-        <span className="inline-flex items-center text-xs font-medium rounded-full px-2 py-0.5 bg-red-100 text-red-800">
+        <span className="inline-flex items-center text-xs font-medium rounded-full px-2 py-0.5 border bg-red-50 text-red-700 border-red-200">
           {warnings.length}
         </span>
       </div>
@@ -139,26 +158,28 @@ function PricesCard({ area }: { area: AreaSummary }) {
         <p className="text-sm text-faint text-center py-4">No sales reported in the last 12 months.</p>
       ) : (
         <div className={TABLE_WRAP}>
+          <div className={TABLE_SCROLL}>
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-line bg-gray-50">
                 <th className={`text-left ${TH}`}>Form</th>
-                <th className={`text-right ${TH}`}>Here</th>
-                <th className={`text-right ${TH}`}>National</th>
-                <th className={`text-right ${TH}`}>Difference</th>
+                <th className={`text-right ${TH}`}>Here (UGX/kg)</th>
+                <th className={`text-right ${TH}`}>National (UGX/kg)</th>
+                <th className={`text-right ${TH}`}>vs national</th>
               </tr>
             </thead>
             <tbody>
               {forms.map((p) => (
                 <tr key={p.form} className="border-b border-gray-100 last:border-b-0">
                   <td className="px-3 py-2 font-medium text-gray-900">{labelForm(p.form)}</td>
-                  <td className="px-3 py-2 text-right font-mono text-gray-700 whitespace-nowrap">{formatUgx(p.median)}</td>
-                  <td className="px-3 py-2 text-right font-mono text-gray-700 whitespace-nowrap">{formatUgx(p.national)}</td>
+                  <td className="px-3 py-2 text-right font-mono text-gray-700 whitespace-nowrap">{p.median === null ? "—" : formatNumber(p.median)}</td>
+                  <td className="px-3 py-2 text-right font-mono text-gray-700 whitespace-nowrap">{p.national === null ? "—" : formatNumber(p.national)}</td>
                   <td className="px-3 py-2 text-right">{formPill(p)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
       {buyers.length > 0 && (
@@ -217,6 +238,7 @@ function ChildrenCard({
         {CHILD_HEADINGS[childAreas[0].level]} in {area.name}
       </h2>
       <div className={TABLE_WRAP}>
+        <div className={TABLE_SCROLL}>
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-line bg-gray-50">
@@ -235,7 +257,9 @@ function ChildrenCard({
               >
                 <td className="px-3 py-2 font-medium text-gray-900">{c.name}</td>
                 <td className="px-3 py-2 text-right font-mono text-gray-700">{formatNumber(c.farmers)}</td>
-                <td className="px-3 py-2 text-right font-mono text-gray-700">{formatIndex(c.priceIndex)}</td>
+                <td className="px-3 py-2 text-right">
+                  <span className={indexPillClass(c.priceIndex)}>{formatIndex(c.priceIndex)}</span>
+                </td>
                 <td
                   className={`px-3 py-2 text-right font-mono ${
                     c.warnings.length > 0 ? "text-red-600 font-medium" : "text-gray-300"
@@ -247,6 +271,7 @@ function ChildrenCard({
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

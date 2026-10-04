@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { AlertTriangle, Database, LayoutDashboard, Map as MapIcon, Search, Settings, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, LayoutDashboard, Map as MapIcon, Search, Settings, TrendingUp, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface NavItem {
@@ -18,7 +18,6 @@ export const NAV: NavItem[] = [
   { href: "/farmers", label: "Farmers", icon: Users },
   { href: "/prices", label: "Prices", icon: TrendingUp },
   { href: "/warnings", label: "Warnings", icon: AlertTriangle },
-  { href: "/data", label: "Data", icon: Database },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

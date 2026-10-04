@@ -160,7 +160,7 @@ export default function MapView({ areas, selected, layer, warnings, onSelect }: 
   const maxFarmers = Math.max(0, ...shown.map((a) => a.farmers));
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative isolate z-0 h-full w-full">
       <MapContainer
         center={UGANDA_CENTER}
         zoom={7}

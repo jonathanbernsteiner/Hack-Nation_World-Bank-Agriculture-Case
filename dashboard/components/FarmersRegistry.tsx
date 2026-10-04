@@ -4,6 +4,9 @@ import { useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ChevronDown, ChevronUp, Search, Users, X } from "lucide-react";
 import FarmerPeek from "@/components/FarmerPeek";
+import FilterMenu from "@/components/FilterMenu";
+import type { FilterField } from "@/components/FilterMenu";
+import SortMenu from "@/components/SortMenu";
 import { registryRows } from "@/lib/registry";
 import type { RegistryRow } from "@/lib/registry";
 import { formatDate, formatIndex, formatNumber, labelBuyer, labelProblem } from "@/lib/format";
@@ -21,15 +24,24 @@ const PRICE_TOLERANCE = 0.03;
 const REGIONS = ["Central", "Eastern", "Northern", "Western"];
 const BUYER_OPTIONS: BuyerType[] = ["middleman", "cooperative", "other"];
 const PRICE_OPTIONS = [
-  { value: "below", label: "Price vs village: below" },
-  { value: "same", label: "Price vs village: same" },
-  { value: "above", label: "Price vs village: above" },
-  { value: "none", label: "Price vs village: no sale" },
+  { value: "below", label: "Below" },
+  { value: "same", label: "Same" },
+  { value: "above", label: "Above" },
+  { value: "none", label: "No sale" },
 ];
-type FilterKey = "q" | "region" | "district" | "sub" | "buyer" | "price" | "problems";
-type SortKey = "registered" | "calls" | "lastSale" | "vsVillage";
+type FilterKey = "q" | "region" | "district" | "sub" | "buyer" | "price" | "problems" | "sort" | "dir";
+type SortKey = "name" | "registered" | "calls" | "lastSale" | "vsVillage";
+const SORT_KEYS: SortKey[] = ["name", "registered", "calls", "lastSale", "vsVillage"];
+const SORT_FIELDS: { key: SortKey; label: string }[] = [
+  { key: "registered", label: "Registered" },
+  { key: "calls", label: "Calls" },
+  { key: "vsVillage", label: "Last sale vs village" },
+  { key: "name", label: "First name" },
+];
+const DEFAULT_SORT = { key: "registered" as SortKey, dir: "desc" as SortDir };
 type SortDir = "asc" | "desc";
 const SORT_VALUE: Record<SortKey, (r: RegistryRow) => string | number | null> = {
+  name: (r) => r.firstName.toLowerCase(),
   registered: (r) => r.registeredAt,
   calls: (r) => r.callCount,
   lastSale: (r) => r.priceVsVillage,
@@ -81,10 +93,10 @@ function Dash() {
   return <span className="text-gray-300">—</span>;
 }
 
-function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
+function Chip({ label, onOpen, onRemove }: { label: string; onOpen: () => void; onRemove: () => void }) {
   return (
     <span className={CHIP}>
-      {label}
+      <button type="button" onClick={onOpen} className="hover:text-blue-900">{label}</button>
       <button type="button" aria-label={`Remove ${label}`} onClick={onRemove} className="hover:text-blue-900">
         <X size={12} />
       </button>
@@ -148,7 +160,12 @@ export default function FarmersRegistry({ data }: { data: DashboardData }) {
   const buyer = param("buyer");
   const priceBucket = param("price");
   const problemsOnly = param("problems") === "1";
-  const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({ key: "registered", dir: "desc" });
+  const sortParam = param("sort") as SortKey;
+  const sort = {
+    key: SORT_KEYS.includes(sortParam) ? sortParam : DEFAULT_SORT.key,
+    dir: (param("dir") === "asc" || param("dir") === "desc" ? param("dir") : DEFAULT_SORT.dir) as SortDir,
+  };
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [shown, setShown] = useState(PAGE_SIZE);
 
   // Filters live in the URL so other pages can link to e.g. /farmers?district=Masaka.
@@ -210,105 +227,77 @@ export default function FarmersRegistry({ data }: { data: DashboardData }) {
         sort.key,
         sort.dir,
       ),
-    [rows, needle, region, district, subCounty, buyer, priceBucket, problemsOnly, sort],
+    [rows, needle, region, district, subCounty, buyer, priceBucket, problemsOnly, sort.key, sort.dir],
   );
+  const applySort = (key: string, dir: SortDir) => setFilters({ sort: key, dir });
   const onSort = (key: SortKey) =>
-    setSort((s) => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "desc" }));
+    applySort(key, sort.key === key ? (sort.dir === "asc" ? "desc" : "asc") : key === "name" ? "asc" : "desc");
   const visible = filtered.slice(0, shown);
-  const hasFilters = Boolean(needle || region || district || subCounty || buyer || priceBucket || problemsOnly);
-
-  const clearAll = () => setFilters({ q: "", region: "", district: "", sub: "", buyer: "", price: "", problems: "" });
+  
+  const clearAll = () => setFilters({ region: "", district: "", sub: "", buyer: "", price: "", problems: "" });
+  const filterValues: Record<string, string> = { region, district, sub: subCounty, buyer, price: priceBucket, problems: problemsOnly ? "1" : "" };
+  const toOptions = (list: string[]) => list.map((v) => ({ value: v, label: v }));
+  const fields: FilterField[] = [
+    { key: "region", label: "Region", options: toOptions(REGIONS) },
+    { key: "district", label: "District", options: toOptions(districts) },
+    { key: "sub", label: "Sub-county", options: toOptions(subCounties), disabledHint: district ? undefined : "Choose a district" },
+    { key: "buyer", label: "Buyer", options: BUYER_OPTIONS.map((b) => ({ value: b, label: labelBuyer(b) })) },
+    { key: "price", label: "Price vs village", options: PRICE_OPTIONS },
+    { key: "problems", label: "Has problems", options: [], kind: "toggle" },
+  ];
+  const onFilterChange = (key: string, value: string) => {
+    if (key === "region") {
+      const isDistrictKept = !district || !value || rows.some((r) => r.region === value && r.district === district);
+      setFilters(isDistrictKept ? { region: value } : { region: value, district: "", sub: "" });
+    } else if (key === "district") setFilters({ district: value, sub: "" });
+    else setFilters({ [key]: value });
+  };
+  const chips = fields
+    .filter((f) => filterValues[f.key])
+    .map((f) => {
+      const v = filterValues[f.key];
+      const label = f.kind === "toggle" ? f.label : `${f.label}: ${f.options.find((o) => o.value === v)?.label ?? v}`;
+      return { key: f.key, label };
+    });
+  const openFilter = () => setIsFilterOpen(true);
 
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto">
-      <div className="flex items-baseline justify-between mb-4 gap-3">
-        <h1 className="text-2xl font-bold text-gray-900">Farmers</h1>
-        <p className="text-sm text-muted whitespace-nowrap">
+      <h1 className="text-2xl font-bold text-gray-900 mb-4">Farmers</h1>
+
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="relative w-64 max-w-full">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            value={query}
+            placeholder="Search name or village"
+            aria-label="Search name, village or area"
+            onChange={(e) => setFilters({ q: e.target.value })}
+            className={`${CONTROL} pl-9`}
+          />
+        </div>
+        <FilterMenu fields={fields} values={filterValues} onChange={onFilterChange} onClearAll={clearAll} open={isFilterOpen} onOpenChange={setIsFilterOpen} />
+        <SortMenu fields={SORT_FIELDS} sortKey={sort.key} dir={sort.dir} onChange={applySort} />
+        <p className="ml-auto text-sm text-muted whitespace-nowrap">
           {formatNumber(rows.length)} farmers · {formatNumber(villageCount)} villages
         </p>
       </div>
 
-      <div className="bg-white border border-line rounded-[14px] p-4 mb-6 space-y-3">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-          <div className="relative min-w-0 sm:col-span-2">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              value={query}
-              placeholder="Search name or village"
-              aria-label="Search name, village or area"
-              onChange={(e) => setFilters({ q: e.target.value })}
-              className={`${CONTROL} pl-9`}
+      {chips.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-3">
+          {chips.map((c) => (
+            <Chip
+              key={c.key}
+              label={c.label}
+              onOpen={openFilter}
+              onRemove={() => setFilters(c.key === "district" ? { district: "", sub: "" } : { [c.key]: "" })}
             />
-          </div>
-          <select
-            value={region}
-            aria-label="Region"
-            onChange={(e) => {
-              const next = e.target.value;
-              const isDistrictKept = !district || !next || rows.some((r) => r.region === next && r.district === district);
-              setFilters(isDistrictKept ? { region: next } : { region: next, district: "", sub: "" });
-            }}
-            className={CONTROL}
-          >
-            <option value="">All regions</option>
-            {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
-          </select>
-          <select
-            value={district}
-            aria-label="District"
-            onChange={(e) => setFilters({ district: e.target.value, sub: "" })}
-            className={CONTROL}
-          >
-            <option value="">All districts</option>
-            {districts.map((d) => <option key={d} value={d}>{d}</option>)}
-          </select>
-          <select
-            value={subCounty}
-            aria-label="Sub-county"
-            disabled={!district}
-            onChange={(e) => setFilters({ sub: e.target.value })}
-            className={`${CONTROL} disabled:opacity-60 disabled:cursor-not-allowed`}
-          >
-            <option value="">{district ? "All sub-counties" : "Choose a district first"}</option>
-            {subCounties.map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
-          <select value={buyer} aria-label="Buyer" onChange={(e) => setFilters({ buyer: e.target.value })} className={CONTROL}>
-            <option value="">Any buyer</option>
-            {BUYER_OPTIONS.map((b) => <option key={b} value={b}>{labelBuyer(b)}</option>)}
-          </select>
-          <select value={priceBucket} aria-label="Price vs village" onChange={(e) => setFilters({ price: e.target.value })} className={CONTROL}>
-            <option value="">Price vs village: any</option>
-            {PRICE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
-          <button
-            type="button"
-            aria-pressed={problemsOnly}
-            onClick={() => setFilters({ problems: problemsOnly ? "" : "1" })}
-            className={`h-10 px-3 text-sm rounded-lg border whitespace-nowrap transition-colors ${
-              problemsOnly ? "bg-red-50 text-red-700 border-red-200" : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
-            }`}
-          >
-            Has problems (90d)
-          </button>
+          ))}
         </div>
-        {hasFilters && (
-          <div className="flex items-start justify-between gap-3 pt-1 border-t border-gray-100">
-            <div className="flex flex-wrap gap-1.5 pt-2">
-              {needle && <Chip label={`Search: ${query.trim()}`} onRemove={() => setFilters({ q: "" })} />}
-              {region && <Chip label={`Region: ${region}`} onRemove={() => setFilters({ region: "" })} />}
-              {district && <Chip label={`District: ${district}`} onRemove={() => setFilters({ district: "", sub: "" })} />}
-              {subCounty && <Chip label={`Sub-county: ${subCounty}`} onRemove={() => setFilters({ sub: "" })} />}
-              {buyer && <Chip label={`Buyer: ${labelBuyer(buyer as BuyerType)}`} onRemove={() => setFilters({ buyer: "" })} />}
-              {priceBucket && <Chip label={PRICE_OPTIONS.find((o) => o.value === priceBucket)?.label ?? `Price: ${priceBucket}`} onRemove={() => setFilters({ price: "" })} />}
-              {problemsOnly && <Chip label="Has problems (90d)" onRemove={() => setFilters({ problems: "" })} />}
-            </div>
-            <button type="button" onClick={clearAll} className="text-xs font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap shrink-0 pt-2">
-              Clear all
-            </button>
-          </div>
-        )}
-      </div>
+      )}
+
+      <div className="mb-6" />
 
       {filtered.length === 0 ? (
         <div className="bg-white border border-line rounded-[14px] flex flex-col items-center justify-center py-16 text-gray-400">
@@ -323,7 +312,7 @@ export default function FarmersRegistry({ data }: { data: DashboardData }) {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-line bg-gray-50">
-                    <th className={`${TH} text-left`}>First name</th>
+                    <SortTh label="First name" k="name" sort={sort} onSort={onSort} className={`${TH} text-left`} />
                     <th className={`${TH} text-left`}>Village</th>
                     <th className={`${TH} text-left`}>District</th>
                     <th className={`${TH} text-left ${WIDE}`}>Parish</th>

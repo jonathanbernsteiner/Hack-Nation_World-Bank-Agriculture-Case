@@ -10,16 +10,16 @@ import { OTHER_KEY, problemsByDistrict, weeklyCounts } from "@/lib/problems";
 import {
   PRICE_LOW_INDEX,
   PRICE_WINDOW_DAYS,
-  MIN_FARMERS,
-  MIN_SALES,
+  PRICE_WARNING_MIN_FARMERS,
+  PRICE_WARNING_MIN_SALES,
   PROBLEM_BASELINE_WEEKS,
   PROBLEM_MIN_FARMERS,
   PROBLEM_WINDOW_DAYS,
   type DashboardData,
 } from "@/lib/types";
 
-const PALETTE = ["#DC2626", "#F59E0B", "#3B82F6", "#8B5CF6"];
-const OTHER_COLOR = "#94A3B8";
+const PALETTE = ["#1D4ED8", "#3B82F6", "#93C5FD", "#CBD5E1"];
+const OTHER_COLOR = "#CBD5E1";
 const WEEKS = 26;
 const TABLE_DAYS = 90;
 const PAGE_SIZE = 25;
@@ -41,12 +41,10 @@ export default function WarningsView({ data }: { data: DashboardData }) {
 
   return (
     <div className="p-4 sm:p-6 flex flex-col gap-6">
-      <h1 className="text-2xl font-bold text-gray-900">Warnings</h1>
-
       <section>
         <h2 className="flex items-center gap-2 text-base font-semibold text-ink mb-4">
           Active warnings
-          <span className="inline-flex items-center text-xs font-medium rounded-full px-2 py-0.5 bg-gray-100 text-gray-800">{warnings.length}</span>
+          <span className="inline-flex items-center text-xs font-medium rounded-full px-2 py-0.5 bg-gray-100 text-gray-700">{warnings.length}</span>
         </h2>
         <div className="bg-white border border-line rounded-xl max-h-[480px] overflow-y-auto">
           {warnings.length === 0 ? (
@@ -69,7 +67,7 @@ export default function WarningsView({ data }: { data: DashboardData }) {
               Problem: {PROBLEM_MIN_FARMERS}+ farms in one parish within {PROBLEM_WINDOW_DAYS} days, above the prior {PROBLEM_BASELINE_WEEKS} weeks.
             </li>
             <li>
-              Price: district median {Math.round((1 - PRICE_LOW_INDEX) * 100)}%+ below national over {PRICE_WINDOW_DAYS} days ({MIN_SALES}+ sales, {MIN_FARMERS}+ farmers).
+              Price: district median {Math.round((1 - PRICE_LOW_INDEX) * 100)}%+ below national over {PRICE_WINDOW_DAYS} days ({PRICE_WARNING_MIN_SALES}+ sales, {PRICE_WARNING_MIN_FARMERS}+ farmers).
             </li>
           </ul>
         </details>
@@ -84,7 +82,7 @@ export default function WarningsView({ data }: { data: DashboardData }) {
         ) : (
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 15, right: 20, left: 20, bottom: 0 }}>
+              <BarChart data={chartData} barCategoryGap="25%" margin={{ top: 15, right: 20, left: 20, bottom: 0 }}>
                 <CartesianGrid stroke="#F1F5F9" vertical={false} />
                 <XAxis dataKey="week" axisLine={false} tickLine={false} tick={AXIS_TICK} interval={3} />
                 <YAxis axisLine={false} tickLine={false} tick={AXIS_TICK} width={45} allowDecimals={false} />
@@ -93,7 +91,7 @@ export default function WarningsView({ data }: { data: DashboardData }) {
                   labelFormatter={(_, payload) => `Week of ${formatDate(payload?.[0]?.payload?.weekStart ?? null)}`}
                   contentStyle={{ background: "#fff", border: "1px solid #E2E8F0", borderRadius: 8, fontSize: 13 }}
                 />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} formatter={(value) => <span className="text-gray-600">{value}</span>} />
                 {weekly.keys.map((key, i) => (
                   <Bar key={key} dataKey={key} name={nameOf(key)} stackId="problems" fill={colorOf(key, i)} isAnimationActive={false} />
                 ))}

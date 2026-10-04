@@ -14,4 +14,5 @@ body {
 ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
 
 /* Map: grey, low-contrast OSM tiles so the data markers carry the colour (DESIGN.md: colour for meaning only) */
-.map-tiles-muted { filter: grayscale(1) brightness(1.06) contrast(0.82); }
+.map-tiles-muted { filter: grayscale(1) brightness(1.08) contrast(0.72); }
+.leaflet-container { background: #F1F5F9; font-family: inherit; }

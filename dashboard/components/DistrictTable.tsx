@@ -3,15 +3,17 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { childrenOf, computeWarnings, median, referenceFor } from "@/lib/aggregate";
+import { childrenOf, computeWarnings, farmerMedianIndex, median, referenceFor } from "@/lib/aggregate";
 import { formatIndex, formatNumber } from "@/lib/format";
 import { MIN_FARMERS, MIN_SALES } from "@/lib/types";
 import type { DashboardData, Sale, Warning } from "@/lib/types";
-import { indexPillClass } from "./FarmersTable";
 
 const WINDOW_DAYS = 90;
 const NEW_DAYS = 30;
 const MS_PER_DAY = 86_400_000;
+const BAD_INDEX_PCT = -15;
+
+type OptionalColumn = "new" | "warnings";
 
 type SortKey = "name" | "region" | "farmers" | "new30d" | "index" | "middleman" | "warnings";
 type SortDir = "asc" | "desc";
@@ -71,7 +73,8 @@ function buildRows(data: DashboardData, warnings: Warning[]): Row[] {
       region: d.region ?? "—",
       farmers: d.farmers,
       new30d: newBy.get(d.name) ?? 0,
-      index: priceIndexOfSales(sales, data),
+      // Same metric as the price warning, so table and warnings agree.
+      index: farmerMedianIndex(sales, data.reference).index,
       middleman: middlemanSharePct(sales),
       warnings: warningsBy.get(d.name) ?? 0,
     };
@@ -105,9 +108,29 @@ const COLUMNS: { key: SortKey; label: string; align: "left" | "right"; className
   { key: "warnings", label: "Warnings", align: "right" },
 ];
 
-export default function DistrictTable({ data, warnings }: { data: DashboardData; warnings?: Warning[] }) {
+interface DistrictTableProps {
+  data: DashboardData;
+  warnings?: Warning[];
+  columns?: OptionalColumn[];
+  defaultSort?: { key: SortKey; dir: SortDir };
+}
+
+const ALL_OPTIONAL: OptionalColumn[] = ["new", "warnings"];
+const OPTIONAL_KEY: Record<OptionalColumn, SortKey> = { new: "new30d", warnings: "warnings" };
+const DEFAULT_SORT: { key: SortKey; dir: SortDir } = { key: "warnings", dir: "desc" };
+
+function IndexValue({ index }: { index: number | null }) {
+  if (index === null) return <span className="text-gray-300">—</span>;
+  const isBad = Math.round((index - 1) * 100) <= BAD_INDEX_PCT;
+  return <span className={isBad ? "text-red-600 font-medium" : "text-gray-700"}>{formatIndex(index)}</span>;
+}
+
+export default function DistrictTable({ data, warnings, columns = ALL_OPTIONAL, defaultSort = DEFAULT_SORT }: DistrictTableProps) {
   const router = useRouter();
-  const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({ key: "warnings", dir: "desc" });
+  const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>(defaultSort);
+  const shownColumns = COLUMNS.filter((c) => !Object.values(OPTIONAL_KEY).includes(c.key) || columns.some((o) => OPTIONAL_KEY[o] === c.key));
+  const showNew = columns.includes("new");
+  const showWarnings = columns.includes("warnings");
   const all = useMemo(() => warnings ?? computeWarnings(data), [warnings, data]);
   const rows = useMemo(() => buildRows(data, all), [data, all]);
   const sorted = useMemo(() => [...rows].sort(compareBy(sort.key, sort.dir)), [rows, sort]);
@@ -124,7 +147,7 @@ export default function DistrictTable({ data, warnings }: { data: DashboardData;
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-line bg-gray-50">
-                {COLUMNS.map((c) => {
+                {shownColumns.map((c) => {
                   const active = sort.key === c.key;
                   const Chevron = sort.dir === "asc" ? ChevronUp : ChevronDown;
                   return (
@@ -145,28 +168,32 @@ export default function DistrictTable({ data, warnings }: { data: DashboardData;
             <tbody>
               {sorted.length === 0 && (
                 <tr>
-                  <td colSpan={COLUMNS.length} className="px-4 py-10 text-center text-faint">No districts yet.</td>
+                  <td colSpan={shownColumns.length} className="px-4 py-10 text-center text-faint">No districts yet.</td>
                 </tr>
               )}
               {sorted.map((r) => (
                 <tr
                   key={r.name}
+                  tabIndex={0}
                   onClick={() => open(r.name)}
+                  onKeyDown={(e) => e.key === "Enter" && open(r.name)}
                   className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">{r.name}</td>
                   <td className="px-4 py-3 text-gray-600 whitespace-nowrap hidden lg:table-cell">{r.region}</td>
                   <td className="px-4 py-3 text-right font-mono text-gray-700">{formatNumber(r.farmers)}</td>
-                  <td className="px-4 py-3 text-right font-mono text-gray-700">{formatNumber(r.new30d)}</td>
+                  {showNew && <td className="px-4 py-3 text-right font-mono text-gray-700">{formatNumber(r.new30d)}</td>}
                   <td className="px-4 py-3 text-right whitespace-nowrap">
-                    {r.index === null ? <span className="text-gray-300">—</span> : <span className={indexPillClass(r.index)}>{formatIndex(r.index)}</span>}
+                    <span className="font-mono"><IndexValue index={r.index} /></span>
                   </td>
                   <td className="px-4 py-3 text-right font-mono text-gray-700">
                     {r.middleman === null ? <span className="text-gray-300">—</span> : `${r.middleman}%`}
                   </td>
-                  <td className={`px-4 py-3 text-right font-mono ${r.warnings > 0 ? "text-red-600 font-medium" : "text-gray-700"}`}>
-                    {r.warnings}
-                  </td>
+                  {showWarnings && (
+                    <td className="px-4 py-3 text-right font-mono text-gray-700">
+                      {r.warnings > 0 ? r.warnings : <span className="text-gray-300">—</span>}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

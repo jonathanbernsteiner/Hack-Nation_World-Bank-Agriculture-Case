@@ -1,10 +1,7 @@
 // Pure per-farmer detail for the Farmer peek panel (no I/O). Windows are relative to data.today.
 
-import { median, referenceFor } from "./aggregate";
-import { MIN_FARMERS, MIN_SALES } from "./types";
-import type { BuyerType, CoffeeForm, DashboardData, Sale } from "./types";
-
-const PRICE_MONTHS = 12;
+import { indexVsVillage, median, medianIndex, medianPrice, referenceFor, saleIndex, yearSales } from "./aggregate";
+import type { BuyerType, CoffeeForm, DashboardData } from "./types";
 
 export interface FarmerSale {
   date: string;
@@ -14,8 +11,8 @@ export interface FarmerSale {
   buyerType: BuyerType | null;
   national: number | null; // national reference for the sale's month and form
   indexVsNational: number | null;
-  villageMedian: number | null; // village median for the form (null below the minimums)
-  indexVsVillage: number | null;
+  villageMedian: number | null; // village median UGX/kg for the form, 365 days (null below the minimums)
+  indexVsVillage: number | null; // sale index / village median index for the form (month-aware)
   totalUgx: number;
 }
 
@@ -36,20 +33,9 @@ export interface FarmerDetail {
   sales: FarmerSale[]; // newest first
   villageMedianByForm: Partial<Record<CoffeeForm, number | null>>;
   medianVsVillage: number | null;
-  lastSaleVsVillage: number | null; // last sale / village 12-month median for its form (same metric as the Farmers list)
+  lastSaleVsVillage: number | null; // last sale's index / village median index for its form (same metric as the Farmers list)
   mainBuyer: BuyerType | null;
   problems: { date: string; problem: string }[]; // newest first
-}
-
-function windowStart(today: string): string {
-  const [y, m] = today.split("-").map(Number);
-  return new Date(Date.UTC(y, m - 1 - (PRICE_MONTHS - 1), 1)).toISOString().slice(0, 10);
-}
-
-function villageMedian(sales: Sale[]): number | null {
-  if (sales.length < MIN_SALES) return null;
-  if (new Set(sales.map((s) => s.farmerId)).size < MIN_FARMERS) return null;
-  return median(sales.map((s) => s.ugxPerKg));
 }
 
 function mostCommonBuyer(sales: FarmerSale[]): BuyerType | null {
@@ -63,12 +49,19 @@ export function farmerDetail(data: DashboardData, farmerId: number): FarmerDetai
   const village = farmer && data.villages.find((v) => v.id === farmer.villageId);
   if (!farmer || !village) return null;
 
-  const start = windowStart(data.today);
-  const villageSales = data.sales.filter((s) => s.villageId === village.id && s.date >= start);
+  const villageSales = yearSales(
+    data.sales.filter((s) => s.villageId === village.id),
+    data.today,
+  );
   const medianByForm = new Map<CoffeeForm, number | null>();
-  const medianFor = (form: CoffeeForm): number | null => {
-    if (!medianByForm.has(form)) medianByForm.set(form, villageMedian(villageSales.filter((s) => s.form === form)));
-    return medianByForm.get(form) ?? null;
+  const indexByForm = new Map<CoffeeForm, number | null>();
+  const villageStatsFor = (form: CoffeeForm): { median: number | null; index: number | null } => {
+    if (!medianByForm.has(form)) {
+      const formSales = villageSales.filter((s) => s.form === form);
+      medianByForm.set(form, medianPrice(formSales));
+      indexByForm.set(form, medianIndex(formSales, data.reference));
+    }
+    return { median: medianByForm.get(form) ?? null, index: indexByForm.get(form) ?? null };
   };
 
   const sales: FarmerSale[] = data.sales
@@ -76,7 +69,7 @@ export function farmerDetail(data: DashboardData, farmerId: number): FarmerDetai
     .sort((a, b) => b.date.localeCompare(a.date))
     .map((s) => {
       const national = referenceFor(data.reference, s.form, s.date.slice(0, 7));
-      const vm = medianFor(s.form);
+      const villageStats = villageStatsFor(s.form);
       return {
         date: s.date,
         form: s.form,
@@ -84,9 +77,9 @@ export function farmerDetail(data: DashboardData, farmerId: number): FarmerDetai
         ugxPerKg: s.ugxPerKg,
         buyerType: s.buyerType,
         national,
-        indexVsNational: national && national > 0 ? s.ugxPerKg / national : null,
-        villageMedian: vm,
-        indexVsVillage: vm && vm > 0 ? s.ugxPerKg / vm : null,
+        indexVsNational: saleIndex(s, data.reference),
+        villageMedian: villageStats.median,
+        indexVsVillage: indexVsVillage(s, villageStats.index, data.reference),
         totalUgx: s.ugxPerKg * s.kg,
       };
     });

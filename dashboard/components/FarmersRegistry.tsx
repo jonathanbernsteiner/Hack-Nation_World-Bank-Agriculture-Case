@@ -44,7 +44,7 @@ const SORT_VALUE: Record<SortKey, (r: RegistryRow) => string | number | null> = 
   name: (r) => r.firstName.toLowerCase(),
   registered: (r) => r.registeredAt,
   calls: (r) => r.callCount,
-  lastSale: (r) => r.priceVsVillage,
+  lastSale: (r) => r.lastSale?.ugxPerKg ?? null,
   vsVillage: (r) => r.priceVsVillage,
 };
 
@@ -154,11 +154,12 @@ export default function FarmersRegistry({ data }: { data: DashboardData }) {
   const selectedId = Number.isInteger(farmerParam) && farmerParam > 0 ? farmerParam : null;
   const param = (key: FilterKey) => searchParams.get(key) ?? "";
   const query = param("q");
-  const region = param("region");
-  const district = param("district");
-  const subCounty = param("sub");
-  const buyer = param("buyer");
-  const priceBucket = param("price");
+  const oneOf = (key: FilterKey, allowed: string[]) => (allowed.includes(param(key)) ? param(key) : "");
+  const region = oneOf("region", REGIONS);
+  const district = rows.some((r) => r.district === param("district") && (!region || r.region === region)) ? param("district") : "";
+  const subCounty = district && rows.some((r) => r.district === district && r.subCounty === param("sub")) ? param("sub") : "";
+  const buyer = oneOf("buyer", BUYER_OPTIONS);
+  const priceBucket = oneOf("price", PRICE_OPTIONS.map((o) => o.value));
   const problemsOnly = param("problems") === "1";
   const sortParam = param("sort") as SortKey;
   const sort = {
@@ -190,8 +191,9 @@ export default function FarmersRegistry({ data }: { data: DashboardData }) {
       else params.set("farmer", String(id));
       const qs = params.toString();
       const url = `${window.location.pathname}${qs ? `?${qs}` : ""}`;
-      if (id !== null && selectedId !== null) window.history.replaceState(null, "", url);
-      else window.history.pushState(null, "", url);
+      // Open pushes; switching rows and closing replace, so Back never re-opens the peek.
+      if (id !== null && selectedId === null) window.history.pushState(null, "", url);
+      else window.history.replaceState(null, "", url);
     },
     [searchParams, selectedId],
   );
@@ -262,11 +264,9 @@ export default function FarmersRegistry({ data }: { data: DashboardData }) {
   const openFilter = () => setIsFilterOpen(true);
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-4">Farmers</h1>
-
+    <div className="p-4 sm:p-6">
       <div className="flex items-center gap-2 flex-wrap">
-        <div className="relative w-64 max-w-full">
+        <div className="relative flex-1 min-w-[240px]">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
@@ -319,7 +319,7 @@ export default function FarmersRegistry({ data }: { data: DashboardData }) {
                     <th className={`${TH} text-left ${WIDE}`}>Sub-county</th>
                     <SortTh label="Registered" k="registered" sort={sort} onSort={onSort} className={`${TH} text-left hidden lg:table-cell`} />
                     <SortTh label="Calls" k="calls" sort={sort} onSort={onSort} className={`${TH} text-right`} />
-                    <SortTh label="Last sale" k="lastSale" sort={sort} onSort={onSort} className={`${TH} text-right`} />
+                    <SortTh label="Last sale (UGX/kg)" k="lastSale" sort={sort} onSort={onSort} className={`${TH} text-right`} />
                     <SortTh label="vs village" k="vsVillage" sort={sort} onSort={onSort} className={`${TH} text-right`} />
                     <th className={`${TH} text-left`}>Problems</th>
                   </tr>
@@ -331,7 +331,7 @@ export default function FarmersRegistry({ data }: { data: DashboardData }) {
             </div>
           </div>
           <div className="flex items-center justify-between mt-4">
-            <p className="text-sm text-muted">Showing {visible.length} of {filtered.length}</p>
+            <p className="text-sm text-muted">Showing {formatNumber(visible.length)} of {formatNumber(filtered.length)}</p>
             {visible.length < filtered.length && (
               <button type="button" className={BTN_SECONDARY} onClick={() => setShown(shown + PAGE_SIZE)}>
                 Load more

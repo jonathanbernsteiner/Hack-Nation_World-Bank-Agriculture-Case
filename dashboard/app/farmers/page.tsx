@@ -1,19 +1,12 @@
 import { Suspense } from "react";
 import FarmersRegistry from "@/components/FarmersRegistry";
-import LoadError from "@/components/LoadError";
 import { loadDashboardData } from "@/lib/queries";
-import type { DashboardData } from "@/lib/types";
 
 export const revalidate = 120;
 
+// Load errors reach app/error.tsx (see app/page.tsx).
 export default async function FarmersPage() {
-  let data: DashboardData | null = null;
-  try {
-    data = await loadDashboardData();
-  } catch {
-    data = null;
-  }
-  if (!data) return <LoadError />;
+  const data = await loadDashboardData();
   return (
     <Suspense fallback={null}>
       <FarmersRegistry data={data} />

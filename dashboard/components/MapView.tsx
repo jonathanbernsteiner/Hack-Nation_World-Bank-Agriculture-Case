@@ -55,15 +55,15 @@ function styleFor(area: AreaSummary, layer: MapLayer, hasWarning: boolean, maxFa
   if (layer === "farmers") {
     return {
       radius: scaledRadius(area.farmers, maxFarmers),
-      color: "#2563EB",
+      color: "#fff",
       fillColor: "#3B82F6",
-      fillOpacity: 0.35,
+      fillOpacity: 0.8,
       weight: 1.5,
     };
   }
   if (layer === "prices") {
     const color = BAND_COLOR[priceBand(area.priceIndex)];
-    return { radius: PRICE_RADIUS, color, fillColor: color, fillOpacity: 0.55, weight: 1.5 };
+    return { radius: PRICE_RADIUS, color: "#fff", fillColor: color, fillOpacity: 0.8, weight: 1.5 };
   }
   if (hasWarning) {
     return { radius: 14, color: COLOR_BAD, fillColor: COLOR_BAD, fillOpacity: 0.25, weight: 3 };
@@ -81,7 +81,7 @@ function labelFor(area: AreaSummary, layer: MapLayer, radius: number): string | 
 function labelIcon(text: string): L.DivIcon {
   return L.divIcon({
     className: "",
-    html: `<div style="width:60px;margin-left:-30px;margin-top:-8px;text-align:center;font:600 11px/16px 'DM Sans',sans-serif;color:#0F172A;pointer-events:none">${text}</div>`,
+    html: `<div style="width:60px;margin-left:-30px;margin-top:-8px;text-align:center;font:600 11px/16px 'DM Sans',sans-serif;color:#fff;pointer-events:none">${text}</div>`,
     iconSize: [0, 0],
   });
 }
@@ -99,6 +99,10 @@ function FitBounds({ areas, selected }: { areas: AreaSummary[]; selected: AreaSu
     const { areas: current, selected: sel } = latest.current;
     if (current.length === 0) {
       map.flyTo([sel.lat, sel.lon], 12);
+      return;
+    }
+    if (current.length === 1) {
+      map.setView([current[0].lat, current[0].lon], 10);
       return;
     }
     const bounds = L.latLngBounds(current.map((a) => [a.lat, a.lon] as [number, number]));
@@ -145,8 +149,8 @@ function Legend({ layer }: { layer: MapLayer }) {
       )}
       {layer === "warnings" && (
         <p>
-          Red: {PROBLEM_MIN_FARMERS}+ farms, same problem, {PROBLEM_WINDOW_DAYS} days, or prices{" "}
-          {Math.round((1 - PRICE_LOW_INDEX) * 100)}%+ below
+          Red: {PROBLEM_MIN_FARMERS}+ farms report the same problem in the last {PROBLEM_WINDOW_DAYS} days, or
+          prices {Math.round((1 - PRICE_LOW_INDEX) * 100)}%+ below national
         </p>
       )}
     </div>
@@ -164,6 +168,7 @@ export default function MapView({ areas, selected, layer, warnings, onSelect }: 
       <MapContainer
         center={UGANDA_CENTER}
         zoom={7}
+        zoomSnap={0.25}
         maxZoom={13}
         scrollWheelZoom
         zoomControl={false}
@@ -171,6 +176,7 @@ export default function MapView({ areas, selected, layer, warnings, onSelect }: 
       >
         <TileLayer url={TILE_URL} attribution={TILE_ATTRIBUTION} className="map-tiles-muted" />
         <ZoomTopRight />
+        <QuietAttribution />
         <FitBounds areas={areas} selected={selected} />
 
         {shown.map((area) => {
@@ -248,6 +254,14 @@ function ZoomTopRight() {
     return () => {
       control.remove();
     };
+  }, [map]);
+  return null;
+}
+
+function QuietAttribution() {
+  const map = useMap();
+  useEffect(() => {
+    map.attributionControl.setPrefix(false);
   }, [map]);
   return null;
 }

@@ -79,8 +79,8 @@ export default function DistrictsToWatch({ data, warnings, onViewAll }: { data: 
           <thead>
             <tr className="border-b border-line bg-gray-50">
               <th className={`${TH} text-left`}>District</th>
-              <th className={`${TH} text-right`}>vs national (90d)</th>
-              <th className={`${TH} text-right`}>Middlemen (90d)</th>
+              <th className={`${TH} text-right`}>vs national, 90 days</th>
+              <th className={`${TH} text-right`}>Middlemen, 90 days</th>
               <th className={`${TH} text-right`}>Warnings</th>
             </tr>
           </thead>
@@ -93,7 +93,9 @@ export default function DistrictsToWatch({ data, warnings, onViewAll }: { data: 
             {rows.map((r) => (
               <tr
                 key={r.name}
+                tabIndex={0}
                 onClick={() => router.push(`/map?path=${encodeURIComponent(r.name)}`)}
+                onKeyDown={(e) => e.key === "Enter" && router.push(`/map?path=${encodeURIComponent(r.name)}`)}
                 className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 <td className="px-4 py-2.5 font-medium text-gray-900 whitespace-nowrap">{r.name}</td>
@@ -103,8 +105,8 @@ export default function DistrictsToWatch({ data, warnings, onViewAll }: { data: 
                 <td className="px-4 py-2.5 text-right font-mono text-gray-700">
                   {r.middleman === null ? <span className="text-gray-300">—</span> : `${r.middleman}%`}
                 </td>
-                <td className={`px-4 py-2.5 text-right font-mono ${r.warnings > 0 ? "text-red-600 font-medium" : "text-gray-700"}`}>
-                  {r.warnings}
+                <td className="px-4 py-2.5 text-right font-mono text-gray-700">
+                  {r.warnings > 0 ? r.warnings : <span className="text-gray-300">—</span>}
                 </td>
               </tr>
             ))}

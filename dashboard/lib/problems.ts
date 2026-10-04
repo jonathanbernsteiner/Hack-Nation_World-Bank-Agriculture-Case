@@ -1,9 +1,11 @@
 // Pure helpers for the Warnings page: problem reports by district, per week, and totals.
 
-import type { DashboardData } from "./types";
+import { inArea, inWindow } from "./aggregate";
+import type { AreaPath, DashboardData } from "./types";
 
 const DAY_MS = 86_400_000;
 const TOP_PROBLEMS = 4;
+const DEFAULT_DAYS = 90;
 export const OTHER_KEY = "other";
 
 export interface DistrictProblemRow {
@@ -50,11 +52,17 @@ function weekStartOf(date: string): string {
 }
 
 function recentProblems(data: DashboardData, days: number) {
-  const since = addDays(data.today, -days);
-  return data.problems.filter((p) => p.date > since && p.date <= data.today);
+  return data.problems.filter((p) => inWindow(p.date, data.today, days));
 }
 
-export function problemsByDistrict(data: DashboardData, days = 90): DistrictProblemRow[] {
+/** Distinct farmers in the area who reported any problem in the `days` days ending today (a farm with
+ *  two problems counts once, unlike summing the per-problem counts). */
+export function problemFarms(data: DashboardData, path: AreaPath, days = DEFAULT_DAYS): number {
+  const villageIds = new Set(data.villages.filter((v) => inArea(v, path)).map((v) => v.id));
+  return new Set(recentProblems(data, days).filter((p) => villageIds.has(p.villageId)).map((p) => p.farmerId)).size;
+}
+
+export function problemsByDistrict(data: DashboardData, days = DEFAULT_DAYS): DistrictProblemRow[] {
   const villages = new Map(data.villages.map((v) => [v.id, v]));
   const groups = new Map<string, { district: string; region: string; problem: string; farmers: Set<number>; reports: number; lastDate: string }>();
   for (const report of recentProblems(data, days)) {
@@ -81,7 +89,7 @@ export function problemsByDistrict(data: DashboardData, days = 90): DistrictProb
     .sort((a, b) => b.farmers - a.farmers || b.reports - a.reports || a.district.localeCompare(b.district));
 }
 
-export function problemTotals(data: DashboardData, days = 90): ProblemTotal[] {
+export function problemTotals(data: DashboardData, days = DEFAULT_DAYS): ProblemTotal[] {
   const groups = new Map<string, { farmers: Set<number>; reports: number }>();
   for (const report of recentProblems(data, days)) {
     const group = groups.get(report.problem) ?? { farmers: new Set<number>(), reports: 0 };

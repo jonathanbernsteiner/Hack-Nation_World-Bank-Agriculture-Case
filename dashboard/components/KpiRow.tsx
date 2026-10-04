@@ -1,4 +1,4 @@
-import { AlertTriangle, Phone, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, Phone, Scale, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { formatIndex, formatNumber } from "@/lib/format";
 import type { Kpis } from "@/lib/types";
@@ -28,11 +28,6 @@ function Tile({ icon, value, label, sub }: TileProps) {
   );
 }
 
-function arrow(current: number, prev: number | undefined): string {
-  if (prev === undefined || current === prev) return "";
-  return current > prev ? " ▲" : " ▼";
-}
-
 function callsDelta(current: number, prev: number | undefined): string {
   if (prev === undefined) return "last 30 days";
   if (prev === 0) return "no calls before";
@@ -42,7 +37,7 @@ function callsDelta(current: number, prev: number | undefined): string {
 
 export default function KpiRow({ kpis }: { kpis: Kpis }) {
   const icon = (Icon: typeof Users) => <Icon size={16} color="#3B82F6" />;
-  const newSub = `+${formatNumber(kpis.newFarmers30d)} in 30 days${arrow(kpis.newFarmers30d, kpis.newFarmersPrev30d)}`;
+  const newSub = `+${formatNumber(kpis.newFarmers30d)} in 30 days`;
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <Tile
@@ -52,7 +47,7 @@ export default function KpiRow({ kpis }: { kpis: Kpis }) {
         sub={newSub}
       />
       <Tile icon={icon(Phone)} value={formatNumber(kpis.callsLast30d)} label="Calls, 30 days" sub={callsDelta(kpis.callsLast30d, kpis.callsPrev30d)} />
-      <Tile icon={icon(TrendingUp)} value={formatIndex(kpis.priceIndex)} label="Price vs national, 90 days" sub="farmer-reported" />
+      <Tile icon={icon(Scale)} value={formatIndex(kpis.priceIndex)} label="Price vs national, 90 days" sub="farmer-reported" />
       <Tile icon={icon(AlertTriangle)} value={formatNumber(kpis.activeWarnings)} label="Active warnings" sub="need an officer check" />
     </div>
   );

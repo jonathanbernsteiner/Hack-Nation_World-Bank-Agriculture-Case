@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
-import { AlertTriangle, LayoutDashboard, Map as MapIcon, Search, Settings, TrendingUp, Users } from "lucide-react";
+import { usePathname } from "next/navigation";
+
+import { AlertTriangle, LayoutDashboard, Map as MapIcon, MapPin, Settings, TrendingUp, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import GlobalSearch from "./GlobalSearch";
 
 export interface NavItem {
   href: string;
@@ -15,6 +16,7 @@ export interface NavItem {
 export const NAV: NavItem[] = [
   { href: "/", label: "Overview", icon: LayoutDashboard },
   { href: "/map", label: "Map", icon: MapIcon },
+  { href: "/areas", label: "Areas", icon: MapPin },
   { href: "/farmers", label: "Farmers", icon: Users },
   { href: "/prices", label: "Prices", icon: TrendingUp },
   { href: "/warnings", label: "Warnings", icon: AlertTriangle },
@@ -24,45 +26,6 @@ export const NAV: NavItem[] = [
 const MAIN_NAV = NAV.filter((item) => item.href !== "/settings");
 const SETTINGS_NAV = NAV.filter((item) => item.href === "/settings");
 
-function SearchPill() {
-  const router = useRouter();
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        inputRef.current?.focus();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
-  return (
-    <form
-      role="search"
-      className="absolute left-1/2 -translate-x-1/2 w-48 sm:w-64 md:w-80 xl:w-96 h-10 rounded-3xl border border-[#CBD5E1] bg-white hidden sm:flex items-center gap-2 px-4 focus-within:border-accent"
-      onSubmit={(e) => {
-        e.preventDefault();
-        const q = inputRef.current?.value.trim() ?? "";
-        router.push(q ? `/farmers?q=${encodeURIComponent(q)}` : "/farmers");
-      }}
-    >
-      <Search size={18} color="#94A3B8" className="shrink-0" />
-      <input
-        ref={inputRef}
-        type="search"
-        aria-label="Search farmers, villages, districts"
-        placeholder="Search farmers, villages, districts"
-        className="w-full bg-transparent text-sm text-ink placeholder:text-faint outline-none"
-        onKeyDown={(e) => {
-          if (e.key === "Escape") inputRef.current?.blur();
-        }}
-      />
-    </form>
-  );
-}
 
 function SideLink({ item, pathname }: { item: NavItem; pathname: string }) {
   const { href, label, icon: Icon } = item;
@@ -114,10 +77,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       <header className="fixed top-0 left-0 md:left-14 right-0 h-14 z-50 bg-white border-b border-line px-4 md:px-6 flex items-center justify-between">
         <div className="flex items-baseline gap-3 min-w-0 max-w-[25%] lg:max-w-[22%]">
-          <p className="text-lg font-semibold text-ink truncate">{current?.label ?? "Coffee hotline"}</p>
-          <span className="text-sm text-faint hidden 2xl:inline whitespace-nowrap">Coffee hotline</span>
+          <p className="text-lg font-semibold text-ink truncate">{current?.label ?? "Overview"}</p>
         </div>
-        <SearchPill />
+        <GlobalSearch />
       </header>
 
       <nav className="fixed bottom-0 inset-x-0 h-14 bg-navy z-40 md:hidden flex justify-around">

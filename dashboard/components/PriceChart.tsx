@@ -41,7 +41,11 @@ export default function PriceChart({ area }: PriceChartProps) {
                 formatter={(value, name) => [`${formatUgx(typeof value === "number" ? value : null)}/kg`, String(name)]}
                 contentStyle={{ background: "#fff", border: "1px solid #E2E8F0", borderRadius: 8, fontSize: 13 }}
               />
-              <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
+              <Legend
+                iconType="circle"
+                wrapperStyle={{ fontSize: 12 }}
+                formatter={(value) => <span className="text-gray-600">{value}</span>}
+              />
               <Line
                 type="monotone"
                 dataKey="median"

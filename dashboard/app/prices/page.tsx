@@ -1,17 +1,10 @@
-import LoadError from "@/components/LoadError";
 import PricesView from "@/components/PricesView";
 import { loadDashboardData } from "@/lib/queries";
-import type { DashboardData } from "@/lib/types";
 
 export const revalidate = 120;
 
+// Load errors reach app/error.tsx (see app/page.tsx).
 export default async function PricesPage() {
-  let data: DashboardData | null = null;
-  try {
-    data = await loadDashboardData();
-  } catch {
-    data = null;
-  }
-  if (!data) return <LoadError />;
+  const data = await loadDashboardData();
   return <PricesView data={data} />;
 }

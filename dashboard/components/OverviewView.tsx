@@ -3,7 +3,7 @@
 import { ArrowRight } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { computeWarnings, kpis as computeKpis } from "@/lib/aggregate";
-import type { DashboardData } from "@/lib/types";
+import type { DashboardData, Warning } from "@/lib/types";
 import DistrictsToWatch from "./DistrictsToWatch";
 import DistrictTable from "./DistrictTable";
 import KpiRow from "./KpiRow";
@@ -12,6 +12,8 @@ import SidePanel from "./SidePanel";
 import WarningRow from "./WarningRow";
 
 const MAX_WARNINGS = 3;
+
+const mapHref = (w: Warning) => `/map?path=${encodeURIComponent(w.path.join("|"))}`;
 
 export default function OverviewView({ data }: { data: DashboardData }) {
   const warnings = useMemo(() => computeWarnings(data), [data]);
@@ -22,7 +24,6 @@ export default function OverviewView({ data }: { data: DashboardData }) {
 
   return (
     <div className="p-4 sm:p-6 flex flex-col gap-6">
-      <h1 className="text-2xl font-bold text-gray-900">Overview</h1>
       <KpiRow kpis={kpis} />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <section>
@@ -38,7 +39,7 @@ export default function OverviewView({ data }: { data: DashboardData }) {
             ) : (
               <ul>
                 {shown.map((w) => (
-                  <WarningRow key={w.id} warning={w} />
+                  <WarningRow key={w.id} warning={w} href={mapHref(w)} />
                 ))}
               </ul>
             )}

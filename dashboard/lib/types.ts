@@ -38,9 +38,11 @@ export interface Farmer {
   id: number;
   firstName: string; // first name only; PINs and phone numbers never leave the database
   villageId: number;
-  registeredAt: string; // ISO timestamp
+  registeredAt: string; // ISO timestamp (display)
+  registeredOn: string; // YYYY-MM-DD (Kampala) of registeredAt; use it for day windows
   callCount: number;
-  lastCallAt: string | null; // ISO timestamp
+  lastCallAt: string | null; // ISO timestamp (display)
+  lastCallOn: string | null; // YYYY-MM-DD (Kampala) of lastCallAt; use it for day windows
   isSynthetic: boolean;
 }
 
@@ -71,13 +73,13 @@ export interface ReferencePrice {
 }
 
 export interface DashboardData {
-  today: string; // YYYY-MM-DD in Africa/Kampala; every time window is relative to this
+  today: string; // YYYY-MM-DD: DASHBOARD_AS_OF if set, else today in Africa/Kampala; every time window is relative to this
   villages: Village[];
   farmers: Farmer[];
   sales: Sale[];
   problems: ProblemReport[];
   reference: ReferencePrice[];
-  callsLast30d: number;
+  callsLast30d: number; // calls on the 30 Kampala days ending today (inclusive)
   callsPrev30d?: number; // calls in the 30 days before the last 30
   callsTotal: number;
   hasSynthetic: boolean;
@@ -87,8 +89,9 @@ export interface DashboardData {
 
 export interface FormPrice {
   form: CoffeeForm;
-  median: number | null; // UGX/kg, last 12 months; null when < MIN_SALES sales or < MIN_FARMERS farmers
+  median: number | null; // UGX/kg, last 12 months (365 days); null when < MIN_SALES sales or < MIN_FARMERS farmers
   national: number | null; // median of the month-matched national reference over the same sales (comparable with `median`)
+  index: number | null; // median of per-sale indexes (price / national same month+form); same window and minimums as `median`
   sales: number;
 }
 
@@ -100,7 +103,7 @@ export interface BuyerPrice {
 
 export interface MonthlyPoint {
   month: string; // YYYY-MM
-  median: number | null; // area median for `form` that month (no minimum; chart only)
+  median: number | null; // area median for `form` that month; null below MIN_MONTHLY_SALES (chart only)
   national: number | null;
 }
 
@@ -129,13 +132,13 @@ export interface AreaSummary {
   lon: number;
   villages: number;
   farmers: number;
-  newFarmers90d: number;
+  newFarmers90d: number; // registered (Kampala date) in the 90 days ending today
   calls: number; // total calls by its farmers
-  priceIndex: number | null; // last 12 months, all forms; null below the minimums
+  priceIndex: number | null; // last 12 months (365 days), all forms; null below the minimums
   priceByForm: FormPrice[]; // always all three forms, in order kiboko, faq, parchment
   priceByBuyer: BuyerPrice[]; // middleman, cooperative, other
   mainForm: CoffeeForm | null; // form with the most sales in the area
-  monthly: MonthlyPoint[]; // last 12 months for mainForm
+  monthly: MonthlyPoint[]; // last 12 calendar months for mainForm (sales from the 365-day window)
   problems90d: { problem: string; farmers: number }[]; // distinct farmers per problem, last 90 days, most first
   warnings: Warning[]; // active warnings inside this area
   isSynthetic: boolean; // true when every farmer in the area is synthetic
@@ -150,6 +153,7 @@ export interface FarmerRow {
   lastCallAt: string | null;
   lastSale: { date: string; form: CoffeeForm; ugxPerKg: number; buyerType: BuyerType | null } | null;
   villageMedian: number | null; // village median for lastSale.form (null below the minimums)
+  lastSaleVsVillage: number | null; // last sale's index / village median index for its form (month-aware; same as the Farmers page)
   problems: string[]; // problems reported in the last 90 days
   isSynthetic: boolean;
 }
@@ -162,7 +166,7 @@ export interface Kpis {
   newFarmersPrev30d: number; // registered in the 30 days before the last 30
   callsLast30d: number;
   callsPrev30d: number; // calls in the 30 days before the last 30
-  priceIndex: number | null; // national median price index, last 90 days
+  priceIndex: number | null; // national median price index, last 90 days (no future dates)
   activeWarnings: number;
 }
 
@@ -186,4 +190,11 @@ export const PROBLEM_WINDOW_DAYS = 30; // problem warning: same problem, same pa
 export const PROBLEM_MIN_FARMERS = 3; // ... reported by at least 3 different farmers
 export const PROBLEM_BASELINE_WEEKS = 12; // "unusual": more farms in the window than reported it in the 12 weeks before
 export const PRICE_WINDOW_DAYS = 90; // price warning: district median over the last 90 days ...
-export const PRICE_LOW_INDEX = 0.85; // ... at least 15% below the national reference
+export const PRICE_LOW_INDEX = 0.85; // ... at least 15% below the national reference (rounded percent, as shown)
+export const PRICE_WARNING_MIN_SALES = 10; // ... from at least 10 sales ...
+export const PRICE_WARNING_MIN_FARMERS = 5; // ... by at least 5 farmers (median per farmer first, then across farmers)
+export const PRICE_YEAR_DAYS = 365; // "last 12 months" = rolling 365 days ending today
+export const MIN_MONTHLY_SALES = 2; // a monthly chart point needs at least 2 sales
+export const REFERENCE_MAX_CARRY_MONTHS = 2; // a reference month is carried forward at most 2 months
+export const OUTLIER_MIN_RATIO = 0.3; // sales below 0.3x ...
+export const OUTLIER_MAX_RATIO = 3; // ... or above 3x the national reference (same month+form) are dropped on load

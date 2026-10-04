@@ -4,12 +4,17 @@ import { formatDate, formatIndex, labelProblem } from "./format";
 import {
   LEVELS,
   MIN_FARMERS,
+  MIN_MONTHLY_SALES,
   MIN_SALES,
   PRICE_LOW_INDEX,
+  PRICE_WARNING_MIN_FARMERS,
+  PRICE_WARNING_MIN_SALES,
   PRICE_WINDOW_DAYS,
+  PRICE_YEAR_DAYS,
   PROBLEM_BASELINE_WEEKS,
   PROBLEM_MIN_FARMERS,
   PROBLEM_WINDOW_DAYS,
+  REFERENCE_MAX_CARRY_MONTHS,
 } from "./types";
 import type {
   AreaPath,
@@ -34,9 +39,13 @@ import type {
 const FORMS: CoffeeForm[] = ["kiboko", "faq", "parchment"];
 const BUYERS: BuyerType[] = ["middleman", "cooperative", "other"];
 const UGANDA_CENTRE = { lat: 1.37, lon: 32.29 };
-const PRICE_MONTHS = 12;
+const CHART_MONTHS = 12;
 const NEW_FARMER_DAYS = 90;
 const PROBLEM_LOOKBACK_DAYS = 90;
+const KPI_WINDOW_DAYS = 30;
+const INTERPOLATED_SOURCE = "interpolated";
+/** Rounded percent at or below which an index is "low" (−15%); the same cut as the red pill. */
+const LOW_INDEX_PCT = Math.round((PRICE_LOW_INDEX - 1) * 100);
 
 // ---------- small helpers ----------
 
@@ -47,7 +56,7 @@ export function median(values: number[]): number | null {
   return sorted.length % 2 === 1 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
-function addDays(date: string, days: number): string {
+export function addDays(date: string, days: number): string {
   const [y, m, d] = date.split("-").map(Number);
   return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
 }
@@ -61,9 +70,22 @@ function monthOf(date: string): string {
   return date.slice(0, 7);
 }
 
-function lastMonths(today: string, count: number): string[] {
+/** Months elapsed from `from` to `to` (both YYYY-MM); negative when `to` is earlier. */
+function monthsBetween(from: string, to: string): number {
+  const [y1, m1] = from.split("-").map(Number);
+  const [y2, m2] = to.split("-").map(Number);
+  return (y2 - y1) * 12 + (m2 - m1);
+}
+
+/** The `count` calendar months ending with the month of `today`, oldest first. */
+export function lastMonths(today: string, count: number): string[] {
   const current = monthOf(today);
   return Array.from({ length: count }, (_, i) => addMonths(current, i - (count - 1)));
+}
+
+/** True when `date` (YYYY-MM-DD) is one of the `days` days ending on `today` (inclusive); future dates are excluded. */
+export function inWindow(date: string, today: string, days: number): boolean {
+  return date <= today && date > addDays(today, -days);
 }
 
 function distinctCount(values: number[]): number {
@@ -92,16 +114,34 @@ function sortedReference(reference: ReferencePrice[]): ReferencePrice[] {
   return sorted;
 }
 
-/** Reference for `month`; else the nearest earlier month; else the earliest one. */
+/** Reference for `month`, else the nearest earlier month if it is at most REFERENCE_MAX_CARRY_MONTHS older; else null. */
 export function referenceFor(reference: ReferencePrice[], form: CoffeeForm, month: string): number | null {
-  if (reference.length === 0) return null;
-  const sorted = sortedReference(reference);
-  let row = sorted[0];
-  for (const r of sorted) {
+  let row: ReferencePrice | undefined;
+  for (const r of sortedReference(reference)) {
     if (r.month > month) break;
     row = r;
   }
+  if (!row || monthsBetween(row.month, month) > REFERENCE_MAX_CARRY_MONTHS) return null;
   return row[form];
+}
+
+/** Last month with a published (not "interpolated") reference, YYYY-MM; null when there is none. */
+export function referenceAsOf(reference: ReferencePrice[]): string | null {
+  const published = sortedReference(reference).filter(
+    (r) => !r.source.toLowerCase().includes(INTERPOLATED_SOURCE),
+  );
+  return published.length === 0 ? null : published[published.length - 1].month;
+}
+
+/** Sale price / national reference for the sale's month and form (1.0 = national); null without a reference. */
+export function saleIndex(sale: Pick<Sale, "date" | "form" | "ugxPerKg">, reference: ReferencePrice[]): number | null {
+  const ref = referenceFor(reference, sale.form, monthOf(sale.date));
+  return ref !== null && ref > 0 ? sale.ugxPerKg / ref : null;
+}
+
+/** True when the index rounds to −15% or lower (the red pill and the price-warning cut). */
+export function isLowIndex(index: number | null): boolean {
+  return index !== null && Math.round((index - 1) * 100) <= LOW_INDEX_PCT;
 }
 
 /** Median of the month-matched reference over these sales, comparable with their median price. */
@@ -131,30 +171,81 @@ export function levelOf(path: AreaPath): Level {
 
 // ---------- price statistics ----------
 
-function meetsMinimums(sales: Sale[]): boolean {
-  return sales.length >= MIN_SALES && distinctCount(sales.map((s) => s.farmerId)) >= MIN_FARMERS;
+interface IndexedSale {
+  farmerId: number;
+  index: number;
 }
 
-function medianPrice(sales: Sale[]): number | null {
+function meetsMinimums(rows: { farmerId: number }[], minSales = MIN_SALES, minFarmers = MIN_FARMERS): boolean {
+  return rows.length >= minSales && distinctCount(rows.map((r) => r.farmerId)) >= minFarmers;
+}
+
+function indexedSales(sales: Sale[], reference: ReferencePrice[]): IndexedSale[] {
+  return sales.flatMap((sale) => {
+    const index = saleIndex(sale, reference);
+    return index === null ? [] : [{ farmerId: sale.farmerId, index }];
+  });
+}
+
+/** Median UGX/kg; null below MIN_SALES sales or MIN_FARMERS farmers. */
+export function medianPrice(sales: Sale[]): number | null {
   return meetsMinimums(sales) ? median(sales.map((s) => s.ugxPerKg)) : null;
 }
 
-function priceIndexOf(sales: Sale[], reference: ReferencePrice[]): number | null {
-  if (!meetsMinimums(sales)) return null;
-  const ratios: number[] = [];
-  for (const sale of sales) {
-    const ref = referenceFor(reference, sale.form, monthOf(sale.date));
-    if (ref !== null && ref > 0) ratios.push(sale.ugxPerKg / ref);
+/** Median of per-sale indexes vs national; null below MIN_SALES indexed sales or MIN_FARMERS farmers. */
+export function medianIndex(sales: Sale[], reference: ReferencePrice[]): number | null {
+  const rows = indexedSales(sales, reference);
+  return meetsMinimums(rows) ? median(rows.map((r) => r.index)) : null;
+}
+
+/** Monthly chart point: median UGX/kg, null below MIN_MONTHLY_SALES sales. */
+export function chartMedian(sales: Sale[]): number | null {
+  return sales.length >= MIN_MONTHLY_SALES ? median(sales.map((s) => s.ugxPerKg)) : null;
+}
+
+/** Sales of the last 12 months (rolling PRICE_YEAR_DAYS days ending today, no future dates). */
+export function yearSales(sales: Sale[], today: string): Sale[] {
+  return sales.filter((s) => inWindow(s.date, today, PRICE_YEAR_DAYS));
+}
+
+/** Sale index relative to the village: saleIndex / village median index for the same form (month-aware). */
+export function indexVsVillage(
+  sale: Pick<Sale, "date" | "form" | "ugxPerKg">,
+  villageIndex: number | null,
+  reference: ReferencePrice[],
+): number | null {
+  const own = saleIndex(sale, reference);
+  return own !== null && villageIndex !== null && villageIndex > 0 ? own / villageIndex : null;
+}
+
+export interface DistrictPriceIndex {
+  index: number | null; // median across farmers of each farmer's median index; null below the warning minimums
+  sales: number; // indexed sales in the window
+  farms: number; // distinct farmers selling in the window
+}
+
+/** Price-warning metric over the last PRICE_WINDOW_DAYS days: each farmer's median index first, then the
+ *  median across farmers, so one farmer's many sales cannot move it. Needs PRICE_WARNING_MIN_SALES sales
+ *  from PRICE_WARNING_MIN_FARMERS farmers. */
+export function farmerMedianIndex(sales: Sale[], reference: ReferencePrice[]): DistrictPriceIndex {
+  const rows = indexedSales(sales, reference);
+  const byFarmer = new Map<number, number[]>();
+  for (const r of rows) byFarmer.set(r.farmerId, [...(byFarmer.get(r.farmerId) ?? []), r.index]);
+  const enough = meetsMinimums(rows, PRICE_WARNING_MIN_SALES, PRICE_WARNING_MIN_FARMERS);
+  const perFarmer = [...byFarmer.values()].map((indexes) => median(indexes) as number);
+  return { index: enough ? median(perFarmer) : null, sales: rows.length, farms: byFarmer.size };
+}
+
+/** The district 90-day index used by the price warning, the Prices page and the district table. */
+export function districtPriceIndexes(data: DashboardData): Map<string, DistrictPriceIndex> {
+  const districtOf = new Map(data.villages.map((v) => [v.id, v.district]));
+  const salesBy = new Map<string, Sale[]>();
+  for (const district of new Set(districtOf.values())) salesBy.set(district, []);
+  for (const sale of data.sales) {
+    const district = districtOf.get(sale.villageId);
+    if (district !== undefined && inWindow(sale.date, data.today, PRICE_WINDOW_DAYS)) salesBy.get(district)?.push(sale);
   }
-  return median(ratios);
-}
-
-function salesSince(sales: Sale[], fromDate: string): Sale[] {
-  return sales.filter((s) => s.date >= fromDate);
-}
-
-function priceWindowStart(today: string): string {
-  return `${lastMonths(today, PRICE_MONTHS)[0]}-01`;
+  return new Map([...salesBy].map(([district, sales]) => [district, farmerMedianIndex(sales, data.reference)]));
 }
 
 // ---------- summaries ----------
@@ -176,9 +267,9 @@ function mainFormOf(sales: Sale[]): CoffeeForm | null {
 }
 
 function monthlySeries(sales: Sale[], form: CoffeeForm, data: DashboardData): MonthlyPoint[] {
-  return lastMonths(data.today, PRICE_MONTHS).map((month) => ({
+  return lastMonths(data.today, CHART_MONTHS).map((month) => ({
     month,
-    median: median(sales.filter((s) => s.form === form && monthOf(s.date) === month).map((s) => s.ugxPerKg)),
+    median: chartMedian(sales.filter((s) => s.form === form && monthOf(s.date) === month)),
     national: referenceFor(data.reference, form, month),
   }));
 }
@@ -191,12 +282,12 @@ export function summarize(data: DashboardData, path: AreaPath, allWarnings?: War
   const villages = data.villages.filter((v) => inArea(v, path));
   const villageIds = new Set(villages.map((v) => v.id));
   const farmers = data.farmers.filter((f) => villageIds.has(f.villageId));
-  const sales = salesSince(
+  const sales = yearSales(
     data.sales.filter((s) => villageIds.has(s.villageId)),
-    priceWindowStart(data.today),
+    data.today,
   );
   const problemsRecent = data.problems.filter(
-    (p) => villageIds.has(p.villageId) && p.date > addDays(data.today, -PROBLEM_LOOKBACK_DAYS),
+    (p) => villageIds.has(p.villageId) && inWindow(p.date, data.today, PROBLEM_LOOKBACK_DAYS),
   );
   const warnings = (allWarnings ?? computeWarnings(data)).filter((w) => startsWithPath(w, path));
 
@@ -206,15 +297,15 @@ export function summarize(data: DashboardData, path: AreaPath, allWarnings?: War
       form,
       median: medianPrice(formSales),
       national: nationalFor(formSales, data.reference, form),
+      index: medianIndex(formSales, data.reference),
       sales: formSales.length,
     };
   });
   const priceByBuyer: BuyerPrice[] = BUYERS.map((buyer) => {
     const buyerSales = sales.filter((s) => s.buyerType === buyer);
-    return { buyer, priceIndex: priceIndexOf(buyerSales, data.reference), sales: buyerSales.length };
+    return { buyer, priceIndex: medianIndex(buyerSales, data.reference), sales: buyerSales.length };
   });
   const mainForm = mainFormOf(sales);
-  const newFarmerCutoff = addDays(data.today, -NEW_FARMER_DAYS);
 
   return {
     path,
@@ -224,9 +315,9 @@ export function summarize(data: DashboardData, path: AreaPath, allWarnings?: War
     ...centreOf(villages),
     villages: villages.length,
     farmers: farmers.length,
-    newFarmers90d: farmers.filter((f) => f.registeredAt.slice(0, 10) > newFarmerCutoff).length,
+    newFarmers90d: farmers.filter((f) => inWindow(f.registeredOn, data.today, NEW_FARMER_DAYS)).length,
     calls: farmers.reduce((sum, f) => sum + f.callCount, 0),
-    priceIndex: priceIndexOf(sales, data.reference),
+    priceIndex: medianIndex(sales, data.reference),
     priceByForm,
     priceByBuyer,
     mainForm,
@@ -318,14 +409,9 @@ function problemWarnings(data: DashboardData): Warning[] {
 }
 
 function priceWarnings(data: DashboardData): Warning[] {
-  const windowStart = addDays(data.today, -(PRICE_WINDOW_DAYS - 1));
-  const districts = [...new Set(data.villages.map((v) => v.district))];
   const warnings: Warning[] = [];
-  for (const district of districts) {
-    const ids = new Set(data.villages.filter((v) => v.district === district).map((v) => v.id));
-    const sales = data.sales.filter((s) => ids.has(s.villageId) && s.date >= windowStart && s.date <= data.today);
-    const index = priceIndexOf(sales, data.reference);
-    if (index === null || index > PRICE_LOW_INDEX) continue;
+  for (const [district, { index, sales, farms }] of districtPriceIndexes(data)) {
+    if (index === null || !isLowIndex(index)) continue;
     warnings.push({
       id: `price:${district}`,
       kind: "price",
@@ -334,8 +420,8 @@ function priceWarnings(data: DashboardData): Warning[] {
       level: "district",
       areaName: district,
       title: `Low prices in ${district}`,
-      detail: `${formatIndex(index)} vs national · ${sales.length} sales · ${PRICE_WINDOW_DAYS} days`,
-      farms: distinctCount(sales.map((s) => s.farmerId)),
+      detail: `${formatIndex(index)} vs national · ${sales} sales · ${farms} farms · ${PRICE_WINDOW_DAYS} days`,
+      farms,
       place: district,
       ...centreOf(data.villages.filter((v) => v.district === district)),
     });
@@ -355,19 +441,17 @@ export function computeWarnings(data: DashboardData): Warning[] {
 export function kpis(data: DashboardData, warnings?: Warning[]): Kpis {
   const villageIds = new Set(data.farmers.map((f) => f.villageId));
   const farmedVillages = data.villages.filter((v) => villageIds.has(v.id));
-  const recentSales = data.sales.filter((s) => s.date > addDays(data.today, -PRICE_WINDOW_DAYS));
-  const cutoff = addDays(data.today, -30);
-  const prevCutoff = addDays(data.today, -60);
-  const registeredDay = (f: Farmer) => f.registeredAt.slice(0, 10);
+  const recentSales = data.sales.filter((s) => inWindow(s.date, data.today, PRICE_WINDOW_DAYS));
+  const prevEnd = addDays(data.today, -KPI_WINDOW_DAYS);
   return {
     farmers: data.farmers.length,
     districts: new Set(farmedVillages.map((v) => v.district)).size,
     villages: farmedVillages.length,
-    newFarmers30d: data.farmers.filter((f) => registeredDay(f) > cutoff).length,
-    newFarmersPrev30d: data.farmers.filter((f) => registeredDay(f) > prevCutoff && registeredDay(f) <= cutoff).length,
+    newFarmers30d: data.farmers.filter((f) => inWindow(f.registeredOn, data.today, KPI_WINDOW_DAYS)).length,
+    newFarmersPrev30d: data.farmers.filter((f) => inWindow(f.registeredOn, prevEnd, KPI_WINDOW_DAYS)).length,
     callsLast30d: data.callsLast30d,
     callsPrev30d: data.callsPrev30d ?? 0,
-    priceIndex: priceIndexOf(recentSales, data.reference),
+    priceIndex: medianIndex(recentSales, data.reference),
     activeWarnings: (warnings ?? computeWarnings(data)).length,
   };
 }
@@ -375,6 +459,7 @@ export function kpis(data: DashboardData, warnings?: Warning[]): Kpis {
 function toFarmerRow(farmer: Farmer, village: Village, data: DashboardData, villageSales: Sale[]): FarmerRow {
   const own = data.sales.filter((s) => s.farmerId === farmer.id).sort((a, b) => b.date.localeCompare(a.date));
   const last = own[0];
+  const formSales = last ? villageSales.filter((s) => s.form === last.form) : [];
   return {
     id: farmer.id,
     firstName: farmer.firstName,
@@ -383,11 +468,12 @@ function toFarmerRow(farmer: Farmer, village: Village, data: DashboardData, vill
     callCount: farmer.callCount,
     lastCallAt: farmer.lastCallAt,
     lastSale: last ? { date: last.date, form: last.form, ugxPerKg: last.ugxPerKg, buyerType: last.buyerType } : null,
-    villageMedian: last ? medianPrice(villageSales.filter((s) => s.form === last.form)) : null,
+    villageMedian: last ? medianPrice(formSales) : null,
+    lastSaleVsVillage: last ? indexVsVillage(last, medianIndex(formSales, data.reference), data.reference) : null,
     problems: [
       ...new Set(
         data.problems
-          .filter((p) => p.farmerId === farmer.id && p.date > addDays(data.today, -PROBLEM_LOOKBACK_DAYS))
+          .filter((p) => p.farmerId === farmer.id && inWindow(p.date, data.today, PROBLEM_LOOKBACK_DAYS))
           .map((p) => p.problem),
       ),
     ],
@@ -398,9 +484,9 @@ function toFarmerRow(farmer: Farmer, village: Village, data: DashboardData, vill
 export function farmersIn(data: DashboardData, path: AreaPath): FarmerRow[] {
   const village = data.villages.find((v) => inArea(v, path));
   if (!village) return [];
-  const villageSales = salesSince(
+  const villageSales = yearSales(
     data.sales.filter((s) => s.villageId === village.id),
-    priceWindowStart(data.today),
+    data.today,
   );
   return data.farmers
     .filter((f) => f.villageId === village.id)

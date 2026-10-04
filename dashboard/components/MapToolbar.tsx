@@ -1,10 +1,11 @@
 "use client";
 
 import { AlertTriangle, TrendingUp, Users } from "lucide-react";
-import type { ComponentType } from "react";
 import type { AreaPath, Level, MapLayer } from "@/lib/types";
 import { LEVELS } from "@/lib/types";
 import { labelLevel } from "@/lib/format";
+import Segmented from "./Segmented";
+import type { SegmentedOption } from "./Segmented";
 
 interface MapToolbarProps {
   path: AreaPath;
@@ -13,16 +14,11 @@ interface MapToolbarProps {
   onSelect: (path: AreaPath) => void;
 }
 
-const CHIPS: { layer: MapLayer; label: string; Icon: ComponentType<{ size?: number }> }[] = [
-  { layer: "farmers", label: "Farmers", Icon: Users },
-  { layer: "prices", label: "Prices", Icon: TrendingUp },
-  { layer: "warnings", label: "Warnings", Icon: AlertTriangle },
+const LAYER_OPTIONS: SegmentedOption<MapLayer>[] = [
+  { value: "farmers", label: "Farmers", icon: Users },
+  { value: "prices", label: "Prices", icon: TrendingUp },
+  { value: "warnings", label: "Warnings", icon: AlertTriangle },
 ];
-
-const CHIP_BASE = "shrink-0 whitespace-nowrap px-3 py-2 text-sm rounded-lg border inline-flex items-center gap-1.5 transition-colors";
-const CHIP_OFF = "bg-white text-gray-600 border-gray-200 hover:bg-gray-50";
-const CHIP_ON = "bg-gray-800 text-white border-gray-800";
-const CHIP_ON_ALERT = "bg-red-50 text-red-700 border-red-200";
 
 export default function MapToolbar({ path, layer, onLayer, onSelect }: MapToolbarProps) {
   const names = ["Uganda", ...path];
@@ -53,24 +49,7 @@ export default function MapToolbar({ path, layer, onLayer, onSelect }: MapToolba
         <span className="ml-1 text-xs text-faint whitespace-nowrap shrink-0">{labelLevel(level)}</span>
       </nav>
 
-      <div className="flex shrink-0 flex-nowrap items-center gap-2">
-        {CHIPS.map(({ layer: chipLayer, label, Icon }) => {
-          const isOn = chipLayer === layer;
-          const onClass = chipLayer === "warnings" ? CHIP_ON_ALERT : CHIP_ON;
-          return (
-            <button
-              key={chipLayer}
-              type="button"
-              aria-pressed={isOn}
-              className={`${CHIP_BASE} ${isOn ? onClass : CHIP_OFF}`}
-              onClick={() => onLayer(chipLayer)}
-            >
-              <Icon size={14} />
-              {label}
-            </button>
-          );
-        })}
-      </div>
+      <Segmented options={LAYER_OPTIONS} value={layer} onChange={onLayer} ariaLabel="Map layer" />
     </div>
   );
 }

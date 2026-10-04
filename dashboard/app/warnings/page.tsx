@@ -1,16 +1,10 @@
-import LoadError from "@/components/LoadError";
 import WarningsView from "@/components/WarningsView";
 import { loadDashboardData } from "@/lib/queries";
-import type { DashboardData } from "@/lib/types";
 
 export const revalidate = 120;
 
+// Load errors reach app/error.tsx (see app/page.tsx).
 export default async function WarningsPage() {
-  let data: DashboardData;
-  try {
-    data = await loadDashboardData();
-  } catch {
-    return <LoadError />;
-  }
+  const data = await loadDashboardData();
   return <WarningsView data={data} />;
 }

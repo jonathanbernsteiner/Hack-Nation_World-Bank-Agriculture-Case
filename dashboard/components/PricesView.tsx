@@ -8,9 +8,9 @@ import type { CoffeeForm, DashboardData, Sale } from "@/lib/types";
 import { MIN_FARMERS, MIN_SALES } from "@/lib/types";
 import { formatIndex, formatMonth, formatNumber, formatUgx } from "@/lib/format";
 import { buyerComparison, districtPrices, FORMS, monthlyByBuyer, spread } from "@/lib/prices";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import DistrictTable, { middlemanSharePct, priceIndexOfSales } from "./DistrictTable";
-import { indexPillClass } from "./FarmersTable";
+import Segmented from "./Segmented";
 
 const CHART_HEIGHT = 280;
 const TICK = { fontSize: 12, fill: "#94A3B8" };
@@ -40,9 +40,11 @@ function Tile({ icon, value, label, sub }: { icon: ReactNode; value: string; lab
 
 const VILLAGE_DAYS = 90;
 const VILLAGE_ROWS = 10;
+const MAX_PER_DISTRICT = 3;
 const MS_PER_DAY = 86_400_000;
 
 function VillagesLowest({ data }: { data: DashboardData }) {
+  const router = useRouter();
   const rows = useMemo(() => {
     const from = new Date(Date.parse(`${data.today}T00:00:00Z`) - (VILLAGE_DAYS - 1) * MS_PER_DAY).toISOString().slice(0, 10);
     const byVillage = new Map<number, Sale[]>();
@@ -50,6 +52,7 @@ function VillagesLowest({ data }: { data: DashboardData }) {
       if (s.date < from || s.date > data.today) continue;
       byVillage.set(s.villageId, [...(byVillage.get(s.villageId) ?? []), s]);
     }
+    const perDistrict = new Map<string, number>();
     return data.villages
       .map((v) => {
         const sales = byVillage.get(v.id) ?? [];
@@ -57,6 +60,11 @@ function VillagesLowest({ data }: { data: DashboardData }) {
       })
       .filter((r): r is typeof r & { index: number } => r.index !== null)
       .sort((a, b) => a.index - b.index || b.sales - a.sales)
+      .filter((r) => {
+        const n = perDistrict.get(r.village.district) ?? 0;
+        perDistrict.set(r.village.district, n + 1);
+        return n < MAX_PER_DISTRICT;
+      })
       .slice(0, VILLAGE_ROWS);
   }, [data]);
 
@@ -66,7 +74,7 @@ function VillagesLowest({ data }: { data: DashboardData }) {
         className="text-base font-semibold text-ink mb-4"
         title={`Median needs ${MIN_SALES} sales from ${MIN_FARMERS} farmers.`}
       >
-        Villages paid least ({VILLAGE_DAYS} days)
+        Villages paid least, {VILLAGE_DAYS} days
       </h2>
       <div className="bg-white border border-line rounded-[14px] overflow-hidden">
         <div className="overflow-x-auto">
@@ -89,13 +97,17 @@ function VillagesLowest({ data }: { data: DashboardData }) {
               {rows.map(({ village: v, sales, index, middleman }) => {
                 const href = `/map?path=${encodeURIComponent([v.district, v.subCounty, v.parish, v.village].join("|"))}`;
                 return (
-                  <tr key={v.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
-                      <Link href={href} className="hover:underline">{v.village}</Link>
-                    </td>
+                  <tr
+                    key={v.id}
+                    tabIndex={0}
+                    onClick={() => router.push(href)}
+                    onKeyDown={(e) => e.key === "Enter" && router.push(href)}
+                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
+                  >
+                    <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">{v.village}</td>
                     <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{v.district}</td>
                     <td className="px-4 py-3 text-right whitespace-nowrap">
-                      <span className={indexPillClass(index)}>{formatIndex(index)}</span>
+                      <span className={`font-mono ${Math.round((index - 1) * 100) <= -15 ? "text-red-600 font-medium" : "text-gray-700"}`}>{formatIndex(index)}</span>
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-gray-700">{middleman === null ? "—" : `${middleman}%`}</td>
                     <td className="px-4 py-3 text-right font-mono text-gray-700">{sales}</td>
@@ -122,8 +134,6 @@ export default function PricesView({ data }: { data: DashboardData }) {
 
   return (
     <div className="p-4 sm:p-6 flex flex-col gap-6">
-      <h1 className="text-2xl font-bold text-gray-900">Prices</h1>
-
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Tile
           icon={<Scale size={20} color="#3B82F6" />}
@@ -148,20 +158,12 @@ export default function PricesView({ data }: { data: DashboardData }) {
       <div className="bg-white border border-line rounded-xl p-6">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <h2 className="text-base font-semibold text-ink">Price per kg by buyer</h2>
-          <div className="flex gap-1 shrink-0">
-            {FORMS.map((f) => (
-              <button
-                key={f}
-                type="button"
-                onClick={() => setForm(f)}
-                className={`px-3 py-1.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                  f === form ? "border-accent text-accent" : "border-transparent text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                {TAB_LABEL[f]}
-              </button>
-            ))}
-          </div>
+          <Segmented
+            ariaLabel="Coffee form"
+            value={form}
+            onChange={setForm}
+            options={FORMS.map((f) => ({ value: f, label: TAB_LABEL[f] }))}
+          />
         </div>
         {!hasChart ? (
           <p className="text-sm text-faint text-center py-10">Price history appears once farmers report sales.</p>
@@ -184,7 +186,11 @@ export default function PricesView({ data }: { data: DashboardData }) {
                   formatter={(value, name) => [`${formatUgx(typeof value === "number" ? value : null)}/kg`, String(name)]}
                   contentStyle={{ background: "#fff", border: "1px solid #E2E8F0", borderRadius: 8, fontSize: 13 }}
                 />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: 12, whiteSpace: "nowrap" }} />
+                <Legend
+                  iconType="circle"
+                  wrapperStyle={{ fontSize: 12, flexWrap: "wrap", justifyContent: "center", display: "flex" }}
+                  formatter={(value) => <span className="text-gray-600">{value}</span>}
+                />
                 {SERIES.map((s) => (
                   <Line
                     key={s.key}
@@ -194,7 +200,7 @@ export default function PricesView({ data }: { data: DashboardData }) {
                     stroke={s.color}
                     strokeWidth={2}
                     strokeDasharray={s.dashed ? "5 4" : undefined}
-                    dot={s.dashed ? false : { r: 3 }}
+                    dot={false}
                     connectNulls
                     isAnimationActive={false}
                   />
@@ -205,7 +211,7 @@ export default function PricesView({ data }: { data: DashboardData }) {
         )}
       </div>
 
-      <DistrictTable data={data} />
+      <DistrictTable data={data} columns={[]} defaultSort={{ key: "index", dir: "asc" }} />
 
       <VillagesLowest data={data} />
     </div>

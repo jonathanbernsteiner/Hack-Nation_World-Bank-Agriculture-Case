@@ -39,7 +39,6 @@ function Rows({ rows }: { rows: [string, string][] }) {
 export default function SettingsView() {
   return (
     <div className="p-4 sm:p-6 flex flex-col gap-6 max-w-3xl">
-      <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
       <section>
         <h2 className="text-base font-semibold text-ink mb-4">Workspace</h2>
         <Rows rows={WORKSPACE} />

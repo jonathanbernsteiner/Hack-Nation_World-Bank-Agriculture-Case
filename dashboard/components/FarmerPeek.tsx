@@ -50,7 +50,12 @@ function SalesChart({ detail }: { detail: FarmerDetail }) {
     .map((s) => ({ t: toTime(s.date), price: s.ugxPerKg, national: s.national }));
   if (points.length < 2) return null;
   return (
-    <div style={{ height: CHART_HEIGHT }} className="mb-4">
+    <div className="mb-4">
+      <div className="flex gap-4 text-xs text-muted mb-2">
+        <span className="inline-flex items-center gap-1.5"><span className="inline-block w-4 border-t-2" style={{ borderColor: BLUE }} />Sale price</span>
+        <span className="inline-flex items-center gap-1.5"><span className="inline-block w-4 border-t-2 border-dashed" style={{ borderColor: GRAY }} />National</span>
+      </div>
+      <div style={{ height: CHART_HEIGHT }}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={points} margin={{ top: 5, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid stroke="#F1F5F9" vertical={false} />
@@ -60,14 +65,17 @@ function SalesChart({ detail }: { detail: FarmerDetail }) {
             scale="time"
             domain={["dataMin", "dataMax"]}
             tickFormatter={(t: number) => tickLabel(t)}
-            tick={{ fontSize: 11, fill: GRAY }}
+            tick={{ fontSize: 12, fill: GRAY }}
+            axisLine={false}
+            tickLine={false}
           />
-          <YAxis width={44} tick={{ fontSize: 11, fill: GRAY }} tickFormatter={(v: number) => formatNumber(v)} domain={["auto", "auto"]} />
+          <YAxis width={44} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: GRAY }} tickFormatter={(v: number) => formatNumber(v)} domain={["auto", "auto"]} />
           <Tooltip formatter={(v) => `UGX ${formatNumber(Number(v))}/kg`} labelFormatter={(t) => formatDate(new Date(Number(t) + MS_PER_DAY / 2).toISOString())} />
-          <Line type="monotone" dataKey="national" name="National reference" stroke={GRAY} strokeDasharray="4 4" dot={false} isAnimationActive={false} />
-          <Line type="monotone" dataKey="price" name="Farmer" stroke={BLUE} strokeWidth={2} dot={{ r: 3 }} isAnimationActive={false} />
+          <Line type="monotone" dataKey="national" name="National" stroke={GRAY} strokeDasharray="4 4" dot={false} isAnimationActive={false} />
+          <Line type="monotone" dataKey="price" name="Sale price" stroke={BLUE} strokeWidth={2} dot={{ r: 3 }} isAnimationActive={false} />
         </LineChart>
       </ResponsiveContainer>
+      </div>
     </div>
   );
 }
@@ -89,7 +97,7 @@ function SalesCard({ detail }: { detail: FarmerDetail }) {
       ) : (
         <>
           <SalesChart detail={detail} />
-          <div className="overflow-x-auto">
+          <div className="border border-line rounded-[14px] overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-line bg-gray-50">
@@ -149,22 +157,24 @@ export default function FarmerPeek({ data, farmerId, onClose }: { data: Dashboar
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      const el = document.activeElement;
+      if (el instanceof HTMLElement && (el.matches("input, textarea, select, [contenteditable]") || el.closest("[role=dialog], [role=listbox]"))) return;
+      onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const position = isFull ? "left-0 md:left-14 w-auto right-0" : "right-0 left-auto";
+  const position = isFull ? "left-0 md:left-14 right-0" : "left-0 right-0 md:left-auto md:w-[min(max(880px,62vw),calc(100vw-56px))]";
   const p = detail?.profile;
   const path = p ? [p.village, p.parish, p.subCounty, p.district, p.region].join(" · ") : "";
   return (
     <aside
       aria-label="Farmer details"
-      style={isFull ? undefined : { width: "min(max(880px, 62vw), calc(100vw - 56px))" }}
-      className={`fixed top-14 bottom-0 ${position} bg-white border-l border-line shadow-xl z-40 flex flex-col transition-[width,left] duration-150`}
+      className={`fixed top-14 bottom-14 md:bottom-0 ${position} bg-white border-l border-line shadow-xl z-40 flex flex-col transition-[width,left] duration-150`}
     >
-      <div className="flex items-start justify-between gap-3 p-5 border-b border-line">
+      <div className="flex items-start justify-between gap-3 px-6 py-5 border-b border-line">
         {p ? (
           <div className="min-w-0 flex-1">
             <h2 className="text-lg font-semibold text-gray-900 truncate">{p.firstName}</h2>
@@ -179,14 +189,16 @@ export default function FarmerPeek({ data, farmerId, onClose }: { data: Dashboar
           <h2 className="text-lg font-semibold text-gray-900">Farmer not found</h2>
         )}
         <div className="flex gap-1 shrink-0">
-          <a
-            href={`${HOTLINE_URL}/demo/farmer/${farmerId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 mr-1 text-xs font-medium rounded-md bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 transition-colors whitespace-nowrap"
-          >
-            Call log <ExternalLink size={12} />
-          </a>
+          {p && (
+            <a
+              href={`${HOTLINE_URL}/demo/farmer/${farmerId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 mr-1 text-xs font-medium rounded-md bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 transition-colors whitespace-nowrap"
+            >
+              Call log <ExternalLink size={12} />
+            </a>
+          )}
           <button type="button" className={ICON_BTN} aria-label={isFull ? "Shrink panel" : "Expand panel"} onClick={() => setIsFull(!isFull)}>
             {isFull ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
           </button>

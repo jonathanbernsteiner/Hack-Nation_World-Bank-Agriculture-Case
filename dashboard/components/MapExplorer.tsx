@@ -1,8 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { childrenOf, computeWarnings, farmersIn, inArea, summarize } from "@/lib/aggregate";
 import type { AreaPath, DashboardData, MapLayer } from "@/lib/types";
 import AreaPanel from "./AreaPanel";
@@ -25,7 +25,27 @@ function pathFromParam(param: string | null, data: DashboardData): AreaPath {
 
 export default function MapExplorer({ data }: { data: DashboardData }) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [path, setPath] = useState<AreaPath>(() => pathFromParam(searchParams.get("path"), data));
+  const [hasUnknownPath, setHasUnknownPath] = useState(() => {
+    const param = searchParams.get("path");
+    return Boolean(param) && pathFromParam(param, data).length === 0;
+  });
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  const select = useCallback(
+    (next: AreaPath) => {
+      setPath(next);
+      setHasUnknownPath(false);
+      const query = next.length > 0 ? `?path=${encodeURIComponent(next.join("|"))}` : "";
+      router.replace(`/map${query}`, { scroll: false });
+    },
+    [router],
+  );
+
+  useEffect(() => {
+    panelRef.current?.scrollTo({ top: 0 });
+  }, [path]);
   const [layer, setLayer] = useState<MapLayer>("farmers");
 
   const warnings = useMemo(() => computeWarnings(data), [data]);
@@ -37,16 +57,22 @@ export default function MapExplorer({ data }: { data: DashboardData }) {
   );
 
   return (
-    <div className="p-4 sm:p-6 flex flex-col gap-6">
-      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_420px] gap-6">
-        <div className="bg-white border border-line rounded-xl overflow-hidden flex flex-col">
-          <MapToolbar path={path} layer={layer} onLayer={setLayer} onSelect={setPath} />
-          <div className="h-[60vh] min-h-[420px] xl:h-[calc(100vh-140px)] xl:min-h-[520px]">
-            <MapView areas={children} selected={area} layer={layer} warnings={area.warnings} onSelect={setPath} />
+    <div className="p-4 sm:p-6 flex flex-col gap-4">
+      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_420px] gap-6 xl:h-[calc(100vh-104px)]">
+        <div className="bg-white border border-line rounded-xl overflow-hidden flex flex-col xl:h-full xl:min-h-0">
+          <MapToolbar path={path} layer={layer} onLayer={setLayer} onSelect={select} />
+          <div className="h-[60vh] min-h-[420px] xl:h-auto xl:min-h-0 xl:flex-1">
+            <MapView areas={children} selected={area} layer={layer} warnings={area.warnings} onSelect={select} />
           </div>
         </div>
-        <div className="xl:max-h-[calc(100vh-112px)] xl:overflow-y-auto">
-          <AreaPanel area={area} childAreas={children} farmers={farmers} onSelect={setPath} />
+        <div ref={panelRef} className="xl:h-full xl:min-h-0 xl:overflow-y-auto">
+          <AreaPanel
+            area={area}
+            childAreas={children}
+            farmers={farmers}
+            onSelect={select}
+            notice={hasUnknownPath ? "Area not found — showing Uganda" : null}
+          />
         </div>
       </div>
       <p className="text-xs text-faint">

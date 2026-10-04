@@ -13,7 +13,6 @@ const SECTIONS: { title: string; items: string[] }[] = [
       "First names only",
       "PINs and phone numbers stay in the database",
       "No export of individual records",
-      "Team login required",
     ],
   },
 ];

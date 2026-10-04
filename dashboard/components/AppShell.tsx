@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { AlertTriangle, Database, LayoutDashboard, LogOut, Map as MapIcon, Search, Settings, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, Database, LayoutDashboard, Map as MapIcon, Search, Settings, TrendingUp, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface NavItem {
@@ -119,15 +119,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <span className="text-sm text-faint hidden 2xl:inline whitespace-nowrap">Coffee hotline</span>
         </div>
         <SearchPill />
-        <div className="flex items-center gap-3 shrink-0 ml-auto whitespace-nowrap">
-          <a
-            href="/api/logout"
-            className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <LogOut size={16} />
-            <span className="hidden sm:inline">Sign out</span>
-          </a>
-        </div>
       </header>
 
       <nav className="fixed bottom-0 inset-x-0 h-14 bg-navy z-40 md:hidden flex justify-around">

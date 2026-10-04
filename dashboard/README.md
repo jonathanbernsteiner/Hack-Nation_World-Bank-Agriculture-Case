@@ -15,15 +15,15 @@ Read-only dashboard for World Bank staff, extension officers and cooperatives, b
 
 ```bash
 npm install
-cp .env.example .env.local   # DATABASE_URL, DEMO_USER, DEMO_PASSWORD
-npm run dev                  # http://localhost:3000 (Basic auth)
+cp .env.example .env.local   # DATABASE_URL
+npm run dev                  # http://localhost:3000
 npm test                     # vitest: medians, warning rules, price index
 ```
 
 ## How it works
 
 - Server components load all rows once (`lib/queries.ts`, server-side SQL with `DATABASE_URL`); `lib/aggregate.ts`, `lib/prices.ts`, `lib/problems.ts` and `lib/registry.ts` are pure functions with tests.
-- Basic auth for every route in `proxy.ts` (fails closed). PINs and phone numbers are never selected.
+- No login: the dashboard is public. PINs and phone numbers are never selected.
 - National reference: `data/price_reference.csv` (UCDA / MAAIF Coffee Department monthly farm-gate averages).
 - Weather: Open-Meteo (`app/api/weather`). Map tiles: OpenStreetMap.
 - Look and components follow `../DESIGN.md`.

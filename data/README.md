@@ -1,8 +1,8 @@
 # Coffee disease reference
 
-A cited reference of what can go wrong on an arabica coffee farm, so the local LLM can go from what a farmer says on the call ("the leaves have dots on them") to a **likely** problem and safe advice. If the description doesn't clearly fit one row, the answer is **"not sure, flagged for the extension officer"**.
+A cited reference of what can go wrong on an arabica coffee farm, so the hotline agent can go from what a farmer says on the call ("the leaves have dots on them") to a **likely** problem and safe advice. If the description doesn't clearly fit one row, the answer is **"not sure, flagged for the extension officer"**.
 
-Built for issue #17. The matcher that uses it is #29.
+Built for issue #17. The hotline agent's knowledge file (#46) is built from these rows.
 
 ## Files
 
@@ -13,10 +13,10 @@ Built for issue #17. The matcher that uses it is #29.
 
 ## How it is meant to be used
 
-1. Extraction (#10) records a coffee `observation` with a `symptom` from the fixed list and the farmer's own words (`evidence_quote`).
-2. The matcher (#29) keeps only rows whose `symptom_categories` include that symptom, then asks Gemma to pick **one of those ids or `not_sure`**. It can't name anything that isn't in this file.
-3. Noor hears that row's `farmer_advice_en`, which is looked up, never generated. `officer_note_en` is for the extension officer and the co-op only.
-4. Unsure or `urgent` results go to the extension officer.
+1. The hotline agent's knowledge file (#46) is built from these rows. The agent may only recommend measures listed for the problem it names (grounded generation).
+2. When the agent is unsure, or the farmer's description fits several rows, the answer is `not_sure`, and it asks the row's `tell_apart_question` to narrow it down.
+3. Post-call extraction (Opus 5.5, #10) stores the agent's stated diagnosis in `entries.likely_disease`: an `id` from this file or `not_sure`.
+4. `officer_note_en` is for the extension officer and the co-op only, never read to the farmer. Unsure or `urgent` results go to the extension officer.
 
 ## Row fields
 
@@ -89,7 +89,7 @@ We cite these sources and restate the facts in our own words. No text, tables or
 - **Not in the dataset:**
   - minor pests: capsid bug, berry moth, yellow-headed borer, red coffee mite, star scale, tailed caterpillar;
   - other problems: boron deficiency, ripe-berry anthracnose, Fusarium root rot;
-  - **any crop other than coffee** (maize, beans, bananas), which the matcher therefore doesn't run on.
+  - **any crop other than coffee** (maize, beans, bananas), which the hotline therefore doesn't diagnose.
 - **No doses or product names in the farmer advice**, by design. The officer notes give control types as the sources state them. Before acting on them, check the products against the current national registered list (in Kenya, the PCPB list).
 - **Coffee wilt is strain-specific.** The strain that attacks arabica is reported from Ethiopia. The strain in Uganda, DRC and Tanzania attacks robusta only.
 - **Swahili names:**

@@ -4,11 +4,12 @@ import csv
 import hashlib
 import json
 import os
+import random
 import re
 import statistics
 import subprocess
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import date, timedelta, timezone
 from pathlib import Path
 
@@ -18,7 +19,7 @@ from test_supabase_schema import check_lists
 from farm_ledger import BuyerType, Currency, Kind, PaidHow, Symptom, Unit
 from farm_ledger.db import ENTRY_FIELDS
 from farm_ledger.enums import CoffeeForm, CoffeeType
-from synthetic import AS_OF, anchor_price, generate_season, price_anchors
+from synthetic import AS_OF, anchor_price, generate, generate_season, price_anchors
 from synthetic.anchors import CSV_PATH
 
 # Spec section 5: plausible UGX per kg per form.
@@ -254,16 +255,16 @@ def coffee_sale_prices(season):
             yield farmer, village, entry["coffee_form"], day, per_kg(entry)
 
 
-def area_median(season, home, form):
+def area_median(season, home, form, as_of=AS_OF):
     """Spec section 5: (level, prices) at the first level from village outwards with >=3 sales by >=3 farmers.
 
-    Rows are restricted to the home district, the band and the 365 days ending at AS_OF (the same
+    Rows are restricted to the home district, the band and the 365 days ending at as_of (the same
     `sale_date > as_of - 365` window as #44's spot-check SQL). (None, []) means the national fallback.
     """
     low, high = BANDS[form]
     rows = [(f, v, price) for f, v, fm, day, price in coffee_sale_prices(season)
             if fm == form and v.district == home.district and low <= price <= high
-            and AS_OF - timedelta(days=365) < day <= AS_OF]
+            and as_of - timedelta(days=365) < day <= as_of]
     for depth in range(len(AREA_LEVELS), 0, -1):
         area = AREA_LEVELS[:depth]
         hits = [(f, price) for f, v, price in rows
@@ -385,3 +386,86 @@ def test_sale_sizes_within_issue_ranges(season):
                if entry["amount_kg"] is not None
                and not SALE_KG[village.form.value][0] <= entry["amount_kg"] <= SALE_KG[village.form.value][1]]
     assert not outside
+
+
+# --- Review regression tests (PR #36, cycle 2) ---
+
+DISTRICTS_CSV = REPO / "hotline" / "hotline" / "data" / "uganda_districts.csv"
+VILLAGE_OFFSET_DEG = 0.05  # a synthetic village sits within about 5 km of its district centre
+DEMO_WEEK = 7  # the demo and judging run in the days after AS_OF, and the hotline uses today's date
+NEARBY_DAYS, MIN_NEARBY_FARMS = 30, 2  # hotline/hotline/history.py nearby_reports
+SPOKEN_DEMO_MEDIAN = 5950  # what prices.village_price says for Kyabakuza kiboko at AS_OF (#44 / #69 quote it)
+HANDOFF_COUNTS = {"sale": 220, "harvest": 84, "observation": 9}  # the #44 heads-up: 313 calls, one entry each
+
+
+def round_half_up(value, step=MEDIAN_STEP):
+    """hotline/hotline/prices.py round_ugx: half up, not Python's half-to-even round()."""
+    return int(value / step + 0.5) * step
+
+
+def test_lots_stay_in_the_form_range_and_within_the_harvest_for_any_harvest():
+    # The cycle 1 fix sizes lots from the harvest; the seeded season only exercises a few
+    # harvests, so walk every plausible harvest size for each form with several rngs.
+    start, end = date(2025, 5, 1), date(2025, 8, 31)
+    for village in {v.form: v for v in generate.VILLAGES}.values():
+        min_kg, max_kg = generate.LOT_KG[village.form]
+        smallest = -(-min_kg // generate.SOLD_SHARE[0])  # always enough to sell one minimum lot
+        for harvest in range(int(smallest), 2500, 5):
+            for seed in range(5):
+                lots = generate._lots(random.Random(seed), ("Nobody", "main", 2025), village, start, end, harvest)
+                sizes = [lot.kg for lot in lots]
+                assert all(min_kg <= kg <= max_kg for kg in sizes), (village.form, harvest, seed, sizes)
+                assert sum(sizes) <= harvest, (village.form, harvest, seed, sizes)
+                assert len({lot.day for lot in lots}) == len(lots)  # one sale per day
+
+
+def test_spoken_demo_median_is_rounded_half_up_like_prices(season):
+    # The raw Kyabakuza median sits on a rounding boundary (5,925): Python's round() gives
+    # 5,900, but the hotline (prices.round_ugx) rounds half up and speaks 5,950. Retuning V1
+    # or the seed changes the spoken number, so update the #44 / #69 handoffs together.
+    level, prices, _ = area_median(season, village_named(season, "Kyabakuza"), "kiboko")
+    assert level == "village"
+    assert round_half_up(statistics.median(prices)) == SPOKEN_DEMO_MEDIAN
+
+
+def test_demo_numbers_hold_for_a_week_after_as_of(season):
+    kyabakuza = village_named(season, "Kyabakuza")
+    nakato = next(i for i, f in enumerate(season.farmers) if f.pin == "9001")
+    for days in range(DEMO_WEEK + 1):
+        as_of = AS_OF + timedelta(days=days)
+        level, prices, farmers = area_median(season, kyabakuza, "kiboko", as_of)
+        assert level == "village" and len(prices) >= 10 and len(farmers) >= 3, as_of
+        assert 5700 <= round_half_up(statistics.median(prices)) <= 6100, as_of
+        # history.nearby_reports for Nakato: >=2 other farms in her parish, last 30 days
+        farms = defaultdict(set)
+        for call in season.calls:
+            entry = call.entries[0]
+            village = season.villages[season.farmers[call.farmer].village]
+            day = entry["date_sold"] or call.received_at.astimezone(KAMPALA).date()
+            if (entry["kind"] == "observation" and call.farmer != nakato and village.parish == kyabakuza.parish
+                    and village.sub_county == kyabakuza.sub_county
+                    and as_of - timedelta(days=NEARBY_DAYS) <= day <= as_of):
+                farms[entry["likely_disease"] or entry["symptom"]].add(call.farmer)
+        groups = {label: len(ids) for label, ids in farms.items() if len(ids) >= MIN_NEARBY_FARMS}
+        assert groups == {TWIG_BORER: CLUSTER_FARMS}, as_of
+
+
+def test_villages_match_the_district_csv(season):
+    # places.match_district and the location login read this CSV; a village whose district
+    # or region is spelled differently can never be found by a caller.
+    with DISTRICTS_CSV.open(newline="") as f:
+        centres = {row["district"]: row for row in csv.DictReader(line for line in f if not line.startswith("#"))}
+    for village in season.villages:
+        centre = centres[village.district]
+        assert centre["region"] == village.region, village.district
+        assert abs(float(centre["lat"]) - village.lat) <= VILLAGE_OFFSET_DEG, village.village
+        assert abs(float(centre["lon"]) - village.lon) <= VILLAGE_OFFSET_DEG, village.village
+    for farmer in season.farmers:
+        village = season.villages[farmer.village]
+        assert abs(farmer.lat - village.lat) <= generate.GPS_JITTER and abs(farmer.lon - village.lon) <= generate.GPS_JITTER
+
+
+def test_one_entry_per_call_and_counts_from_the_handoff(season):
+    assert all(len(call.entries) == 1 for call in season.calls)
+    assert len(season.calls) == sum(HANDOFF_COUNTS.values())
+    assert dict(Counter(call.entries[0]["kind"] for call in season.calls)) == HANDOFF_COUNTS

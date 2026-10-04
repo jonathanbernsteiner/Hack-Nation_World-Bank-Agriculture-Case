@@ -92,6 +92,15 @@ def test_price_include_synthetic_defaults_true(monkeypatch, raw, expected):
     assert config.load_settings().price_include_synthetic is expected
 
 
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [(" Off ", False), ("No", False), ("\tFALSE\n", False), (" 0 ", False), ("   ", True), ("yes", True)],
+)
+def test_price_include_synthetic_is_case_and_space_insensitive(monkeypatch, raw, expected):
+    monkeypatch.setenv("PRICE_INCLUDE_SYNTHETIC", raw)
+    assert config.load_settings().price_include_synthetic is expected
+
+
 def test_every_setting_has_a_name_in_env_example():
     names = _env_example()
     missing = [f.name.upper() for f in dataclasses.fields(config.Settings) if f.name.upper() not in names]

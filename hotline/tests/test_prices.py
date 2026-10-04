@@ -1,10 +1,13 @@
+import re
 from dataclasses import replace
 from datetime import date, timedelta
+from decimal import Decimal
 from types import SimpleNamespace
 
 import pytest
 
 from hotline import bands, prices
+from hotline.numbers_sw import to_words
 
 AS_OF = date(2026, 10, 3)
 HOME = {"village_id": 1, "village": "Kyabakuza", "parish": "Kyabakuza P", "sub_county": "Kyanamukaaka", "district": "Masaka"}
@@ -283,3 +286,55 @@ def test_three_sales_do_not_reveal_individual_prices_through_quartiles():
 def test_drugar_has_a_national_reference():
     out = prices.village_price([], HOME, "drugar", AS_OF)
     assert (out["level"], out["median_ugx_per_kg"]) == ("national", 14_500)
+
+
+# --- Review cycle 2 regression tests (#43) ---
+
+
+@pytest.mark.xfail(strict=True, reason="review cycle 2 finding 1: level is 'national', the #43 contract says 'national_reference'")
+def test_national_fallback_level_is_national_reference():
+    """Issue #43 scope: the fallback is {"level": "national_reference", ...}, and the agent prompt (#46) branches on
+    that value. Zombo (one farmer in the #20 season) takes this path in the demo."""
+    zombo = {"village_id": 6, "village": "Ora", "parish": "Ora P", "sub_county": "Ora S", "district": "Zombo"}
+    rows = [sale(1, village_id=6, village="Ora", parish="Ora P", sub_county="Ora S", district="Zombo",
+                 form="parchment", per_kg=16_000, days_ago=d) for d in (5, 40, 90)]
+    out = prices.prices_for(rows, zombo, "parchment", AS_OF)
+    assert out["village_price"]["median_ugx_per_kg"] == 15_500
+    assert out["village_price"]["level"] == "national_reference"
+
+
+@pytest.mark.parametrize("form", sorted(prices.NATIONAL_REFERENCE))
+def test_national_reference_is_spoken_from_its_own_figure(form):
+    """The fallback the agent reads for Zombo-like callers: words match the figure, the figure is plausible."""
+    ref = prices.NATIONAL_REFERENCE[form]
+    out = prices.village_price([], HOME, form, AS_OF)
+    assert out["median_ugx_per_kg"] == ref["median_ugx_per_kg"] and ref["median_ugx_per_kg"] % 50 == 0
+    assert bands.in_band(form, ref["median_ugx_per_kg"]), "a reference outside its band is a typo"
+    assert out["median_words_sw"] == to_words(ref["median_ugx_per_kg"])
+    assert re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", ref["month"])
+    assert (out["reference_month"], out["reference_source_url"]) == (ref["month"], ref["source_url"])
+    assert (out["n_sales"], out["n_farmers"], out["p25"], out["p75"], out["includes_synthetic"]) == (0, 0, None, None, False)
+
+
+def test_quartiles_appear_only_from_five_sales():
+    """Guardrail 7: p25/p75 stay None below 5 sales; at 5 they are the 2nd and 4th sale."""
+    four = [sale(f, p) for f, p in zip(range(1, 5), (4_000, 5_000, 6_000, 7_000), strict=True)]
+    out = prices.village_price(four, HOME, "kiboko", AS_OF)
+    assert (out["level"], out["n_sales"], out["p25"], out["p75"]) == ("village", 4, None, None)
+    out = prices.village_price([*four, sale(5, 8_000)], HOME, "kiboko", AS_OF)
+    assert (out["p25"], out["median_ugx_per_kg"], out["p75"]) == (5_000, 6_000, 7_000)
+
+
+def test_excluded_synthetic_rows_do_not_move_the_median():
+    rows = three_farmers(per_kg=5_000) + [sale(f, per_kg=9_000, synthetic=True) for f in (4, 5, 6)]
+    real = prices.village_price(rows, HOME, "kiboko", AS_OF, include_synthetic=False)
+    assert (real["n_sales"], real["n_farmers"], real["median_ugx_per_kg"], real["includes_synthetic"]) == (3, 3, 5_000, False)
+    mixed = prices.village_price(rows, HOME, "kiboko", AS_OF, include_synthetic=True)
+    assert (mixed["n_sales"], mixed["median_ugx_per_kg"], mixed["includes_synthetic"]) == (6, 7_000, True)
+
+
+def test_numeric_price_total_from_postgres_gives_the_same_median():
+    """entries.price_total is numeric(14, 2), so psycopg returns Decimal; amount_kg is double precision."""
+    rows = [{**sale(f), "price_total": Decimal("590000.00"), "amount_kg": 100.0} for f in (1, 2, 3)]
+    out = prices.village_price(rows, HOME, "kiboko", AS_OF)
+    assert (out["level"], out["median_ugx_per_kg"], out["median_words_sw"]) == ("village", 5_900, "elfu tano na mia tisa")

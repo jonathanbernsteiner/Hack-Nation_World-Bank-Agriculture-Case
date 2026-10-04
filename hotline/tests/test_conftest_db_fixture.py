@@ -5,8 +5,10 @@ the fixture depends on. The `supabase` tests check the same promise against the 
 in a way that does not depend on test order.
 """
 
+import ast
 import uuid
 from contextlib import contextmanager, suppress
+from pathlib import Path
 from types import SimpleNamespace
 
 import psycopg
@@ -19,6 +21,12 @@ from hotline import db as hotline_db
 
 FRESH_TIMEOUT_SECS = 5
 TABLE_EXISTS = "select count(*) from information_schema.tables where table_schema = 'public' and table_name = %s"
+PACKAGE_DIR = Path(__file__).resolve().parents[1] / "hotline"
+PATCHED_DB_NAMES = {"connect", "transaction", "*"}
+VILLAGE_COUNT = "select count(*) from public.villages where village = %s"
+INSERT_VILLAGE = """insert into public.villages (region, district, sub_county, parish, village, is_synthetic)
+                    values ('Central', 'Masaka', 'T76', 'T76', %s, true)"""
+REMOVE_PROBE_VILLAGE = "delete from public.villages where village = %s and village like 'rollback_probe_%%'"
 
 
 class FakeConnection:
@@ -240,3 +248,79 @@ def test_db_error_inside_connect_block_does_not_poison_the_shared_transaction(db
             conn.execute("select * from table_that_does_not_exist_76")
     with hotline_db.transaction() as conn:
         assert conn.execute("select 1").fetchone()[0] == 1
+
+
+# --- Regression tests from review cycle 3 (#76). ---
+
+
+def _fixture_bypasses(path: Path) -> list[str]:
+    """Ways to reach the database that the fixture's monkeypatch of hotline.db attributes cannot see."""
+    found = []
+    for node in ast.walk(ast.parse(path.read_text(), filename=str(path))):
+        if isinstance(node, ast.ImportFrom):
+            names = {alias.name for alias in node.names}
+            from_db = node.module == "hotline.db" or (node.level > 0 and node.module == "db")
+            if from_db and names & PATCHED_DB_NAMES:
+                found.append(f"{path.name}:{node.lineno} from-imports {sorted(names & PATCHED_DB_NAMES)}")
+            if node.module == "psycopg" and node.level == 0 and names & {"connect", "*"}:
+                found.append(f"{path.name}:{node.lineno} from-imports psycopg.connect")
+        elif isinstance(node, ast.Attribute) and node.attr == "connect":
+            if isinstance(node.value, ast.Name) and node.value.id == "psycopg":
+                found.append(f"{path.name}:{node.lineno} calls psycopg.connect")
+    return found
+
+
+def test_no_hotline_module_can_bypass_the_db_fixture():
+    # `from hotline.db import transaction` binds the real function at import time, so the fixture's
+    # monkeypatch never reaches it and a RUN_SUPABASE test would COMMIT to the live database.
+    sources = [p for p in PACKAGE_DIR.rglob("*.py") if p != PACKAGE_DIR / "db.py"]
+    assert sources, PACKAGE_DIR
+    bypasses = [hit for path in sources for hit in _fixture_bypasses(path)]
+    assert not bypasses, f"use `from hotline import db` and call db.connect()/db.transaction(): {bypasses}"
+
+
+def test_every_supabase_test_runs_inside_the_db_fixture(request):
+    # Spec §12: database tests always run inside the rolled-back fixture. A supabase test without `db`
+    # reaches the real hotline.db and commits whatever the code under test writes.
+    unguarded = [
+        item.nodeid
+        for item in request.session.items
+        if item.get_closest_marker("supabase") and "db" not in getattr(item, "fixturenames", ())
+    ]
+    assert not unguarded, f"request the `db` fixture in: {unguarded}"
+
+
+@pytest.mark.supabase
+def test_failing_hotline_db_transaction_keeps_rows_the_test_seeded_live(temp_probe, db):
+    # Route tests seed rows through `db`, then call code that fails inside hotline.db.transaction().
+    # Only that block may roll back (a savepoint), as its own connection would in production.
+    table = sql.Identifier(temp_probe)
+    db.execute(sql.SQL("create temp table {} (x int)").format(table))
+    db.execute(sql.SQL("insert into {} values (1)").format(table))
+    with pytest.raises(psycopg.errors.UndefinedTable), hotline_db.transaction() as conn:
+        conn.execute(sql.SQL("insert into {} values (2)").format(table))
+        conn.execute("select * from table_that_does_not_exist_76")
+    assert db.execute(sql.SQL("select x from {} order by x").format(table)).fetchall() == [(1,)]
+
+
+@pytest.fixture
+def village_guard():
+    """Request before `db`: after the fixture's rollback, a fresh connection must not see the
+    village. If a commit leaked it, remove that one probe row again and fail."""
+    village = f"rollback_probe_{uuid.uuid4().hex}"
+    yield village
+    with _fresh_connection() as fresh:
+        leaked = fresh.execute(VILLAGE_COUNT, (village,)).fetchone()[0]
+        if leaked:
+            fresh.execute(REMOVE_PROBE_VILLAGE, (village,))
+    assert not leaked, "the db fixture committed a village to the live database"
+
+
+@pytest.mark.supabase
+def test_synthetic_village_written_through_hotline_db_is_gone_after_teardown(village_guard, db):
+    # The acceptance criterion of #76, now that public.villages exists in the live database.
+    with hotline_db.transaction() as conn:
+        conn.execute(INSERT_VILLAGE, (village_guard,))
+    assert db.execute(VILLAGE_COUNT, (village_guard,)).fetchone()[0] == 1
+    with _fresh_connection() as fresh:
+        assert fresh.execute(VILLAGE_COUNT, (village_guard,)).fetchone()[0] == 0

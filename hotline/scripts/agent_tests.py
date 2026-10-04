@@ -56,7 +56,7 @@ TESTS: dict[str, dict] = {
         "name": "hotline-happy-silent-identify",
         "type": "tool",
         "chat_history": [
-            {"role": "agent", "message": "Hi Nakato! I'm your farm agent, here to help you with your coffee in Kyabakuza. How are things going?", "time_in_call_secs": 0},
+            {"role": "agent", "message": "Hey Nakato! It's your farm agent here. How's it going?", "time_in_call_secs": 0},
             {"role": "user", "message": "Hi! Things are okay. What's the coffee price looking like?", "time_in_call_secs": 6},
         ],
         "tool_call_parameters": {
@@ -86,7 +86,7 @@ TESTS: dict[str, dict] = {
         "name": "hotline-intro-no-questions-about-identity",
         "type": "llm",
         "chat_history": [
-            {"role": "agent", "message": "Hi Nakato! I'm your farm agent, here to help you with your coffee in Kyabakuza. How are things going?", "time_in_call_secs": 0},
+            {"role": "agent", "message": "Hey Nakato! It's your farm agent here. How's it going?", "time_in_call_secs": 0},
             {"role": "user", "message": "Hello, I want to know the coffee price.", "time_in_call_secs": 5},
         ],
         "success_condition": (

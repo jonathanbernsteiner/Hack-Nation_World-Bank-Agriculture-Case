@@ -4,7 +4,7 @@ CLI (run from server/, psycopg needed: `uv run --with "psycopg[binary]" python -
   --dry-run          print counts and the planted-case checks, no DB access
   --apply            remove the previous expansion rows, then insert, in ONE transaction (idempotent)
   --remove           delete exactly the expansion rows (entries, calls, farmers, villages)
-  --farmers N        number of farmers (default 2000, 60-4000); villages and districts scale with N
+  --farmers N        number of farmers (default 2000, 60-2500); villages and districts scale with N
 
 Expansion rows are identified by calls.conversation_id 'synmap-%' (every expansion farmer has at least
 one such call). The five demo districts (Masaka, Mubende, Bududa, Zombo, Bushenyi) are never used.
@@ -13,7 +13,7 @@ Nothing prints a secret. Inserts are multi-row VALUES batches, so --apply is a f
 PINs: the loader's space is 4 digits (hotline.pins: 0000-9999, 9000-9099 reserved, so 9,900 usable).
 Expansion PINs are drawn without replacement from 1000-8999 and de-duplicated against every hash already
 in the database. 2,021 farmers fill ~20% of the space, so the hotline's random allocation (50 tries) still
-finds a free PIN with probability 1 - 0.2**50. --farmers is capped at 4000 (~40% full) for that reason.
+finds a free PIN with probability 1 - 0.2**50. --farmers is capped at 2500 (~25% full) for that reason.
 
 Planted: Kayunga prices (factor 0.80, ~80% middlemen) and a coffee wilt cluster in Ibanda /
 Kikyenkye parish (4 farmers, 2026-09-16 .. 2026-10-01). Background problem reports stay >= 95 days
@@ -38,13 +38,13 @@ from .anchors import anchor_price
 
 SEED = 20261005
 DEFAULT_FARMERS = 2000
-MIN_FARMERS, MAX_FARMERS = 60, 4000
+MIN_FARMERS, MAX_FARMERS = 60, 2500  # ~14 farmers x ~200 villages is the layout's ceiling
 AS_OF = date(2026, 10, 3)
 LAST_DAY = AS_OF - timedelta(days=1)
 LAST_ANCHOR_DAY = date(2026, 9, 30)  # no October anchor yet
 SALES_START = date(2025, 10, 4)  # 12 months before AS_OF
 FARMER_HISTORY_DAYS = 730  # registrations spread over 24 months
-GROWTH_EXPONENT = 1.3  # >1 skews registrations to recent months (about 3x more in the last month than the first)
+GROWTH_EXPONENT = 1.2  # >1 skews registrations to recent months (about 2x more in the last month than the first)
 NEW_FARMER_DAYS = 90  # farmers registered this recently have only 2-3 sales
 SALES_PER_FARMER = (2, 6)
 FARMERS_PER_VILLAGE = (6, 14)
@@ -66,7 +66,7 @@ INSERT_BATCH_ROWS = 400  # rows per multi-row INSERT (<= 22 params each, far bel
 PLANTED_PRICE_DISTRICT = "Kayunga"
 PLANTED_FACTOR = 0.80
 PLANTED_MIDDLEMAN_SHARE = 0.80
-OTHER_FACTOR_RANGE = (0.96, 1.05)
+OTHER_FACTOR_RANGE = (0.98, 1.05)
 WILT_DISTRICT, WILT_SUB_COUNTY, WILT_PARISH = "Ibanda", "Ishongororo", "Kikyenkye"
 WILT_VILLAGES = ("Kitojo", "Rwamuhanda")
 WILT_DAYS = (date(2026, 9, 16), date(2026, 9, 21), date(2026, 9, 26), date(2026, 10, 1))
@@ -324,11 +324,13 @@ STICKY_SHARE = 0.75
 DISTRESS_P, DISTRESS_RANGE = 0.15, (0.60, 0.75)  # inside the harvest-start windows (~5% of all sales)
 HARVEST_STARTS = ((10, 11), (4, 5))  # month ranges where early cash need bites
 PRICE_NOISE = 0.07
+MIDDLEMAN_SPREAD = 0.12  # middlemen pay 5-17% under the reference ...
+REMOTE_DISCOUNT = 0.08  # ... and remote villages up to 8% less on top
 
 
 def _buyer_factor(rng, buyer: str, remote: float) -> float:
     if buyer == "middleman":  # remote villages get the worst middleman prices
-        return 0.95 - 0.17 * (0.5 * remote + 0.5 * rng.random())
+        return 0.95 - MIDDLEMAN_SPREAD * (0.5 * remote + 0.5 * rng.random())
     if buyer == "cooperative":  # a quarter of co-ops pay a quality / certification premium
         return rng.uniform(1.04, 1.08) if rng.random() < 0.25 else rng.uniform(0.97, 1.04)
     return rng.uniform(0.88, 1.00)
@@ -352,7 +354,7 @@ def _sale_entry(rng, village: VillageRow, day: date, district_factor: float, rem
     buyer = _pick_buyer(rng, village, remote, preferred)
     kg = rng.randint(*KG_RANGE)
     per_kg = (anchor_price(min(day, LAST_ANCHOR_DAY), form) * district_factor
-              * (1.03 - 0.13 * remote) * _buyer_factor(rng, buyer, remote)
+              * (1.03 - REMOTE_DISCOUNT * remote) * _buyer_factor(rng, buyer, remote)
               * (1 + rng.uniform(-PRICE_NOISE, PRICE_NOISE)))
     if any(a <= day.month <= b for a, b in HARVEST_STARTS) and rng.random() < DISTRESS_P:
         per_kg *= rng.uniform(*DISTRESS_RANGE)

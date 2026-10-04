@@ -178,3 +178,35 @@ def test_run_eval_helpers():
     with pytest.raises(SystemExit):
         run_eval.check_cost(100, 5.0, 0.0)
     assert len(run_eval.prompt_sha()) == run_eval.SHA_LEN
+
+
+def test_fewer_preds_than_gold_aligns_to_best_gold():
+    a, b, c = (sale(amount_kg=n, price_total=n * 5000) for n in (100, 200, 300))
+    s = run(call([a, b, c]), [c])
+    assert (s.fields_total, s.fields_correct) == (28, 10)
+    assert {e[2] for e in s.errors} == {"missing_entry"}
+
+
+def test_run_result_shaped_inputs_score_perfectly():
+    from datetime import date
+
+    lines_en = [
+        {"i": 0, "role": "agent", "sw": "-", "t": 0.0, "en": "The median is 5,000 shillings per kilo."},
+        {"i": 1, "role": "farmer", "sw": "-", "t": 2.0, "en": "I sold 300 kilos of kiboko yesterday for 1,500,000 shillings."},
+    ]
+    pred = sale(date_sold=date(2026, 10, 2), amount_kg=300.0, price_total=1_500_000.0, amount=300.0, unit="kg",
+                quote_verified=True, confidence=0.9)
+    s = run(call([sale()]), [pred], lines=lines_en)
+    assert s.errors == [] and (s.quotes_total, s.quotes_valid) == (1, 1)
+
+
+def test_phantom_sale_in_untagged_call_without_gold_sale():
+    s = run(call([], tags=["weather_only"]), [sale()])
+    assert s.phantom_sales == 1
+    assert not sc.summarise([s])["passed"]
+
+
+def test_default_budget_covers_one_set_of_ten():
+    import run_eval
+
+    assert run_eval.check_cost(10, run_eval.DEFAULT_MAX_COST_USD, 0.0) > 0

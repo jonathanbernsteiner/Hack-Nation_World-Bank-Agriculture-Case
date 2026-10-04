@@ -21,7 +21,7 @@ EVALS_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(EVALS_DIR))
 PROMPTS_DIR = EVALS_DIR.parent / "hotline" / "prompts"
 EST_COST_PER_CALL_USD = 0.60  # translate + extract on Opus 5.5, one short call; a rough ceiling
-DEFAULT_MAX_COST_USD = 5.0
+DEFAULT_MAX_COST_USD = 8.0  # one full set of 10 at the rough estimate, with headroom
 TOTAL_COST_CAP_USD = 60.0  # spec section 9 cost cap, all rounds together
 SHA_LEN = 12
 TOOL_TO_IDENTIFIED_BY = {

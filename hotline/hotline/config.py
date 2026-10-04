@@ -12,6 +12,9 @@ if not os.environ.get("VERCEL") and _REPO_ENV.is_file():
     load_dotenv(_REPO_ENV)
 
 
+_FALSE_VALUES = {"false", "0", "no", "off"}
+
+
 def _env(name: str) -> str | None:
     value = os.environ.get(name)
     return value if value else None
@@ -55,7 +58,7 @@ def load_settings() -> Settings:
         demo_user=_env("DEMO_USER"),
         demo_password=_env("DEMO_PASSWORD"),
         ledger_pin_salt=_env("LEDGER_PIN_SALT"),
-        price_include_synthetic=(_env("PRICE_INCLUDE_SYNTHETIC") or "true").lower() != "false",
+        price_include_synthetic=(_env("PRICE_INCLUDE_SYNTHETIC") or "true").strip().lower() not in _FALSE_VALUES,
         public_base_url=_env("PUBLIC_BASE_URL"),
     )
 

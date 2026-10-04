@@ -1,0 +1,188 @@
+import base64
+import dataclasses
+import hashlib
+import hmac
+
+import pytest
+from fastapi import Depends, FastAPI
+from fastapi.testclient import TestClient
+
+from hotline import config, security
+
+TOOL = "tool-secret-value"
+ADMIN = "admin-secret-value"
+WEBHOOK = "whsec_test"
+NOW = 1_700_000_000
+BODY = b'{"type":"post_call_transcription"}'
+KNOWN_HEX = "02c2877dc2f785ce97475b66c6b9a512019eaab5809f9021e6221d8571ebcfaa"
+
+
+def _patch(monkeypatch, **overrides):
+    monkeypatch.setattr(config, "settings", dataclasses.replace(config.settings, **overrides))
+
+
+@pytest.fixture
+def client():
+    app = FastAPI()
+
+    @app.get("/tool", dependencies=[Depends(security.require_tool_secret)])
+    def tool():
+        return {"ok": True}
+
+    @app.get("/admin", dependencies=[Depends(security.require_admin_secret)])
+    def admin():
+        return {"ok": True}
+
+    @app.get("/demo", dependencies=[Depends(security.require_demo_basic_auth)])
+    def demo():
+        return {"ok": True}
+
+    return TestClient(app)
+
+
+def _sign(body: bytes, ts: int, secret: str = WEBHOOK) -> str:
+    digest = hmac.new(secret.encode(), f"{ts}.".encode() + body, hashlib.sha256).hexdigest()
+    return f"t={ts},v0={digest}"
+
+
+# tool secret
+
+
+def test_tool_secret_missing_401(client, monkeypatch):
+    _patch(monkeypatch, hotline_tool_secret=TOOL)
+    assert client.get("/tool").status_code == 401
+
+
+def test_tool_secret_wrong_401(client, monkeypatch):
+    _patch(monkeypatch, hotline_tool_secret=TOOL)
+    assert client.get("/tool", headers={"X-Hotline-Tool-Secret": "nope"}).status_code == 401
+    same_len = "x" * len(TOOL)
+    assert client.get("/tool", headers={"X-Hotline-Tool-Secret": same_len}).status_code == 401
+
+
+def test_tool_secret_ok(client, monkeypatch):
+    _patch(monkeypatch, hotline_tool_secret=TOOL)
+    assert client.get("/tool", headers={"X-Hotline-Tool-Secret": TOOL}).status_code == 200
+
+
+def test_tool_secret_server_unset_fails_closed(client, monkeypatch):
+    _patch(monkeypatch, hotline_tool_secret=None)
+    assert client.get("/tool").status_code == 401
+    assert client.get("/tool", headers={"X-Hotline-Tool-Secret": ""}).status_code == 401
+    assert client.get("/tool", headers={"X-Hotline-Tool-Secret": "anything"}).status_code == 401
+
+
+def test_tool_secret_non_ascii_is_401_not_500(client, monkeypatch):
+    _patch(monkeypatch, hotline_tool_secret=TOOL)
+    response = client.get("/tool", headers={"X-Hotline-Tool-Secret": "\xe9\xe9".encode("latin-1")})
+    assert response.status_code == 401
+
+
+# admin secret
+
+
+def test_admin_secret_missing_401(client, monkeypatch):
+    _patch(monkeypatch, hotline_admin_secret=ADMIN)
+    assert client.get("/admin").status_code == 401
+
+
+def test_admin_secret_wrong_401(client, monkeypatch):
+    _patch(monkeypatch, hotline_admin_secret=ADMIN)
+    assert client.get("/admin", headers={"X-Hotline-Admin-Secret": "nope"}).status_code == 401
+
+
+def test_admin_secret_ok(client, monkeypatch):
+    _patch(monkeypatch, hotline_admin_secret=ADMIN)
+    assert client.get("/admin", headers={"X-Hotline-Admin-Secret": ADMIN}).status_code == 200
+
+
+def test_admin_secret_server_unset_fails_closed(client, monkeypatch):
+    _patch(monkeypatch, hotline_admin_secret=None)
+    assert client.get("/admin", headers={"X-Hotline-Admin-Secret": ""}).status_code == 401
+
+
+def test_tool_secret_does_not_open_admin(client, monkeypatch):
+    _patch(monkeypatch, hotline_tool_secret=TOOL, hotline_admin_secret=ADMIN)
+    assert client.get("/admin", headers={"X-Hotline-Admin-Secret": TOOL}).status_code == 401
+
+
+# ElevenLabs signature
+
+
+def test_signature_valid():
+    assert security.verify_elevenlabs_signature(BODY, _sign(BODY, NOW), WEBHOOK, now=NOW)
+
+
+def test_signature_known_answer():
+    header = f"t={NOW},v0={KNOWN_HEX}"
+    assert security.verify_elevenlabs_signature(BODY, header, WEBHOOK, now=NOW)
+
+
+def test_signature_tampered_body():
+    header = _sign(BODY, NOW)
+    assert not security.verify_elevenlabs_signature(BODY + b" ", header, WEBHOOK, now=NOW)
+
+
+def test_signature_wrong_secret():
+    assert not security.verify_elevenlabs_signature(BODY, _sign(BODY, NOW, "other"), WEBHOOK, now=NOW)
+
+
+def test_signature_expired_timestamp():
+    header = _sign(BODY, NOW)
+    assert security.verify_elevenlabs_signature(BODY, header, WEBHOOK, now=NOW + 1800)
+    assert not security.verify_elevenlabs_signature(BODY, header, WEBHOOK, now=NOW + 1801)
+
+
+def test_signature_future_timestamp_beyond_tolerance():
+    header = _sign(BODY, NOW)
+    assert security.verify_elevenlabs_signature(BODY, header, WEBHOOK, now=NOW - 1800)
+    assert not security.verify_elevenlabs_signature(BODY, header, WEBHOOK, now=NOW - 1801)
+
+
+@pytest.mark.parametrize(
+    "header",
+    ["", "garbage", "t=abc,v0=ff", f"t={NOW}", "v0=ff", f"t={NOW},v0", f"t={NOW},v0=zz", None],
+)
+def test_signature_malformed_header(header):
+    assert security.verify_elevenlabs_signature(BODY, header, WEBHOOK, now=NOW) is False
+
+
+def test_signature_secret_unset():
+    header = _sign(BODY, NOW, "")
+    assert not security.verify_elevenlabs_signature(BODY, header, None, now=NOW)
+    assert not security.verify_elevenlabs_signature(BODY, header, "", now=NOW)
+
+
+def test_signature_invalid_utf8_body_does_not_raise():
+    body = b"\xff\xfe"
+    assert security.verify_elevenlabs_signature(body, _sign(body, NOW), WEBHOOK, now=NOW)
+
+
+# demo basic auth
+
+
+def _basic(user: str, password: str) -> dict[str, str]:
+    token = base64.b64encode(f"{user}:{password}".encode()).decode()
+    return {"Authorization": f"Basic {token}"}
+
+
+def test_basic_auth_ok_and_wrong(client, monkeypatch):
+    _patch(monkeypatch, demo_user="judge", demo_password="pw-1234")
+    assert client.get("/demo", headers=_basic("judge", "pw-1234")).status_code == 200
+    for headers in (_basic("judge", "bad"), _basic("bad", "pw-1234"), _basic("bad", "bad")):
+        response = client.get("/demo", headers=headers)
+        assert response.status_code == 401
+        assert response.headers["WWW-Authenticate"] == "Basic"
+
+
+def test_basic_auth_missing_header_401_with_challenge(client, monkeypatch):
+    _patch(monkeypatch, demo_user="judge", demo_password="pw-1234")
+    response = client.get("/demo")
+    assert response.status_code == 401
+    assert response.headers["WWW-Authenticate"] == "Basic"
+
+
+def test_basic_auth_server_unset_fails_closed(client, monkeypatch):
+    _patch(monkeypatch, demo_user=None, demo_password=None)
+    assert client.get("/demo", headers=_basic("", "")).status_code == 401
+    assert client.get("/demo", headers=_basic("judge", "pw")).status_code == 401

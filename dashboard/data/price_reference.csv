@@ -1,0 +1,26 @@
+# source: Uganda Coffee Development Authority / MAAIF Coffee Department monthly reports (national average farm-gate price, UGX/kg); 'interpolated' rows are carried forward. Copied from server/synthetic/price_anchors.csv
+month,kiboko,faq,parchment,drugar,source
+2024-10,6500,12500,12500,11500,https://ugandacoffee.go.ug/sites/default/files/2024-11/October%202024.pdf
+2024-11,6500,12500,12500,11500,https://ugandacoffee.go.ug/sites/default/files/2024-12/November%202024.pdf
+2024-12,6500,12500,12500,11500,https://ugandacoffee.go.ug/sites/default/files/2025-01/December%202024.pdf
+2025-01,7000,13000,13250,13000,https://ugandacoffee.go.ug/sites/default/files/2025-02/04-January%202025%20Report%20%281%29.Final_.pdf
+2025-02,7750,15500,14500,13250,https://ugandacoffee.go.ug/sites/default/files/2025-03/05-February%202025%20Report%20%281%29_Final.pdfI_.pdf
+2025-03,7600,15250,15000,14500,https://ugandacoffee.go.ug/sites/default/files/2025-05/06-March%202025%20Report%20%281%29_ppt%20%281%29.pdf
+2025-04,7200,14500,14800,14000,https://ugandacoffee.go.ug/sites/default/files/2025-05/07-April%202025%20Report%20pptx%281%29.pptxii.pdf
+2025-05,6250,13500,14000,13750,https://ugandacoffee.go.ug/sites/default/files/2025-06/08-May%202025%20Report%20pptx%281%29.pptx_II.pdf
+2025-06,5750,11500,14000,13500,https://ugandacoffee.go.ug/sites/default/files/2025-07/09-June%202025%20Report%20pptx%281%29.pdf
+2025-07,5250,10250,13750,12500,https://ugandacoffee.go.ug/sites/default/files/2025-08/10-July%202025%20Report%20pptx..pdfI_.pdf
+2025-08,6500,13500,14500,13500,https://ugandacoffee.go.ug/sites/default/files/2025-10/11-August%202025%20Report%20pptx%281%29%20%281%29%20%281%29.pdf
+2025-09,6500,13500,14500,13500,https://ugandacoffee.go.ug/sites/default/files/2025-10/12-September%202025%20Report%20pptx%281%29%20%281%29%20%281%29.pdf
+2025-10,7000,14500,16500,16500,https://ugandacoffee.go.ug/sites/default/files/2025-12/October%202025%20Report.pdf
+2025-11,6800,13700,16500,16500,https://ugandacoffee.go.ug/sites/default/files/2026-01/02-November%202025%20Report%20pptx%281%29%20%281%29.pdf
+2025-12,6750,13500,16750,16500,https://ugandacoffee.go.ug/sites/default/files/2026-02/03-December%202025%20Report%20pptx.pdf
+2026-01,6250,12500,16500,16500,https://ugandacoffee.go.ug/sites/default/files/2026-03/04-January%202026%20Report%20pptx%20%281%29_Final.pdf
+2026-02,5750,12250,15500,14500,https://ugandacoffee.go.ug/sites/default/files/2026-04/05-February%202026%20Report%20pptx.pptx_final.pdf
+2026-03,5650,12000,15000,14500,https://ugandacoffee.go.ug/sites/default/files/2026-05/06-March%202026%20Report%20pptx%281%29_Final.pdf
+2026-04,5750,11750,15750,14500,https://ugandacoffee.go.ug/sites/default/files/2026-05/07-April%202026%20Report%20pptx%281%29%20%281%29.pdf
+2026-05,5250,11250,15250,14500,https://ugandacoffee.go.ug/sites/default/files/2026-06/08%20May%202026%20Report%20pptx%281%29%281%29.pptx_ii.pdf
+2026-06,5500,11500,15000,14500,https://ugandacoffee.go.ug/sites/default/files/2026-07/Monthly%20Report%20for%20June%202026%20.pdf
+2026-07,5500,11500,15000,14500,https://ugandacoffee.go.ug/sites/default/files/2026-09/10%20July%202026%20Report%20draft%282%29%281%29%281%29.pdf
+2026-08,5750,12000,15500,14750,https://ugandacoffee.go.ug/sites/default/files/2026-09/11%20August%202026%20Report%20dpptx%20%281%29.pdf
+2026-09,5750,12000,15500,14750,interpolated

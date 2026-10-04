@@ -93,7 +93,7 @@ def test_review_badge_and_unverified_mark_rendered():
     view = _view(identified_by="location")
     view["entries"][0]["quote_verified"] = False
     page = demo.render_page(view)
-    assert "REVIEW" in page and "&#10007;" in page
+    assert "Needs review" in page and "&#10007;" in page
 
 
 def test_widget_only_on_public_page_without_refresh(client, monkeypatch):

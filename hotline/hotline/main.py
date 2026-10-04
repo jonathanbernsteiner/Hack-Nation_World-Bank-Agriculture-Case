@@ -5,12 +5,12 @@ from typing import Annotated
 from fastapi import FastAPI, Header, HTTPException, Query
 
 from hotline import db, pins, security
-from hotline.routes import demo, jobs, webhooks
+from hotline.routes import demo, farmer, jobs, webhooks
 from hotline.routes.tools import find, identify, register, weather
 
 app = FastAPI(title="Hotline", docs_url=None, redoc_url=None)
 
-for _module in (identify, find, register, weather, webhooks, jobs, demo):
+for _module in (identify, find, register, weather, webhooks, jobs, demo, farmer):
     app.include_router(_module.router)
 
 

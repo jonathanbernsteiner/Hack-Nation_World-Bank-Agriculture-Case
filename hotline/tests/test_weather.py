@@ -322,3 +322,65 @@ def test_missing_temperature_is_not_reported_as_zero_degrees(api):
 def test_payload_without_dates_is_unavailable(api, daily):
     install(FakeOpenMeteo(daily=daily))
     assert api.post(URL, json=MASAKA, headers=HEADERS).json() == {"status": "unavailable"}
+
+
+# --- Review regressions (cycle 2) -------------------------------------------------
+
+
+def test_cached_forecast_never_carries_another_callers_place(api, monkeypatch):
+    """Two farmers in the same 0.01-degree cache cell: the second hears only their own village."""
+    fake = install(FakeOpenMeteo())
+    places = iter([route.Place(-0.311, 31.741, "Kyabakuza, Masaka"), route.Place(-0.312, 31.742, "Kitenga, Masaka")])
+    monkeypatch.setattr(route, "farmer_place", lambda cid, conn=None: next(places))
+    first = api.post(URL, json={"conversation_id": "conv_a"}, headers=HEADERS).json()
+    second = api.post(URL, json={"conversation_id": "conv_b"}, headers=HEADERS)
+    assert first["place"] == "Kyabakuza, Masaka"
+    assert second.json()["place"] == "Kitenga, Masaka" and "Kyabakuza" not in second.text
+    assert len(fake.requests) == 1  # same cell, so the second answer came from the cache
+
+
+@pytest.mark.parametrize("headers", [{}, {"X-Hotline-Tool-Secret": "wrong"}])
+def test_bad_secret_never_reaches_the_farmer_lookup(api, monkeypatch, headers):
+    """Auth runs before the database: without the secret nobody can probe a conversation for a village."""
+    fake = install(FakeOpenMeteo())
+    lookups = []
+    monkeypatch.setattr(route, "farmer_place", lambda cid, conn=None: lookups.append(cid))
+    response = api.post(URL, json={"conversation_id": "conv_victim", "district": "Masaka"}, headers=headers)
+    assert response.status_code == 401 and "Masaka" not in response.text
+    assert lookups == [] and fake.requests == []
+
+
+@pytest.mark.parametrize(
+    ("row", "district", "expected"),
+    [
+        (("Kyabakuza", "Masaka", -0.31, None), "Gulu", "Masaka"),  # half a coordinate: village district centroid
+        (("Kyabakuza", "Atlantis", None, None), "Gulu", "Gulu"),  # unmatched village district: request district
+        (("Kyabakuza", "Atlantis", None, None), None, None),  # nothing usable: unknown_location
+    ],
+)
+def test_farmer_village_without_usable_coordinates(api, monkeypatch, row, district, expected):
+    from hotline import db as hotline_db
+
+    install(FakeOpenMeteo())
+    monkeypatch.setattr(route, "farmer_place", REAL_FARMER_PLACE)
+    monkeypatch.setattr(hotline_db, "connect", lambda: RecordingConnection(row))
+    response = api.post(URL, json={"conversation_id": "conv_1", "district": district}, headers=HEADERS)
+    assert response.status_code == 200
+    if expected is None:
+        assert response.json() == {"status": "unknown_location"}
+    else:
+        assert response.json()["status"] == "ok" and response.json()["place"] == expected
+
+
+def test_truncated_forecast_is_unavailable(api):
+    """Six days are not a week: a truncated payload must not be summarized as the week's rain."""
+    install(FakeOpenMeteo(daily={name: values[:6] for name, values in DAILY.items()}))
+    assert api.post(URL, json=MASAKA, headers=HEADERS).json() == {"status": "unavailable"}
+
+
+def test_day_fields_match_the_contract(api):
+    """Spec section 6 day shape; rain chance is a whole percentage even if Open-Meteo sends a float."""
+    install(FakeOpenMeteo(daily={**DAILY, "precipitation_probability_max": [79.6, 20, 50, 80, 90, 95, None]}))
+    days = api.post(URL, json=MASAKA, headers=HEADERS).json()["days"]
+    assert all(set(day) == {"date", "rain_mm", "rain_chance_pct", "tmin_c", "tmax_c"} for day in days)
+    assert days[0]["rain_chance_pct"] == 80 and isinstance(days[0]["rain_chance_pct"], int)

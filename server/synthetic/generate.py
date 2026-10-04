@@ -17,7 +17,7 @@ Planted cases (each is a call with `planted` set):
   low_confidence      one FAQ sale with confidence 0.46 and "[unclear]" in the transcript
   price_slip          a Bushenyi sale whose price_total has an extra zero (x10)
   bag_without_kg      a Bushenyi sale of one bag with no weight, so no amount_kg
-  yield_drop          a Mubende farmer's 2026 fly-crop harvest is half of 2025's
+  yield_drop          two farmers (Mubende, Bududa) whose 2026 fly-crop harvest is 50-60% of 2025's
   wilt, leaf_rust, berry_disease   two reports each, never 3 farms in one parish
 Nakato (PIN 9001, Kyabakuza) has a last sale of 400 kg at 5,300 UGX/kg on 18 Jul 2026.
 """
@@ -28,6 +28,7 @@ from datetime import UTC, date, datetime, time, timedelta
 
 from farm_ledger import BuyerType, Currency, Kind, PaidHow, Unit
 from farm_ledger.db import ENTRY_FIELDS
+from farm_ledger.enums import CoffeeForm
 
 from .anchors import anchor_price
 from .transcripts import OBSERVATIONS, bag_sale_turns, harvest_turns, observation_turns, render, sale_turns
@@ -47,7 +48,10 @@ SEASON_LEAD_DAYS = 30  # a season counts once it started this long before AS_OF
 FIRST_LOT_DELAY, LAST_LOT_DELAY = 10, 15  # days after the season start / end
 SOLD_SHARE = (0.85, 0.95)
 LOT_COUNTS = (2, 3, 3, 4)
-MIN_LOT_KG, KG_STEP = 50, 5
+LOT_KG = {  # (min, max) kg of one sale, per coffee form (issue #20)
+    CoffeeForm.KIBOKO: (150, 600), CoffeeForm.FAQ: (80, 300), CoffeeForm.PARCHMENT: (60, 250),
+}
+KG_STEP = 5
 NORMAL_CONFIDENCE = (0.80, 0.98)
 LOW_CONFIDENCE = 0.46
 BAG_KG = 55  # only used to size the bag sale's price; the entry has no weight
@@ -121,7 +125,10 @@ DEMO_LOTS = (
     Lot(date(2026, 6, 27), 300, BuyerType.COOPERATIVE),
     Lot(date(2026, 7, 18), 400, BuyerType.MIDDLEMAN, price=5300),
 )
-HARVEST_FACTOR = {("Tumusiime", "fly", 2026): (0.5, "yield_drop")}
+HARVEST_FACTOR = {
+    ("Tumusiime", "fly", 2026): (0.5, "yield_drop"),
+    ("Wamoto", "fly", 2026): (0.6, "yield_drop"),
+}
 # (farmer, case, day, planted tag): disease reports. Only the twig borer reaches 3 farms.
 REPORTS = (
     ("Kasule", "twig_borer", date(2026, 9, 12), "twig_borer_cluster"),
@@ -204,22 +211,34 @@ def _lots(rng, key, village: Village, start: date, end: date, harvest_kg: int) -
     """The sales of one season. The rng draws happen even for fixed lots, so the others don't shift."""
     first = start + timedelta(days=FIRST_LOT_DELAY)
     last = min(end + timedelta(days=LAST_LOT_DELAY), AS_OF - timedelta(days=1))
-    offsets = rng.sample(range((last - first).days + 1), rng.choice(LOT_COUNTS))
+    sellable = harvest_kg * rng.uniform(*SOLD_SHARE)
+    min_kg, max_kg = LOT_KG[village.form]
+    count = max(-(-int(sellable) // max_kg), min(rng.choice(LOT_COUNTS), int(sellable) // min_kg), 1)
+    offsets = rng.sample(range((last - first).days + 1), count)
     days = sorted(first + timedelta(days=d) for d in offsets)
     weights = [rng.uniform(0.6, 1.4) for _ in days]
-    sellable = harvest_kg * rng.uniform(*SOLD_SHARE)
     kinds, shares = zip(*village.buyer_weights, strict=True)
     buyers = [rng.choices(kinds, shares)[0] for _ in days]
-    lots = [
-        Lot(day, max(MIN_LOT_KG, round(sellable * w / sum(weights) / KG_STEP) * KG_STEP), buyer)
-        for day, w, buyer in zip(days, weights, buyers, strict=True)
-    ]
+    sizes = _lot_sizes(sellable, weights, min_kg, max_kg)
+    lots = [Lot(day, kg, buyer) for day, kg, buyer in zip(days, sizes, buyers, strict=True)]
     if key == DEMO_SEASON:
         return list(DEMO_LOTS)
     if key in PLANTED_LOTS:
         position, changes = PLANTED_LOTS[key]
         lots[position] = replace(lots[position], **changes)
     return lots
+
+
+def _lot_sizes(sellable: float, weights: list[float], min_kg: int, max_kg: int) -> list[int]:
+    """Every lot gets min_kg, the rest of what is sellable is shared by weight, no lot above max_kg.
+    The total never exceeds `sellable` (a farmer with less than min_kg sells one smaller lot)."""
+    if sellable < min_kg:
+        return [int(sellable // KG_STEP) * KG_STEP]
+    spare = sellable - min_kg * len(weights)
+    return [
+        min_kg + min(max_kg - min_kg, int(spare * w / sum(weights) // KG_STEP) * KG_STEP)
+        for w in weights
+    ]
 
 
 def _unit_price(rng, village: Village, lot: Lot) -> int:

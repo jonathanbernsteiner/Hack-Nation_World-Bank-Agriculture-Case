@@ -168,10 +168,12 @@ def test_planted_cases_present(season):
     assert bag.entries[0]["unit"] == "bag" and bag.entries[0]["amount_kg"] is None
     assert bag.entries[0]["price_total"] > 0
     # yield drop: this farmer's 2026 fly-crop harvest is about half of 2025's
-    (drop,) = planted(season, "yield_drop")
-    same = {c.season: c.entries[0]["yield_amount"] for c in season.calls
-            if c.farmer == drop.farmer and c.season and c.season.startswith("fly")}
-    assert same["fly-2026"] <= 0.6 * same["fly-2025"]
+    drops = planted(season, "yield_drop")
+    assert len(drops) == 2
+    for drop in drops:
+        same = {c.season: c.entries[0]["yield_amount"] for c in season.calls
+                if c.farmer == drop.farmer and c.season and c.season.startswith("fly")}
+        assert same["fly-2026"] <= 0.6 * same["fly-2025"]
     assert all(planted(season, tag) for tag in ("wilt", "leaf_rust", "berry_disease"))
 
 
@@ -346,10 +348,6 @@ def season_start(village, label):
     return date(int(year), definition.start_month, 1)
 
 
-@pytest.mark.xfail(
-    strict=True, raises=AssertionError,
-    reason="PR #36 review cycle 1, finding 1: only one yield-drop farmer is planted",
-)
 def test_two_farmers_with_yield_drop_and_problem_reports(season):
     harvests = defaultdict(dict)
     for call in season.calls:
@@ -366,10 +364,6 @@ def test_two_farmers_with_yield_drop_and_problem_reports(season):
     assert len(dropped & reporters) >= 2
 
 
-@pytest.mark.xfail(
-    strict=True, raises=AssertionError,
-    reason="PR #36 review cycle 1, finding 2: MIN_LOT_KG lifts small lots above the harvest",
-)
 def test_season_sales_never_exceed_the_harvest(season):
     harvest, sold = {}, defaultdict(int)
     for call in season.calls:
@@ -386,10 +380,6 @@ def test_season_sales_never_exceed_the_harvest(season):
     assert not over
 
 
-@pytest.mark.xfail(
-    strict=True, raises=AssertionError,
-    reason="PR #36 review cycle 1, finding 3: sale sizes outside the issue's per-form ranges",
-)
 def test_sale_sizes_within_issue_ranges(season):
     outside = [(village.form.value, entry["amount_kg"]) for _, _, village, entry in sales(season)
                if entry["amount_kg"] is not None

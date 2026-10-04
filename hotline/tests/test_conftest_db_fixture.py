@@ -150,7 +150,6 @@ def test_transaction_block_on_the_handed_out_connection_is_a_savepoint(checked_f
     assert "savepoint" in checked_fake_conn.calls
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason="PR #78 review cycle 2, finding 1")
 def test_rollback_then_transaction_on_the_handed_out_connection_cannot_commit(fake_conn, db):
     # rollback() leaves the connection idle, so conn.transaction() (forwarded by the proxy) would be
     # an outermost block that COMMITS. Same rule as the hotline.db.transaction() case above.
@@ -225,7 +224,6 @@ def test_with_connect_commit_and_exit_never_commit_live(temp_probe, db):
 
 
 @pytest.mark.supabase
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason="PR #78 review cycle 2, finding 1")
 def test_rollback_then_transaction_on_the_handed_out_connection_never_commits_live(temp_probe, db):
     conn = hotline_db.connect()
     conn.rollback()
@@ -233,3 +231,12 @@ def test_rollback_then_transaction_on_the_handed_out_connection_never_commits_li
         conn.execute(sql.SQL("create temp table {} (x int)").format(sql.Identifier(temp_probe)))
     conn.rollback()
     assert not _temp_table_exists(conn, temp_probe), "the db fixture committed"
+
+
+@pytest.mark.supabase
+def test_db_error_inside_connect_block_does_not_poison_the_shared_transaction(db):
+    with pytest.raises(Exception):
+        with hotline_db.connect() as conn:
+            conn.execute("select * from table_that_does_not_exist_76")
+    with hotline_db.transaction() as conn:
+        assert conn.execute("select 1").fetchone()[0] == 1

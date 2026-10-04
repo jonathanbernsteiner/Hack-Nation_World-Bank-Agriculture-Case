@@ -37,8 +37,18 @@ class _NoCloseConnection:
     def __enter__(self):
         return self
 
-    def __exit__(self, *exc):
+    def __exit__(self, exc_type, exc, tb):
+        # Production's __exit__ rolls back on error; mirror that so an aborted transaction does not
+        # poison later statements in the same test.
+        if exc_type is not None and self._conn.info.transaction_status == TransactionStatus.INERROR:
+            self.rollback()
         return None
+
+    def rollback(self):
+        # Keep the outer transaction open: on an idle connection a later conn.transaction() would
+        # be outermost and COMMIT.
+        self._conn.rollback()
+        self._conn.execute("select 1")
 
     def __getattr__(self, name):
         return getattr(self._conn, name)
@@ -71,5 +81,7 @@ def db(monkeypatch):
     try:
         yield shared
     finally:
-        conn.rollback()
-        conn.close()
+        try:
+            conn.rollback()
+        finally:
+            conn.close()

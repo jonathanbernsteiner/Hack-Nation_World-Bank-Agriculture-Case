@@ -341,7 +341,6 @@ def _spoken_forms(pin):
     return [pin, " ".join(pin), " ".join(words), ", ".join(words)]
 
 
-@pytest.mark.xfail(strict=True, reason="review cycle 2 finding 1: English digit words are not redacted")
 @pytest.mark.parametrize(
     "text",
     [

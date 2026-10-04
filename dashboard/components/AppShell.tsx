@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { AlertTriangle, LayoutDashboard, Map as MapIcon, MapPin, Settings, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, LayoutDashboard, Map as MapIcon, MapPin, PhoneCall, Settings, TrendingUp, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import GlobalSearch from "./GlobalSearch";
 
@@ -15,6 +15,7 @@ export interface NavItem {
 
 export const NAV: NavItem[] = [
   { href: "/", label: "Overview", icon: LayoutDashboard },
+  { href: "/call", label: "Live call", icon: PhoneCall },
   { href: "/map", label: "Map", icon: MapIcon },
   { href: "/areas", label: "Areas", icon: MapPin },
   { href: "/farmers", label: "Farmers", icon: Users },

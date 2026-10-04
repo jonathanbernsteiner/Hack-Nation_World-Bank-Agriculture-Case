@@ -395,3 +395,86 @@ def test_supabase_kampala_date_rule_own_rows_and_review_filter(db):
         {"year": "2025/26", "harvest_kg": 0, "sold_kg": 100, "avg_ugx_per_kg": 6000},
         {"year": "2024/25", "harvest_kg": 0, "sold_kg": 50, "avg_ugx_per_kg": 5000}]
     assert [s["kg"] for s in out["last_sales"]] == [100, 50]
+
+
+# --- review cycle 2 regressions ---
+
+class WindowedCursor(FakeCursor):
+    def execute(self, sql, params):
+        super().execute(sql, params)
+        self.rows = [r for r in self.rows if params["since"] <= r["entry_date"] <= params["as_of"]]
+
+
+class WindowedConn(FakeConn):
+    """A fake connection whose history query keeps only rows inside [since, as_of], like the SQL."""
+
+    def cursor(self, row_factory=None):
+        return WindowedCursor(self)
+
+
+# 2024/25 has 200 kg (Oct 2024) + 100 kg (Sep 2025) = 300 kg; 2025/26 has 400 kg; nothing in 2026/27.
+GAP_ROWS = [sale(date(2024, 10, 20), 200, 1_000_000), sale(date(2025, 9, 10), 100, 500_000),
+            sale(date(2025, 11, 5), 400, 2_000_000)]
+FULL_SOLD_KG = {"2025/26": 400, "2024/25": 300}
+
+
+def test_windowed_history_keeps_full_oldest_year_in_october():
+    out = summarize(WindowedConn(GAP_ROWS), 1, HOME, date(2026, 10, 3), totals_only=True)
+    assert {y["year"]: y["sold_kg"] for y in out["coffee_years"]} == FULL_SOLD_KG
+
+
+@pytest.mark.xfail(strict=True, reason="review cycle 2, finding 1: the 24-month window truncates "
+                                        "the oldest coffee year outside October")
+@pytest.mark.parametrize("as_of", [date(2026, 11, 15), date(2027, 3, 15), date(2027, 9, 30)])
+def test_oldest_coffee_year_is_never_a_partial_total(as_of):
+    out = summarize(WindowedConn(GAP_ROWS), 1, HOME, as_of, totals_only=True)
+    for year in out["coffee_years"]:
+        assert year["sold_kg"] == FULL_SOLD_KG[year["year"]], year
+
+
+@pytest.mark.supabase
+def test_supabase_location_login_bag_harvest_and_kes_sale_stay_out(db):
+    def one(sql, params=()):
+        return db.execute(sql, params).fetchone()[0]
+
+    village = one("insert into villages (region, district, sub_county, parish, village, is_synthetic) "
+                  "values ('Central','C2District','C2SC','C2Parish','C2Village', true) returning id")
+    caller, pin_neighbour, location_neighbour = (
+        one("insert into farmers (name, pin_hash, village_id, is_synthetic) values (%s, %s, %s, true) "
+            "returning id", (f"C2-{i}", f"review2-hash-49-{i}", village)) for i in range(3))
+
+    def call(farmer, received_at, identified_by="pin"):
+        return one("insert into calls (farmer_id, is_synthetic, received_at, identified_by) "
+                   "values (%s, true, %s, %s) returning id", (farmer, received_at, identified_by))
+
+    def entry(call_id, farmer, **cols):
+        cols = {"call_id": call_id, "farmer_id": farmer, "confidence": 0.9, **cols}
+        db.execute(f"insert into entries ({', '.join(cols)}) values ({', '.join(['%s'] * len(cols))})",
+                   tuple(cols.values()))
+
+    pin_call = call(caller, "2026-01-10 08:00+03")
+    entry(pin_call, caller, kind="harvest", crop="coffee", yield_amount=500, unit="kg")
+    entry(pin_call, caller, kind="harvest", crop="coffee", yield_amount=10, unit="bag")
+    entry(pin_call, caller, kind="sale", crop="coffee", amount_kg=200, price_total=1_200_000,
+          currency="UGX", coffee_form="kiboko", buyer_type="middleman")
+    entry(pin_call, caller, kind="sale", crop="coffee", amount_kg=100, price_total=50_000,
+          currency="KES", coffee_form="kiboko", buyer_type="middleman", date_sold=date(2026, 1, 9))
+    # Someone who logged in as the caller by name and village: review-queue rows, never her history.
+    impostor_call = call(caller, "2026-09-25 08:00+03", identified_by="location")
+    entry(impostor_call, caller, kind="sale", crop="coffee", amount_kg=999, price_total=999_000,
+          currency="UGX", coffee_form="kiboko", buyer_type="other")
+    entry(impostor_call, caller, kind="observation", symptom="wilting", likely_disease=BORER)
+    # One reviewed neighbour report plus one from a location login: below the 2-farm threshold.
+    entry(call(pin_neighbour, "2026-09-20 08:00+03"), pin_neighbour,
+          kind="observation", symptom="wilting", likely_disease=BORER)
+    entry(call(location_neighbour, "2026-09-21 08:00+03", identified_by="location"), location_neighbour,
+          kind="observation", symptom="wilting", likely_disease=BORER)
+    home = {"district": "C2District", "sub_county": "C2SC", "parish": "C2Parish"}
+
+    out = summarize(db, caller, home, AS_OF)
+
+    assert out["coffee_years"] == [
+        {"year": "2025/26", "harvest_kg": 500, "sold_kg": 300, "avg_ugx_per_kg": 6000}]
+    assert [(s["kg"], s["ugx_per_kg"]) for s in out["last_sales"]] == [(200, 6000), (100, None)]
+    assert out["problems"] == []
+    assert out["nearby_reports"] == []

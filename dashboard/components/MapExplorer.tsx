@@ -27,13 +27,32 @@ export default function MapExplorer({ data }: { data: DashboardData }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [path, setPath] = useState<AreaPath>(() => pathFromParam(searchParams.get("path"), data));
-  const context = useMemo(
-    () =>
-      data.villages
-        .filter((v) => v.lat !== null && v.lon !== null)
-        .map((v) => ({ path: [v.district, v.subCounty, v.parish, v.village], name: `${v.village}, ${v.district}`, lat: v.lat as number, lon: v.lon as number })),
-    [data],
-  );
+  const context = useMemo(() => {
+    const farmersByVillage = new Map<number, number>();
+    for (const f of data.farmers) farmersByVillage.set(f.villageId, (farmersByVillage.get(f.villageId) ?? 0) + 1);
+    const villages = data.villages
+      .filter((v) => v.lat !== null && v.lon !== null)
+      .map((v) => ({
+        path: [v.district, v.subCounty, v.parish, v.village],
+        name: `${v.village}, ${v.district}`,
+        lat: v.lat as number,
+        lon: v.lon as number,
+        farmers: farmersByVillage.get(v.id) ?? 0,
+      }));
+    const byDistrict = new Map<string, { lat: number; lon: number; n: number; farmers: number }>();
+    for (const v of villages) {
+      const d = byDistrict.get(v.path[0]) ?? { lat: 0, lon: 0, n: 0, farmers: 0 };
+      byDistrict.set(v.path[0], { lat: d.lat + v.lat, lon: d.lon + v.lon, n: d.n + 1, farmers: d.farmers + v.farmers });
+    }
+    const districts = [...byDistrict].map(([name, d]) => ({
+      path: [name],
+      name,
+      lat: d.lat / d.n,
+      lon: d.lon / d.n,
+      farmers: d.farmers,
+    }));
+    return { villages, districts };
+  }, [data]);
   const [hasUnknownPath, setHasUnknownPath] = useState(() => {
     const param = searchParams.get("path");
     return Boolean(param) && pathFromParam(param, data).length === 0;

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
-import { CircleMarker, MapContainer, Marker, TileLayer, Tooltip, useMap } from "react-leaflet";
+import { CircleMarker, MapContainer, Marker, TileLayer, Tooltip, useMap, useMapEvents } from "react-leaflet";
 import type { AreaPath, AreaSummary, MapLayer, Warning } from "@/lib/types";
 import { PRICE_LOW_INDEX, PROBLEM_MIN_FARMERS, PROBLEM_WINDOW_DAYS } from "@/lib/types";
 import { formatIndex, formatNumber, labelLevel } from "@/lib/format";
@@ -15,6 +15,25 @@ export interface ContextPoint {
   name: string;
   lat: number;
   lon: number;
+  farmers: number;
+}
+
+/** Background areas outside the selection: district bubbles when zoomed out, village dots when zoomed in. */
+export interface MapContext {
+  districts: ContextPoint[];
+  villages: ContextPoint[];
+}
+
+const CONTEXT_VILLAGE_ZOOM = 9; // at or above this zoom the background shows single villages
+const COUNTRY_ZOOM = 7.75; // zooming out to this level returns to the whole-country view
+
+function ZoomWatcher({ onZoom }: { onZoom: (zoom: number) => void }) {
+  const map = useMapEvents({ zoomend: () => onZoom(map.getZoom()) });
+  return null;
+}
+
+function isInside(path: AreaPath, selected: AreaPath): boolean {
+  return selected.length > 0 && path.length >= selected.length && selected.every((name, i) => path[i] === name);
 }
 
 interface MapViewProps {
@@ -23,7 +42,7 @@ interface MapViewProps {
   layer: MapLayer;
   warnings: Warning[];
   onSelect: (path: AreaPath) => void;
-  context?: ContextPoint[];
+  context?: MapContext;
 }
 
 const UGANDA_CENTER: [number, number] = [1.37, 32.29];
@@ -166,7 +185,8 @@ function Legend({ layer }: { layer: MapLayer }) {
   );
 }
 
-export default function MapView({ areas, selected, layer, warnings, onSelect, context = [] }: MapViewProps) {
+export default function MapView({ areas, selected, layer, warnings, onSelect, context }: MapViewProps) {
+  const [zoom, setZoom] = useState(7);
   const isVillage = selected.level === "village";
   const isEmpty = areas.length === 0 && !isVillage;
   const shown = areas.length === 0 && isVillage ? [] : areas;
@@ -188,19 +208,40 @@ export default function MapView({ areas, selected, layer, warnings, onSelect, co
         <QuietAttribution />
         <FitBounds areas={areas} selected={selected} />
 
-        {context
-          .filter((point) => !point.path.slice(0, selected.path.length).every((name, i) => name === selected.path[i]))
-          .map((point) => (
-            <CircleMarker
-              key={`ctx-${point.path.join("|")}`}
-              center={[point.lat, point.lon]}
-              radius={4}
-              pathOptions={{ color: "#FFFFFF", weight: 1, fillColor: "#64748B", fillOpacity: 0.75 }}
-              eventHandlers={{ click: () => onSelect(point.path) }}
-            >
-              <Tooltip direction="top" offset={[0, -4]}>{point.name}</Tooltip>
-            </CircleMarker>
-          ))}
+        <ZoomWatcher
+          onZoom={(next) => {
+            setZoom(next);
+            // Zooming out to the country view goes back to Uganda, so every district shows again.
+            if (next <= COUNTRY_ZOOM && selected.path.length > 0) onSelect([]);
+          }}
+        />
+
+        {selected.path.length > 0 &&
+          context &&
+          (zoom < CONTEXT_VILLAGE_ZOOM ? context.districts : context.villages)
+            .filter((point) => !isInside(point.path, selected.path) && !(point.path.length === 1 && point.path[0] === selected.path[0]))
+            .map((point) => {
+              const isDistrict = point.path.length === 1;
+              const radius = isDistrict ? Math.min(18, 7 + 2.2 * Math.sqrt(point.farmers)) : 4;
+              return (
+                <CircleMarker
+                  key={`ctx-${point.path.join("|")}`}
+                  center={[point.lat, point.lon]}
+                  radius={radius}
+                  pathOptions={{
+                    color: "#FFFFFF",
+                    weight: isDistrict ? 1.5 : 1,
+                    fillColor: isDistrict ? "#94A3B8" : "#64748B",
+                    fillOpacity: isDistrict ? 0.55 : 0.75,
+                  }}
+                  eventHandlers={{ click: () => onSelect(point.path) }}
+                >
+                  <Tooltip direction="top" offset={[0, -radius]}>
+                    {point.name} · {point.farmers} farmers
+                  </Tooltip>
+                </CircleMarker>
+              );
+            })}
 
         {shown.map((area) => {
           const style = styleFor(area, layer, containsWarning(area, warnings), maxFarmers);

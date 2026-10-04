@@ -119,7 +119,6 @@ def test_close_from_code_under_test_does_not_close_the_fixture_connection(checke
     assert "close" not in checked_fake_conn.calls
 
 
-@pytest.mark.xfail(strict=True, raises=TypeError, reason="PR #78 review finding 1: proxy has no __enter__/__exit__")
 def test_with_connect_block_from_main_works_and_neither_commits_nor_closes(fake_conn, db):
     # main._db_status() uses `with db.connect() as conn:`; psycopg's own __exit__ commits and closes.
     with hotline_db.connect() as conn:
@@ -129,14 +128,12 @@ def test_with_connect_block_from_main_works_and_neither_commits_nor_closes(fake_
     assert main._db_status() == "ok"
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason="PR #78 review finding 2: proxy forwards commit()")
 def test_commit_from_code_under_test_does_not_commit_the_fixture_transaction(fake_conn, db):
     with suppress(Exception):
         hotline_db.connect().commit()
     assert "commit" not in fake_conn.calls
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason="PR #78 review finding 2: idle conn makes block outermost")
 def test_rollback_from_code_under_test_cannot_turn_the_next_block_into_a_commit(fake_conn, db):
     with suppress(Exception):
         hotline_db.connect().rollback()

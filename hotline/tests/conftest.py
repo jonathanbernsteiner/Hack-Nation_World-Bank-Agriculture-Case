@@ -2,6 +2,7 @@ import os
 from contextlib import contextmanager
 
 import pytest
+from psycopg.pq import TransactionStatus
 
 from hotline import db as hotline_db
 
@@ -28,6 +29,17 @@ class _NoCloseConnection:
     def close(self):
         pass
 
+    def commit(self):
+        pass  # the fixture owns the outer transaction; only teardown ends it, with a rollback
+
+    # Python looks dunders up on the class, so __getattr__ cannot supply them. Do not delegate to
+    # psycopg's __exit__: it commits and closes.
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return None
+
     def __getattr__(self, name):
         return getattr(self._conn, name)
 
@@ -47,6 +59,10 @@ def db(monkeypatch):
 
     @contextmanager
     def rolled_back_transaction():
+        # Code under test may have called rollback(), leaving the connection idle; a block would
+        # then be outermost and commit. Re-open the outer transaction first.
+        if conn.info.transaction_status == TransactionStatus.IDLE:
+            conn.execute("select 1")
         with conn.transaction():  # a savepoint inside the outer transaction
             yield shared
 

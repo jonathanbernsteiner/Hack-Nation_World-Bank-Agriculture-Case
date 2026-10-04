@@ -181,11 +181,17 @@ def _quote_errors(extraction: CallExtraction, lines_en: list[dict[str, Any]]) ->
     return [quote_error(e.evidence_quote, farmer, agent) for e in extraction.entries]
 
 
+def _unit_interval(value: float | None) -> float | None:
+    """Clamp a score to [0, 1]: the entries table CHECKs both scores, and the schema can't."""
+    return None if value is None else min(max(value, 0.0), 1.0)
+
+
 def _verify_entry(entry: Entry, index: int, error: str | None, call_date: date, medians: list[float],
                   farmer_text: str, flags: list[str]) -> dict[str, Any]:
     label = f"entry {index}"
-    data = entry.model_dump()
-    data["confidence"] = min(max(data["confidence"], 0.0), 1.0)
+    raw = entry.model_dump()
+    data = dict(raw, confidence=_unit_interval(raw["confidence"]),
+                disease_confidence=_unit_interval(raw["disease_confidence"]))
     data = _null_inapplicable(data, flags, label)
     data = _money(data, flags, label)
     data = _caps(data, flags, label, medians, farmer_text)

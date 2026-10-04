@@ -145,3 +145,28 @@ def test_rule9_review_flag():
 
 def test_confidence_never_raised():
     assert one(SALE | {"confidence": 0.3, "price_total": 18_000_000})["confidence"] == 0.3
+
+
+def test_reask_that_flips_consent_to_no_writes_nothing():
+    def reask(errors):
+        return CallExtraction(consent="no", entries=[Entry(**SALE)])
+
+    result = run([SALE | {"evidence_quote": "made up words"}], reask=reask)
+    assert result.entries == [] and result.consent == "no"
+
+
+def test_reask_not_called_for_consent_no_or_unpenalised_quotes():
+    def reask(errors):
+        raise AssertionError(f"reask must not run: {errors}")
+
+    assert run([SALE | {"evidence_quote": "made up words"}], consent="no", reask=reask).entries == []
+    assert one(SALE | {"evidence_quote": "Yes"}, reask=reask)["quote_verified"] is None
+    assert one(SALE, reask=reask)["quote_verified"] is True
+
+
+def test_scores_clamped_to_db_check_range():
+    obs = BASE | {"kind": "observation", "likely_disease": "coffee_leaf_rust", "evidence_quote": "orange powder"}
+    high = one(obs | {"disease_confidence": 1.5, "confidence": 1.7})
+    assert high["disease_confidence"] == 1.0 and high["confidence"] == 1.0
+    low = one(obs | {"disease_confidence": -0.2})
+    assert low["disease_confidence"] == 0.0 and low["likely_disease"] == "not_sure"

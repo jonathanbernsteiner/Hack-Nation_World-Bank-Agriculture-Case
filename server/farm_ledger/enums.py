@@ -21,6 +21,7 @@ class Unit(StrEnum):
 
 class Currency(StrEnum):
     KES = "KES"
+    UGX = "UGX"
     USD = "USD"
     OTHER = "other"
 
@@ -57,3 +58,17 @@ class Symptom(StrEnum):
     PESTS = "pests"
     STUNTED_GROWTH = "stunted_growth"
     OTHER = "other"
+
+
+class CoffeeForm(StrEnum):
+    RED_CHERRY = "red_cherry"
+    KIBOKO = "kiboko"  # dried whole cherry
+    FAQ = "faq"  # fair average quality hulled coffee
+    PARCHMENT = "parchment"
+    DRUGAR = "drugar"  # dried unsorted arabica cherry
+    OTHER = "other"
+
+
+class CoffeeType(StrEnum):
+    ROBUSTA = "robusta"
+    ARABICA = "arabica"

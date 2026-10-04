@@ -8,10 +8,12 @@ import pytest
 
 from farm_ledger import Activity, BuyerType, Currency, Kind, PaidHow, Symptom, Unit
 from farm_ledger.db import ENTRY_FIELDS
+from farm_ledger.enums import CoffeeForm, CoffeeType
 
 MIGRATIONS = Path(__file__).resolve().parents[2] / "supabase" / "migrations"
 FIXED_LISTS = {"kind": Kind, "unit": Unit, "currency": Currency, "buyer_type": BuyerType,
-               "paid_how": PaidHow, "activity": Activity, "symptom": Symptom}
+               "paid_how": PaidHow, "activity": Activity, "symptom": Symptom,
+               "coffee_form": CoffeeForm, "coffee_type": CoffeeType}
 # sha256 of the normalised SQL (see `normalised`); checked against the live
 # supabase_migrations.schema_migrations statements for 20261003234752 on 2026-10-03.
 APPLIED_LEDGER_SQL_SHA256 = "a3dc06635dd1e25244cfd993b96b74838698c3b4e761f8a89585bb1290f76b45"
@@ -37,10 +39,66 @@ def all_migrations():
     return normalised("\n".join(p.read_text() for p in sorted(MIGRATIONS.glob("*.sql")))).lower()
 
 
-def test_check_lists_match_the_python_enums(sql):
+def uncommented_sql():
+    """Every migration in filename order, comments removed."""
+    text = "\n".join(p.read_text() for p in sorted(MIGRATIONS.glob("*.sql")))
+    return re.sub(r"--[^\n]*", "", text)
+
+
+def check_lists():
+    """column -> allowed values; the last `check (col in (...))` for a column wins."""
+    found = re.finditer(r"check\s*\(\s*(\w+)\s+in\s*\(([^)]*)\)\)", uncommented_sql())
+    return {m.group(1): re.findall(r"'([^']*)'", m.group(2)) for m in found}
+
+
+def migrated_columns(table):
+    """`create table public.<table>` columns plus every `alter table public.<table> ... add column`."""
+    text = uncommented_sql()
+    created = re.search(rf"create table public\.{table} \((.*?)\n\);", text, re.S).group(1)
+    names = {m.group(1) for m in re.finditer(r"^ {4}(\w+) ", created, re.M)} - {"unique", "primary"}
+    for alter in re.finditer(rf"alter table public\.{table}\b(.*?);", text, re.S):
+        names |= set(re.findall(r"add column (\w+)", alter.group(1)))
+    return names
+
+
+def test_check_lists_match_enums_after_all_migrations():
+    lists = check_lists()
     for column, enum in FIXED_LISTS.items():
-        listed = re.search(rf"check \({column} in \((.*?)\)\)", sql, re.S).group(1)
-        assert re.findall(r"'([^']*)'", listed) == [m.value for m in enum], column
+        assert lists[column] == [m.value for m in enum], column
+
+
+def test_currency_includes_ugx():
+    assert "UGX" in [m.value for m in Currency]
+    assert "UGX" in check_lists()["currency"]
+
+
+def test_entries_columns_include_coffee_form_type_amount_kg():
+    assert {"coffee_form", "coffee_type", "amount_kg"} <= migrated_columns("entries")
+    assert {"id", "call_id", "farmer_id", *ENTRY_FIELDS} <= migrated_columns("entries")
+
+
+def test_status_default_processed_for_existing_rows():
+    text = uncommented_sql()
+    assert re.search(r"add column status text not null default 'processed'", text)
+    assert "update public.calls set source = 'synthetic' where source is null" in text
+
+
+def test_conversation_id_unique():
+    assert re.search(r"add column conversation_id text unique", uncommented_sql())
+
+
+def test_coffee_form_rejects_unknown_value():
+    """'beans' is not a coffee form, and amount_kg must be positive."""
+    text = uncommented_sql()
+    assert "beans" not in check_lists()["coffee_form"]
+    assert "check (amount_kg > 0)" in text
+
+
+def test_view_is_security_invoker_and_revoked():
+    text = uncommented_sql()
+    assert "create view public.coffee_sale_prices with (security_invoker = true)" in text
+    assert "revoke all on public.coffee_sale_prices from anon, authenticated;" in text
+    assert "grant " not in text
 
 
 def test_tables_have_the_ledger_columns(sql):

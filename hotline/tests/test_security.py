@@ -2,6 +2,7 @@ import base64
 import dataclasses
 import hashlib
 import hmac
+import time
 
 import pytest
 from fastapi import Depends, FastAPI
@@ -186,3 +187,59 @@ def test_basic_auth_server_unset_fails_closed(client, monkeypatch):
     _patch(monkeypatch, demo_user=None, demo_password=None)
     assert client.get("/demo", headers=_basic("", "")).status_code == 401
     assert client.get("/demo", headers=_basic("judge", "pw")).status_code == 401
+
+
+# review regressions
+
+
+def test_admin_secret_does_not_open_tool(client, monkeypatch):
+    _patch(monkeypatch, hotline_tool_secret=TOOL, hotline_admin_secret=ADMIN)
+    assert client.get("/tool", headers={"X-Hotline-Tool-Secret": ADMIN}).status_code == 401
+
+
+def test_signature_matches_spec_string_formula_for_utf8_body():
+    # Spec §7 signs f"{t}.{raw_body}" as text; the bytes form must agree for UTF-8 bodies.
+    text = '{"type":"post_call_transcription","data":{"transcript":"Habari, bei ya kahawa ☕"}}'
+    digest = hmac.new(WEBHOOK.encode("utf-8"), f"{NOW}.{text}".encode("utf-8"), hashlib.sha256).hexdigest()
+    header = f"t={NOW},v0={digest}"
+    assert security.verify_elevenlabs_signature(text.encode("utf-8"), header, WEBHOOK, now=NOW)
+
+
+def test_signature_timestamp_is_covered_by_mac():
+    # Replaying an old signature with a fresh timestamp must fail.
+    old = _sign(BODY, NOW - 3600)
+    digest = old.split("v0=", 1)[1]
+    assert not security.verify_elevenlabs_signature(BODY, f"t={NOW},v0={digest}", WEBHOOK, now=NOW)
+
+
+def test_signature_uses_real_clock_by_default():
+    fresh = int(time.time())
+    assert security.verify_elevenlabs_signature(BODY, _sign(BODY, fresh), WEBHOOK)
+    stale = fresh - security.SIGNATURE_TOLERANCE_S - 60
+    assert not security.verify_elevenlabs_signature(BODY, _sign(BODY, stale), WEBHOOK)
+
+
+@pytest.mark.xfail(
+    raises=OverflowError,
+    strict=True,
+    reason="review cycle 1: huge t raises OverflowError against the float clock; remove marker once fixed",
+)
+@pytest.mark.parametrize("ts", ["9" * 400, "-" + "9" * 400], ids=["huge", "huge-negative"])
+def test_signature_huge_timestamp_returns_false_with_real_clock(ts):
+    assert security.verify_elevenlabs_signature(BODY, f"t={ts},v0=ff", WEBHOOK) is False
+
+
+@pytest.mark.parametrize(
+    "authorization",
+    ["Basic !!!not-base64", "Basic " + base64.b64encode(b"no-colon").decode(), "Bearer judge:pw-1234", "Basic"],
+)
+def test_basic_auth_malformed_header_401_with_challenge(client, monkeypatch, authorization):
+    _patch(monkeypatch, demo_user="judge", demo_password="pw-1234")
+    response = client.get("/demo", headers={"Authorization": authorization})
+    assert response.status_code == 401
+    assert response.headers["WWW-Authenticate"] == "Basic"
+
+
+def test_basic_auth_password_unset_fails_closed(client, monkeypatch):
+    _patch(monkeypatch, demo_user="judge", demo_password=None)
+    assert client.get("/demo", headers=_basic("judge", "")).status_code == 401

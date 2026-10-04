@@ -125,3 +125,47 @@ def test_salt_fingerprint_prefix(salt):
 def test_salt_fingerprint_unset(monkeypatch):
     monkeypatch.setattr(config, "settings", dataclasses.replace(config.settings, ledger_pin_salt=None))
     assert pins.salt_fingerprint() is None
+
+
+# review regressions
+
+KNOWN_9001_HASH = "caf110b918ca046ca085c46b10a7081814e595fc82f77838647603a2ab8b76ec"
+
+
+def test_hash_pin_known_answer(salt):
+    # sha256("test-salt:9001"), computed outside Python; pins the formula independently of farm_ledger.
+    assert pins.hash_pin("9001") == KNOWN_9001_HASH
+
+
+@pytest.mark.parametrize("raw", ["¹²³⁴", "٩٠٠١", "৯০০১", "90​01"])
+def test_normalize_pin_rejects_non_ascii_digits(raw):
+    # str.isdigit() is True for these; they must not reach hash_pin.
+    assert pins.normalize_pin(raw) is None
+
+
+def test_allocate_pin_reserved_boundaries():
+    class Rng:
+        def __init__(self):
+            self.values = iter([9000, 9099, 9050, 9100])
+
+        def randrange(self, _start, _stop):
+            return next(self.values)
+
+    assert pins.allocate_pin(None, rng=Rng(), is_taken=lambda _p: False) == "9100"
+
+    class Below:
+        def randrange(self, _start, _stop):
+            return 8999
+
+    assert pins.allocate_pin(None, rng=Below(), is_taken=lambda _p: False) == "8999"
+
+
+def test_allocate_pin_fails_closed_without_salt(monkeypatch):
+    monkeypatch.setattr(config, "settings", dataclasses.replace(config.settings, ledger_pin_salt=None))
+
+    class Conn:
+        def execute(self, sql, params):
+            raise AssertionError("must not query without a salt")
+
+    with pytest.raises(pins.PinSaltMissing):
+        pins.allocate_pin(Conn(), rng=random.Random(3))

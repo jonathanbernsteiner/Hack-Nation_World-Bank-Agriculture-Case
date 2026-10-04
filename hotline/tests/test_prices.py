@@ -43,7 +43,7 @@ def test_falls_back_to_parish_when_two_farmers_only():
 
 def test_falls_back_through_all_levels_to_national():
     out = prices.village_price([sale(1), sale(2)], HOME, "kiboko", AS_OF)
-    assert out["level"] == "national" and out["is_reference"] is True
+    assert out["level"] == "national_reference" and out["is_reference"] is True
     assert out["median_ugx_per_kg"] == prices.NATIONAL_REFERENCE["kiboko"]["median_ugx_per_kg"]
     assert out["n_sales"] == 0
 
@@ -58,17 +58,17 @@ def test_district_level_and_subcounty_level():
 
 def test_other_district_rows_ignored():
     rows = three_farmers(district="Mbarara")
-    assert prices.village_price(rows, HOME, "kiboko", AS_OF)["level"] == "national"
+    assert prices.village_price(rows, HOME, "kiboko", AS_OF)["level"] == "national_reference"
 
 
 def test_single_farmer_many_sales_does_not_qualify():
     rows = [sale(1, days_ago=d) for d in range(1, 8)]
-    assert prices.village_price(rows, HOME, "kiboko", AS_OF)["level"] == "national"
+    assert prices.village_price(rows, HOME, "kiboko", AS_OF)["level"] == "national_reference"
 
 
 def test_other_form_rows_ignored():
     rows = three_farmers(form="faq", per_kg=12000)
-    assert prices.village_price(rows, HOME, "kiboko", AS_OF)["level"] == "national"
+    assert prices.village_price(rows, HOME, "kiboko", AS_OF)["level"] == "national_reference"
 
 
 def test_band_filters_x10_slip():
@@ -76,16 +76,16 @@ def test_band_filters_x10_slip():
     out = prices.village_price(rows, HOME, "kiboko", AS_OF)
     assert out["n_sales"] == 3 and out["median_ugx_per_kg"] == 5000
     only_slips = three_farmers(per_kg=50000)
-    assert prices.village_price(only_slips, HOME, "kiboko", AS_OF)["level"] == "national"
+    assert prices.village_price(only_slips, HOME, "kiboko", AS_OF)["level"] == "national_reference"
 
 
 def test_window_edges_365_in_366_out():
     inside = [sale(f, days_ago=365) for f in (1, 2, 3)]
     outside = [sale(f, days_ago=366) for f in (1, 2, 3)]
     assert prices.village_price(inside, HOME, "kiboko", AS_OF)["level"] == "village"
-    assert prices.village_price(outside, HOME, "kiboko", AS_OF)["level"] == "national"
+    assert prices.village_price(outside, HOME, "kiboko", AS_OF)["level"] == "national_reference"
     future = [sale(f, days_ago=-1) for f in (1, 2, 3)]
-    assert prices.village_price(future, HOME, "kiboko", AS_OF)["level"] == "national"
+    assert prices.village_price(future, HOME, "kiboko", AS_OF)["level"] == "national_reference"
 
 
 @pytest.mark.parametrize(("raw", "rounded"), [(5024, 5000), (5025, 5050), (5074, 5050), (5075, 5100), (12250, 12250)])
@@ -103,7 +103,7 @@ def test_includes_synthetic_flag():
     rows = [sale(1, synthetic=True), sale(2), sale(3)]
     assert prices.village_price(rows, HOME, "kiboko", AS_OF, include_synthetic=True)["includes_synthetic"] is True
     real = prices.village_price(rows, HOME, "kiboko", AS_OF, include_synthetic=False)
-    assert real["level"] == "national" and real["includes_synthetic"] is False
+    assert real["level"] == "national_reference" and real["includes_synthetic"] is False
     assert prices.village_price(three_farmers(), HOME, "kiboko", AS_OF, include_synthetic=True)["includes_synthetic"] is False
 
 
@@ -128,7 +128,7 @@ def test_national_reference_has_source_and_month():
 
 def test_unknown_form_gets_no_reference():
     out = prices.village_price([], HOME, "red_cherry", AS_OF)
-    assert out["level"] == "national" and out["median_ugx_per_kg"] is None and out["median_words_sw"] is None
+    assert out["level"] == "national_reference" and out["median_ugx_per_kg"] is None and out["median_words_sw"] is None
 
 
 def test_prices_for_returns_main_and_other_forms():
@@ -164,7 +164,7 @@ def test_load_sale_rows_round_trip(db):
 def test_three_sales_from_two_farmers_falls_back_to_parish():
     """Acceptance: 3 sales from 2 farmers does not qualify, even though the sale count does."""
     village = [sale(1, days_ago=5), sale(1, days_ago=40), sale(2)]
-    assert prices.village_price(village, HOME, "kiboko", AS_OF)["level"] == "national"
+    assert prices.village_price(village, HOME, "kiboko", AS_OF)["level"] == "national_reference"
     neighbour = [sale(3, village_id=2, village="Other")]
     out = prices.village_price(village + neighbour, HOME, "kiboko", AS_OF)
     assert (out["level"], out["n_sales"], out["n_farmers"]) == ("parish", 4, 3)
@@ -182,7 +182,7 @@ def test_median_uses_the_bands_defined_in_bands_py(monkeypatch):
     assert prices.BANDS is bands.BANDS
     assert prices.village_price(three_farmers(), HOME, "kiboko", AS_OF)["level"] == "village"
     monkeypatch.setattr(bands, "BANDS", {**bands.BANDS, "kiboko": (1, 2)})
-    assert prices.village_price(three_farmers(), HOME, "kiboko", AS_OF)["level"] == "national"
+    assert prices.village_price(three_farmers(), HOME, "kiboko", AS_OF)["level"] == "national_reference"
 
 
 def test_prices_for_never_carries_farmer_ids():
@@ -285,13 +285,12 @@ def test_three_sales_do_not_reveal_individual_prices_through_quartiles():
 
 def test_drugar_has_a_national_reference():
     out = prices.village_price([], HOME, "drugar", AS_OF)
-    assert (out["level"], out["median_ugx_per_kg"]) == ("national", 14_500)
+    assert (out["level"], out["median_ugx_per_kg"]) == ("national_reference", 14_500)
 
 
 # --- Review cycle 2 regression tests (#43) ---
 
 
-@pytest.mark.xfail(strict=True, reason="review cycle 2 finding 1: level is 'national', the #43 contract says 'national_reference'")
 def test_national_fallback_level_is_national_reference():
     """Issue #43 scope: the fallback is {"level": "national_reference", ...}, and the agent prompt (#46) branches on
     that value. Zombo (one farmer in the #20 season) takes this path in the demo."""

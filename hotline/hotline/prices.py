@@ -18,7 +18,8 @@ MIN_FARMERS = 3
 ROUND_TO_UGX = 50
 MIN_SALES_FOR_QUARTILES = 5  # below this p25/p75 plus the median would reveal single prices
 LEVELS = ("village", "parish", "sub_county", "district")
-NATIONAL_SOURCE_URL = "https://ugandacoffee.go.ug/resource-center/reports/monthly-reports"
+NATIONAL_SOURCE_URL = "https://ugandacoffee.go.ug/sites/default/files/2026-04/05-February%202026%20Report%20pptx.pptx_final.pdf"
+NATIONAL_LEVEL = "national_reference"
 # A reference from the UCDA monthly report for February 2026 (figures checked against the
 # PDF), not a village median. There is no national red_cherry figure in the report, so a
 # red_cherry caller can get median_ugx_per_kg None at national level.
@@ -162,7 +163,7 @@ def _national(form: str, as_of: date) -> dict:
         "p75": None,
         "n_sales": 0,
         "n_farmers": 0,
-        "level": "national",
+        "level": NATIONAL_LEVEL,
         "area": NATIONAL_AREA,
         "window": {"from": start.isoformat(), "to": end.isoformat()},
         "includes_synthetic": False,

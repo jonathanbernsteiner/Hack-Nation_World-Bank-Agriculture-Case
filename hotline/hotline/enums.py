@@ -21,6 +21,7 @@ class Unit(StrEnum):
 
 class Currency(StrEnum):
     KES = "KES"
+    UGX = "UGX"
     USD = "USD"
     OTHER = "other"
 
@@ -57,3 +58,52 @@ class Symptom(StrEnum):
     PESTS = "pests"
     STUNTED_GROWTH = "stunted_growth"
     OTHER = "other"
+
+
+class CoffeeForm(StrEnum):
+    RED_CHERRY = "red_cherry"
+    KIBOKO = "kiboko"  # dried whole cherry
+    FAQ = "faq"  # fair average quality hulled coffee
+    PARCHMENT = "parchment"
+    DRUGAR = "drugar"  # dried unsorted arabica cherry
+    OTHER = "other"
+
+
+class CoffeeType(StrEnum):
+    ROBUSTA = "robusta"
+    ARABICA = "arabica"
+
+
+class CallStatus(StrEnum):
+    IN_CALL = "in_call"
+    RECEIVED = "received"
+    PROCESSING = "processing"
+    PROCESSED = "processed"
+    FAILED = "failed"
+    NEEDS_REVIEW = "needs_review"
+
+
+class CallSource(StrEnum):
+    ELEVENLABS = "elevenlabs"
+    TWILIO = "twilio"
+    SYNTHETIC = "synthetic"
+    EVAL = "eval"
+
+
+class IdentifiedBy(StrEnum):
+    PIN = "pin"
+    LOCATION = "location"
+    REGISTRATION = "registration"
+
+
+class Consent(StrEnum):
+    YES = "yes"
+    NO = "no"
+    UNCLEAR = "unclear"
+
+
+class Region(StrEnum):
+    CENTRAL = "Central"
+    EASTERN = "Eastern"
+    NORTHERN = "Northern"
+    WESTERN = "Western"

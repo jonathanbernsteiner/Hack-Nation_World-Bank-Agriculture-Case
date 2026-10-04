@@ -2,7 +2,7 @@
   "type": "post_call_transcription",
   "event_timestamp": 1791082082,
   "data": {
-    "agent_id": "agent_3601m426r0abf01bs300wb1ssdsp",
+    "agent_id": "agent_fixture",
     "agent_name": "Farm record line (draft)",
     "conversation_id": "conv_7901m42cyshjej6vwnezf9zmg9dc",
     "status": "done",
@@ -811,11 +811,11 @@
       "experiments": [],
       "procedure_ids": null,
       "dynamic_variables": {
-        "system__agent_id": "agent_3601m426r0abf01bs300wb1ssdsp",
+        "system__agent_id": "agent_fixture",
         "system__agent_turns": 5,
         "system__current_agent_turns": 5,
         "system__current_subagent_turns": 5,
-        "system__current_agent_id": "agent_3601m426r0abf01bs300wb1ssdsp",
+        "system__current_agent_id": "agent_fixture",
         "system__conversation_id": "conv_7901m42cyshjej6vwnezf9zmg9dc",
         "system__call_duration_secs": 14,
         "system__time_utc": "2026-10-04T02:47:57.811218+00:00",

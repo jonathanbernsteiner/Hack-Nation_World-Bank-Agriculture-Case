@@ -30,7 +30,7 @@ Derived from the GET (not confirmed against a real webhook delivery):
 - A phone call fills `metadata.phone_call` and `system__caller_id`/`system__called_number`/`system__call_sid`. The fixture has them as `null` and a text call can't show their real shape.
 - The analysis summary is in English although the call is Kiswahili. Data collection is not configured, so `data_collection_results` is empty.
 
-**Scrubbing.** Nulled: `user_id`, `metadata.phone_call`, `system__caller_id`, `system__called_number`, `system__call_sid`, `system__call_id`, `system__user_id`, `system__initiator_id`. No PIN appears in any turn (the farmer never said one). Floats rounded to 4 decimals.
+**Scrubbing.** Replaced the real agent id with the placeholder `agent_fixture` (`agent_id`, `system__agent_id`, `system__current_agent_id`). Nulled: `user_id`, `metadata.phone_call`, `system__caller_id`, `system__called_number`, `system__call_sid`, `system__call_id`, `system__user_id`, `system__initiator_id`. No PIN appears in any turn (the farmer never said one). Floats rounded to 4 decimals.
 
 **Gotcha for the grep check.** The three unix timestamps (`event_timestamp`, `start_time_unix_secs`, `accepted_time_unix_secs`) are 10 digits, so a bare `[0-9]{9,}` grep matches them and they cannot be removed without breaking the shape. Everything else is clean. Suggested test for #57 (not committed here): `test_fixture_has_no_phone_numbers`, asserting no `\+\d{6,}` and no run of 9+ digits outside keys ending in `_unix_secs` or `event_timestamp`.
 
@@ -54,6 +54,8 @@ Response 200, and a follow-up GET returns `{'dtmf_input_timeout': 3.0, 'hash_ter
 - A GET shows `source_medium` can be `dtmf`, so keypad turns are identifiable.
 
 **Not verified.** Live delivery of keys on a Twilio-imported number. The number is not imported into ElevenLabs (that is #56, outside this leaf) and text/WebSocket conversations cannot send DTMF. The old TwiML route (`twilio_line`) never reaches the agent. "Twilio-imported" means the native integration.
+
+**For #57.** With `redact_input: true`, keypad turns (`source_medium` `dtmf`) arrive in the transcript as `<REDACTED>`, not digits, so the PIN must come from the `identify_farmer` tool params, not from the farmer turns; a DTMF-only `9001` turn test is not valid.
 
 **Decision.** #47 writes the prompt for **keypad PIN first, spoken PIN as fallback** (and when a digit string arrives either way, same `identify_farmer` path). `sync_agent.py` sets `dtmf_input_settings` with `redact_input: true`. Consequence of the redaction limits: our §7 PIN redaction to `[PIN]` must still run, because spoken digits, agent read-backs and tool params are not covered. #56 must make a real call with keypad digits and check for a `dtmf` turn; if none arrives, the demo uses the spoken PIN.
 

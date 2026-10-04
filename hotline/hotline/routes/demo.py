@@ -1,4 +1,5 @@
 """GET /demo: read-only, server-rendered judge screen behind Basic auth (spec section 11).
+GET /: public call page with the ElevenLabs widget only (no ledger data, no refresh).
 
 Never selects pin_hash, PINs or phone numbers. Every value is escaped by `_e`."""
 
@@ -38,6 +39,12 @@ def _e(value: Any) -> str:
     return html.escape("" if value is None else str(value), quote=True)
 
 
+def _num(value: Any) -> str:
+    """Readable amounts for the judge screen: Decimal('1800000.00') -> '1,800,000', 300.0 -> '300'."""
+    number = float(value)
+    return f"{number:,.0f}" if number.is_integer() else f"{number:,.2f}"
+
+
 def _rows(conn, sql: str, params: tuple) -> list[dict]:
     with conn.cursor() as cur:
         cur.execute(sql, params)
@@ -52,9 +59,11 @@ def _village_medians(conn, calls: list[dict], today: date) -> list[dict]:
     except ImportError:
         return []
     homes = {c["village_id"]: c for c in calls if c.get("village_id") is not None}
+    districts = {home["district"] for home in homes.values()}
+    rows_by_district = {d: prices.load_sale_rows(conn, d, today) for d in districts}  # one query per district
     result = []
     for home in homes.values():
-        rows = prices.load_sale_rows(conn, home["district"], today)
+        rows = rows_by_district[home["district"]]
         forms = [prices.village_price(rows, home, form, today) for form in MEDIAN_FORMS]
         result.append({"village": home["village"], "forms": forms})
     return result
@@ -110,8 +119,8 @@ def _entry(entry: dict, call: dict) -> str:
         _e(x)
         for x in (
             entry.get("coffee_form") or entry.get("crop"),
-            f"{kg} kg" if kg else None,
-            f"{entry['price_total']} {entry.get('currency') or ''}".strip() if entry.get("price_total") else None,
+            f"{_num(kg)} kg" if kg else None,
+            f"{_num(entry['price_total'])} {entry.get('currency') or ''}".strip() if entry.get("price_total") else None,
             entry.get("likely_disease") or entry.get("symptom"),
             entry.get("description"),
         )
@@ -138,7 +147,7 @@ def _medians(medians: list[dict]) -> str:
     out = []
     for village in medians:
         cells = "".join(
-            f"<tr><td>{_e(m['form'])}</td><td>{_e(m.get('median_ugx_per_kg'))} UGX/kg</td>"
+            f"<tr><td>{_e(m['form'])}</td><td>{_e(_num(m['median_ugx_per_kg']))} UGX/kg</td>"
             f"<td>n={_e(m.get('n_sales'))}</td><td>{_e(m.get('level'))}: {_e(m.get('area'))}</td></tr>"
             for m in village["forms"]
         )
@@ -163,25 +172,50 @@ _CSS = (
 )
 
 
+FOOTER = "<footer>Weather data by Open-Meteo.com (CC BY 4.0). Synthetic demo data.</footer>"
+CALL_LINK = (
+    "<p><a href=/ target=_blank rel=noopener>Open the call page</a> in a new tab, call there, and watch "
+    "this page. (The widget is not on this page: the 10 s refresh would cut the call.)</p>"
+)
+
+
+def _page(title: str, body: str, refresh: bool) -> str:
+    meta = f"<meta http-equiv=refresh content={REFRESH_SECS}>" if refresh else ""
+    return (
+        f"<!doctype html><html lang=en><head><meta charset=utf-8>{meta}"
+        f"<meta name=viewport content='width=device-width,initial-scale=1'>"
+        f"<title>{_e(title)}</title><style>{_CSS}</style></head><body>"
+        f"<h1>{_e(title)}</h1>{body}{FOOTER}</body></html>"
+    )
+
+
 def render_page(view: dict) -> str:
     entries_by_call: dict[Any, list[dict]] = {}
     for entry in view["entries"]:
         entries_by_call.setdefault(entry["call_id"], []).append(entry)
     calls = "".join(_call_block(c, entries_by_call.get(c["id"], [])) for c in view["calls"])
-    return (
-        f"<!doctype html><html lang=en><head><meta charset=utf-8>"
-        f"<meta http-equiv=refresh content={REFRESH_SECS}><meta name=viewport content='width=device-width,initial-scale=1'>"
-        f"<title>Hotline demo</title><style>{_CSS}</style></head><body>"
-        f"<h1>Hotline demo</h1><h2>Try a call</h2>{_widget()}"
+    body = (
+        f"<h2>Try a call</h2>{CALL_LINK}"
         f"<h2>Village medians</h2>{_medians(view['medians'])}"
         f"<h2>Latest calls</h2>{calls or '<p class=muted>No calls yet.</p>'}"
-        "<footer>Weather data by Open-Meteo.com (CC BY 4.0). Synthetic demo data.</footer></body></html>"
     )
+    return _page("Hotline demo", body, refresh=True)
+
+
+def render_call_page() -> str:
+    """Public page: the browser widget only. No ledger data, no refresh (a reload would end the call)."""
+    body = "<p>Kiswahili coffee price and problem line. Press the button to talk to the agent.</p>" + _widget()
+    return _page("Coffee hotline", body, refresh=False)
 
 
 def _load() -> dict:
     with db.connect() as conn:
         return load_view(conn)
+
+
+@router.get("/", response_class=HTMLResponse)
+def call_page() -> HTMLResponse:
+    return HTMLResponse(render_call_page())
 
 
 @router.get("/demo", response_class=HTMLResponse, dependencies=[Depends(security.require_demo_basic_auth)])

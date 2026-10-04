@@ -47,7 +47,7 @@ Caller without a PIN gives village Kyabakuza, parish Kyanamukaaka. The call show
 
 ## Backup: browser widget
 
-If the phone line fails (the +1 number is an international call from Uganda), open `/demo` (Basic auth) and use the **Try a call** widget. The widget has no keypad: use the **spoken PIN** (nine, zero, zero, one) with the agent's read-back. Allow microphone access in the browser. The page refresh can hide an expanded call, so do not expand transcripts mid-demo.
+If the phone line fails (the +1 number is an international call from Uganda), open the public call page `/` and use the widget there; keep `/demo` (Basic auth) open in a second tab to watch the result. The widget is not on `/demo` because its 10 s refresh would end the call. The widget has no keypad: use the **spoken PIN** (nine, zero, zero, one) with the agent's read-back. Allow microphone access in the browser.
 
 ## Notes
 
@@ -60,5 +60,5 @@ If the phone line fails (the +1 number is an international call from Uganda), op
 - [ ] Warm `/api/health` (and `/api/health?deep=1` with the admin secret: db ok, salt_fp matches).
 - [ ] Note the Kyabakuza kiboko median and n on `/demo`: **[from /demo after the load]**.
 - [ ] Confirm the agent is synced (`sync_agent --dry-run` shows no diff).
-- [ ] Confirm the widget backup loads on `/demo` and the microphone prompt works.
+- [ ] Confirm the widget backup loads on `/` and the microphone prompt works.
 - [ ] Kiswahili lines checked by a speaker; numbers in the script match `/demo`.

@@ -69,7 +69,7 @@ function SideLink({ item, pathname }: { item: NavItem; pathname: string }) {
   const { href, label, icon: Icon } = item;
   const active = isActive(pathname, href);
   return (
-    <div className="h-14 w-14 flex items-center justify-center">
+    <div className="h-12 w-14 flex items-center justify-center">
       <Link
         href={href}
         aria-label={label}
@@ -79,7 +79,7 @@ function SideLink({ item, pathname }: { item: NavItem; pathname: string }) {
         }`}
       >
         <Icon size={22} color="#ffffff" />
-        <span className="pointer-events-none absolute left-full ml-2 whitespace-nowrap rounded-md bg-ink text-white text-[13px] font-medium px-3 py-1.5 shadow-[0_2px_8px_rgba(0,0,0,0.3)] opacity-0 group-hover:opacity-100 group-hover:delay-200 transition-opacity">
+        <span className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-4 z-50 whitespace-nowrap rounded-md bg-ink text-white text-[13px] font-medium px-3 py-1.5 shadow-[0_2px_8px_rgba(0,0,0,0.3)] opacity-0 group-hover:opacity-100 group-hover:delay-200 transition-opacity">
           {label}
         </span>
       </Link>
@@ -101,7 +101,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <div className="w-8 h-8 rounded-full bg-white text-navy text-sm font-bold flex items-center justify-center mt-3 mb-4">
           C
         </div>
-        <nav className="flex flex-col gap-1">
+        <nav className="flex flex-col">
           {MAIN_NAV.map((item) => (
             <SideLink key={item.href} item={item} pathname={pathname} />
           ))}

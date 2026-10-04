@@ -44,7 +44,7 @@ function SalesChart({ detail }: { detail: FarmerDetail }) {
   );
 }
 
-function SalesCard({ detail, isFull }: { detail: FarmerDetail; isFull: boolean }) {
+function SalesCard({ detail }: { detail: FarmerDetail }) {
   return (
     <section className={CARD}>
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 mb-3">
@@ -71,7 +71,7 @@ function SalesCard({ detail, isFull }: { detail: FarmerDetail; isFull: boolean }
                   <th className={`${TH} text-right`}>UGX/kg</th>
                   <th className={`${TH} text-left`}>Buyer</th>
                   <th className={`${TH} text-right`}>vs national</th>
-                  {isFull && <th className={`${TH} text-right`}>Total UGX</th>}
+                  <th className={`${TH} text-right`}>Total UGX</th>
                 </tr>
               </thead>
               <tbody>
@@ -83,7 +83,7 @@ function SalesCard({ detail, isFull }: { detail: FarmerDetail; isFull: boolean }
                     <td className="px-3 py-2 text-right font-mono text-gray-700 whitespace-nowrap">{formatNumber(s.ugxPerKg)}</td>
                     <td className="px-3 py-2 text-gray-600 whitespace-nowrap">{s.buyerType ? labelBuyer(s.buyerType) : "—"}</td>
                     <td className="px-3 py-2 text-right whitespace-nowrap"><span className={indexPillClass(s.indexVsNational)}>{formatIndex(s.indexVsNational)}</span></td>
-                    {isFull && <td className="px-3 py-2 text-right font-mono text-gray-700 whitespace-nowrap">{formatNumber(s.totalUgx)}</td>}
+                    <td className="px-3 py-2 text-right font-mono text-gray-700 whitespace-nowrap">{formatNumber(s.totalUgx)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -133,7 +133,7 @@ export default function FarmerPeek({ data, farmerId, onClose }: { data: Dashboar
   return (
     <aside
       aria-label="Farmer details"
-      style={isFull ? undefined : { width: "min(560px, 100vw)" }}
+      style={isFull ? undefined : { width: "min(max(880px, 62vw), calc(100vw - 56px))" }}
       className={`fixed top-14 bottom-0 ${position} bg-white border-l border-line shadow-xl z-40 flex flex-col transition-[width,left] duration-150`}
     >
       <div className="flex items-start justify-between gap-3 p-5 border-b border-line">
@@ -161,7 +161,7 @@ export default function FarmerPeek({ data, farmerId, onClose }: { data: Dashboar
       </div>
       {detail && (
         <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-gray-50">
-          <SalesCard detail={detail} isFull={isFull} />
+          <SalesCard detail={detail} />
           <ProblemsCard detail={detail} />
         </div>
       )}

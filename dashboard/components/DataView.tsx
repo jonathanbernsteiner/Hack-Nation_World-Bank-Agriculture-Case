@@ -1,14 +1,3 @@
-import {
-  PRICE_LOW_INDEX,
-  PRICE_WINDOW_DAYS,
-  PROBLEM_MIN_FARMERS,
-  PROBLEM_WINDOW_DAYS,
-  MIN_FARMERS,
-  MIN_SALES,
-} from "@/lib/types";
-
-const PRICE_DROP_PCT = Math.round((1 - PRICE_LOW_INDEX) * 100);
-
 const SECTIONS: { title: string; items: string[] }[] = [
   {
     title: "Sources",
@@ -27,14 +16,6 @@ const SECTIONS: { title: string; items: string[] }[] = [
       "Village points, not plot GPS: not EUDR-grade",
       "Problems are suspected, not confirmed in the field",
       "Latest national reference month is carried forward",
-    ],
-  },
-  {
-    title: "Warnings",
-    items: [
-      `Problem: ${PROBLEM_MIN_FARMERS}+ farms, one parish, ${PROBLEM_WINDOW_DAYS} days`,
-      `Price: ${PRICE_DROP_PCT}%+ below national, ${PRICE_WINDOW_DAYS} days (${MIN_SALES}+ sales, ${MIN_FARMERS}+ farmers)`,
-      "Each warning is a prompt for an officer check",
     ],
   },
   {

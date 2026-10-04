@@ -20,6 +20,7 @@ from pathlib import Path
 EVALS_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(EVALS_DIR))
 PROMPTS_DIR = EVALS_DIR.parent / "hotline" / "prompts"
+TRANSLATION_CACHE_DIR = EVALS_DIR.parent / ".cache" / "translations"  # spec section 7: evals cache translations (gitignored)
 EST_COST_PER_CALL_USD = 0.60  # translate + extract on Opus 5.5, one short call; a rough ceiling
 DEFAULT_MAX_COST_USD = 8.0  # one full set of 10 at the rough estimate, with headroom
 TOTAL_COST_CAP_USD = 60.0  # spec section 9 cost cap, all rounds together
@@ -66,6 +67,13 @@ def check_cost(n_calls: int, max_cost: float, spent_before: float) -> float:
     return estimate
 
 
+def cached_translator(lines: list[dict]) -> list[str]:
+    """Translate with the on-disk cache (key: model + effort + prompt hash + transcript hash)."""
+    from hotline.pipeline.translate import translate_lines
+
+    return translate_lines(lines, cache_dir=TRANSLATION_CACHE_DIR)
+
+
 def run_one(call: dict) -> dict:
     from hotline.pipeline.run import run_call
     from hotline.pipeline.transcript import scrub_tool_results, to_lines
@@ -79,6 +87,7 @@ def run_one(call: dict) -> dict:
             date.fromisoformat(call["call_date"]),
             tool_results=scrub_tool_results(conversation),
             identified_by=identified_by(conversation),
+            translator=cached_translator,
         )
         consent, entries, lines_en = result.consent, list(result.entries), result.lines_en
         error = None

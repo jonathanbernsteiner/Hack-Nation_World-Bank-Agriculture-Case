@@ -23,7 +23,7 @@ MEDIAN_FORMS = ("kiboko", "faq", "parchment")
 WIDGET_SCRIPT = "https://unpkg.com/@elevenlabs/convai-widget-embed"
 
 _CALLS_SQL = (
-    "select c.id, c.received_at, c.status, c.identified_by, c.is_synthetic, c.transcript_lines, "
+    "select c.id, c.farmer_id, c.received_at, c.status, c.identified_by, c.is_synthetic, c.transcript_lines, "
     "split_part(f.name, ' ', 1) as first_name, v.village, v.parish, v.sub_county, v.district, v.id as village_id "
     "from calls c left join farmers f on f.id = c.farmer_id left join villages v on v.id = f.village_id "
     "order by c.received_at desc limit %s"
@@ -133,6 +133,8 @@ def _entry(entry: dict, call: dict) -> str:
 def _call_block(call: dict, entries: list[dict]) -> str:
     badge = " <span class=synthetic>SYNTHETIC</span>" if call.get("is_synthetic") else ""
     who = " / ".join(_e(x) for x in (call.get("first_name"), call.get("village")) if x) or "unidentified"
+    if call.get("farmer_id") is not None:
+        who = f"<a href=/demo/farmer/{_e(call['farmer_id'])}>{who}</a>"
     items = "".join(_entry(x, call) for x in entries) or "<li class=muted>No entries.</li>"
     return (
         f"<section class=call><h3>{_e(_kampala(call.get('received_at')))} &middot; {_e(call.get('status'))}"

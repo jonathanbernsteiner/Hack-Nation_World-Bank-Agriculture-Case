@@ -3,6 +3,7 @@ import sqlite3
 import pytest
 
 from hotline import places
+from hotline.enums import Region
 from hotline.places import (
     DistrictMatch,
     create_unverified_village,
@@ -289,3 +290,61 @@ def test_village_cache_expires(conn, monkeypatch):
     now = places.time.monotonic()
     monkeypatch.setattr(places.time, "monotonic", lambda: now + places.VILLAGE_CACHE_TTL_SECS + 1)
     assert places._district_villages(conn, "Masaka") == ()
+
+
+# --- Review regressions, cycle 2 (#48) ---
+
+# Generous bounding box around Uganda; centroids are the fallback position for new villages.
+UGANDA_LAT = (-1.6, 4.4)
+UGANDA_LON = (29.4, 35.1)
+
+
+def test_csv_districts_fit_the_villages_table():
+    rows = places._districts()
+    allowed_regions = {r.value for r in Region}
+    assert {region for _, region, _, _ in rows} <= allowed_regions  # villages.region check constraint
+    lowered = [name.lower() for name, _, _, _ in rows]
+    assert len(lowered) == len(set(lowered))  # the cache and SQL key on lower(district)
+    for name, _, lat, lon in rows:
+        assert UGANDA_LAT[0] < lat < UGANDA_LAT[1] and UGANDA_LON[0] < lon < UGANDA_LON[1], name
+
+
+def test_matched_district_round_trips_through_create_and_match(conn):
+    mbale = match_district("wilaya ya Mbale")
+    new_id = create_unverified_village(conn, mbale, "kijiji cha Bumbo", None, None)
+    row = conn.execute(
+        "select region, district, village, lat, lon from villages where id = %s", (new_id,)
+    ).fetchone()
+    assert row == ("Eastern", "Mbale", "Bumbo", mbale.lat, mbale.lon)
+    assert match_village(conn, mbale.district, "Bumbo").best.village_id == new_id
+    assert match_village(conn, "Masaka", "Bumbo").status == "none"
+
+
+def test_unknown_parish_row_does_not_swallow_parish_narrowing(conn):
+    unknown_id = create_unverified_village(conn, MASAKA, "Kisenyi", None, None)
+    narrowed = match_village(conn, "Masaka", "Kisenyi", parish="Nyendo")
+    assert narrowed.status == "ambiguous"
+    assert {c.parish for c in narrowed.candidates} == {"Nyendo", "unknown"}
+    assert unknown_id in {c.village_id for c in narrowed.candidates}
+    everything = match_village(conn, "Masaka", "Kisenyi")
+    assert len(everything.candidates) == places.MAX_CANDIDATES
+
+
+def test_village_within_five_points_of_the_best_is_ambiguous():
+    # "Kiseny" scores 92.3 for Kisenyi and 90.0 for Kisenyeka: not a tie, but inside the margin.
+    c = SqliteConn()
+    add(c, "Masaka", "Kyanamukaaka", "Kitovu", "Kisenyi")
+    add(c, "Masaka", "Kyanamukaaka", "Nyendo", "Kisenyeka")
+    assert match_village(c, "Masaka", "Kisenyi").status == "unique"
+    halfway = match_village(c, "Masaka", "Kiseny")
+    assert halfway.status == "ambiguous"
+    assert halfway.best is None
+    assert [v.village for v in halfway.candidates] == ["Kisenyi", "Kisenyeka"]
+
+
+def test_village_at_minimum_length_still_matches_itself(conn):
+    add(conn, "Masaka", "Kyanamukaaka", "Nyendo", "Bisu")
+    assert len("Bisu") == places.MIN_VILLAGE_LETTERS
+    result = match_village(conn, "Masaka", "Bisu")
+    assert result.status == "unique"
+    assert result.best.village == "Bisu"

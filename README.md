@@ -13,7 +13,7 @@ Status as of 4 Oct, 00:15 UTC. **We moved from the laptop to the cloud** ([decis
 | Supabase | all data: the ledger (`farmers`, `calls`, `entries`) and the call audio | **In use.** Project `hack-nation-farm-record` (East US, `supabase/config.toml`). Tables come from the migration in #19 | Jonathan |
 | Vercel | hosting the app: co-op dashboard and the API that saves calls | **In use.** Project linked to this repo, Supabase keys already set (#28) | Jonathan |
 | ElevenLabs | voice models (speech-to-text Scribe, text-to-speech) and the call agent. The agent's LLM is **Claude**, picked in the agent settings and billed through the ElevenLabs key | **Account ready** (Creator tier via Hack-Nation). Key being added | Jonathan |
-| Twilio | the phone number Noor calls in the demo | **Ready and tested**: trial number **+1 628 272 9173** (voice + SMS). Probably connected through ElevenLabs next | Jonathan |
+| Twilio | the phone number Noor calls in the demo | **Ready and tested**: number **+1 628 272 9173** (voice + SMS), paid account since 4 Oct. Probably connected through ElevenLabs next | Jonathan |
 | Anthropic | direct Claude API, **only** for steps outside the call (e.g. disease matching, #29). Claude inside the ElevenLabs agent needs no Anthropic key | Optional: a key only if we use it | Jonathan |
 
 ### How a call flows (plan)
@@ -40,7 +40,7 @@ Callers' voices and transcripts pass through ElevenLabs (which sends the text to
 | Variable | Service | Where it's used |
 |---|---|---|
 | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SUPABASE_*` | Supabase | browser-safe (row-level security applies) |
-| `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, `SUPABASE_DB_PASSWORD` | Supabase | server only |
+| `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, `SUPABASE_DB_PASSWORD` | Supabase | server only |
 | `ELEVENLABS_API_KEY`, `ELEVENLABS_AGENT_ID`, `ELEVENLABS_WEBHOOK_SECRET` | ElevenLabs | server only |
 | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` | Anthropic (optional) | server only; only if our API calls Claude directly |
 | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER` | Twilio | server only (also pasted into ElevenLabs to import the number) |
@@ -51,9 +51,4 @@ Every server-only key also goes into the Vercel project settings (Production + P
 
 - Env vars: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER`.
 - Demo call route (epic #2), planned: basic phone → Twilio number → ElevenLabs agent. ElevenLabs sets the number's webhooks itself when the number is imported. Fallback: our webhook in `twilio_line/` on Vercel. The old route through ngrok to a laptop is only for local testing now.
-- Free-trial limits:
-  - Only verified phones can call the number. To add yours, send Jonathan your number; Twilio texts you a 6-digit code to pass back. Jonathan's phone is verified.
-  - Every call first plays a trial notice and waits for the caller to press any key. Only then does our webhook run. Upgrade before recording the demo video.
-  - The number can't call out to our phones on the trial, and the API's call log stayed empty in our test, so test by calling in.
-  - One phone number, and the trial runs 30 days.
-  - Upgrading the account removes these limits.
+- The account was upgraded from the free trial on 4 Oct (balance topped up, owner Jonathan). The trial limits are gone: any phone can call the number, there's no trial notice before our webhook, and the number can call out.

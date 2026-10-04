@@ -143,6 +143,25 @@ def test_rollback_from_code_under_test_cannot_turn_the_next_block_into_a_commit(
     assert "commit" not in fake_conn.calls
 
 
+def test_transaction_block_on_the_handed_out_connection_is_a_savepoint(checked_fake_conn, db):
+    # The psycopg idiom `with conn.transaction():` on the connection from hotline.db.connect().
+    with hotline_db.connect() as conn, conn.transaction():
+        conn.execute("insert probe")
+    assert "savepoint" in checked_fake_conn.calls
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError, reason="PR #78 review cycle 2, finding 1")
+def test_rollback_then_transaction_on_the_handed_out_connection_cannot_commit(fake_conn, db):
+    # rollback() leaves the connection idle, so conn.transaction() (forwarded by the proxy) would be
+    # an outermost block that COMMITS. Same rule as the hotline.db.transaction() case above.
+    conn = hotline_db.connect()
+    conn.rollback()
+    with conn.transaction():
+        conn.execute("insert probe")
+    assert "begin" not in fake_conn.calls
+    assert "commit" not in fake_conn.calls
+
+
 def _fresh_connection() -> psycopg.Connection:
     return psycopg.connect(
         config.settings.database_url,
@@ -182,3 +201,35 @@ def test_writes_through_hotline_db_are_never_visible_outside_the_fixture(leak_gu
     assert db.execute(sql.SQL("select count(*) from public.{}").format(table)).fetchone()[0] == 2
     with _fresh_connection() as fresh:
         assert not _table_exists(fresh, leak_guard)
+
+
+def _temp_table_exists(conn, name: str) -> bool:
+    return conn.execute("select to_regclass(%s)", (f"pg_temp.{name}",)).fetchone()[0] is not None
+
+
+@pytest.fixture
+def temp_probe():
+    """A session-local temp table name: even if the fixture commits, nothing reaches other sessions,
+    and the table disappears when the fixture closes its connection. Only a commit survives rollback()."""
+    return f"rollback_probe_{uuid.uuid4().hex}"
+
+
+@pytest.mark.supabase
+def test_with_connect_commit_and_exit_never_commit_live(temp_probe, db):
+    with hotline_db.connect() as conn:
+        conn.execute(sql.SQL("create temp table {} (x int)").format(sql.Identifier(temp_probe)))
+        conn.commit()
+    assert _temp_table_exists(db, temp_probe)
+    db.rollback()
+    assert not _temp_table_exists(db, temp_probe), "the db fixture committed"
+
+
+@pytest.mark.supabase
+@pytest.mark.xfail(strict=True, raises=AssertionError, reason="PR #78 review cycle 2, finding 1")
+def test_rollback_then_transaction_on_the_handed_out_connection_never_commits_live(temp_probe, db):
+    conn = hotline_db.connect()
+    conn.rollback()
+    with conn.transaction():
+        conn.execute(sql.SQL("create temp table {} (x int)").format(sql.Identifier(temp_probe)))
+    conn.rollback()
+    assert not _temp_table_exists(conn, temp_probe), "the db fixture committed"

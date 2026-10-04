@@ -12,6 +12,7 @@ agent are villages, never farmers. The caller owns the connection and its transa
 
 import csv
 import re
+import time
 import unicodedata
 from dataclasses import dataclass
 from functools import lru_cache
@@ -26,6 +27,8 @@ MARGIN_POINTS = 5
 CANDIDATE_FLOOR = 60
 MAX_CANDIDATES = 3
 UNKNOWN_PLACE = "unknown"
+VILLAGE_CACHE_TTL_SECS = 60
+MIN_VILLAGE_LETTERS = 4
 
 # Filler words callers put around place names ("kijiji cha X" = "village of X").
 FILLER_WORDS = frozenset(
@@ -123,8 +126,9 @@ def match_district(spoken: str) -> DistrictMatch | None:
     return top[0]
 
 
-# Per-process cache of villages by lower-cased district, refreshed after a create.
-_village_cache: dict[str, tuple[tuple[Any, ...], ...]] = {}
+# Per-process cache of villages by lower-cased district: (fetched_at, rows). Entries expire
+# after VILLAGE_CACHE_TTL_SECS so villages created by another instance become visible.
+_village_cache: dict[str, tuple[float, tuple[tuple[Any, ...], ...]]] = {}
 
 
 def clear_village_cache() -> None:
@@ -133,21 +137,24 @@ def clear_village_cache() -> None:
 
 def _district_villages(conn: Any, district: str) -> tuple[tuple[Any, ...], ...]:
     key = district.lower()
-    if key not in _village_cache:
-        rows = conn.execute(
-            "select id, village, parish, sub_county, district from villages where lower(district) = %s",
-            (key,),
-        ).fetchall()
-        _village_cache[key] = tuple(tuple(row) for row in rows)
-    return _village_cache[key]
+    cached = _village_cache.get(key)
+    if cached and time.monotonic() - cached[0] < VILLAGE_CACHE_TTL_SECS:
+        return cached[1]
+    rows = conn.execute(
+        "select id, village, parish, sub_county, district from villages where lower(district) = %s",
+        (key,),
+    ).fetchall()
+    fresh = tuple(tuple(row) for row in rows)
+    _village_cache[key] = (time.monotonic(), fresh)
+    return fresh
 
 
 def _narrow(rows: list[VillageCandidate], parish: str | None, sub_county: str | None):
     scored = []
     for candidate in rows:
-        if parish and score(parish, candidate.parish) < MATCH_THRESHOLD:
+        if parish and candidate.parish != UNKNOWN_PLACE and score(parish, candidate.parish) < MATCH_THRESHOLD:
             continue
-        if sub_county and score(sub_county, candidate.sub_county) < MATCH_THRESHOLD:
+        if sub_county and candidate.sub_county != UNKNOWN_PLACE and score(sub_county, candidate.sub_county) < MATCH_THRESHOLD:
             continue
         scored.append(candidate)
     return scored
@@ -162,7 +169,7 @@ def match_village(
 ) -> VillageMatch:
     """Match a spoken village inside one district. A parish or sub-county that is given
     but matches nothing yields `none` (it may be a different village of the same name)."""
-    if not normalize(village):
+    if len(normalize(village).replace(" ", "")) < MIN_VILLAGE_LETTERS:
         return VillageMatch("none", None, ())
     candidates = [
         VillageCandidate(row[0], row[1], row[2], row[3], row[4], score(village, row[1]))

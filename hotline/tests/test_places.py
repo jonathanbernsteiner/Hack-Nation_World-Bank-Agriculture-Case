@@ -269,13 +269,23 @@ def test_district_case_does_not_split_the_cache(conn):
     assert match_village(conn, "masaka", "Lwanda").best.village_id == new_id
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="review #48 finding 1: a stored 'unknown' parish/sub-county must not hide a registered village",
-)
 @pytest.mark.parametrize("narrow", [{"parish": "Nyendo"}, {"sub_county": "Kyanamukaaka"}])
 def test_unknown_parish_does_not_hide_a_registered_village(conn, narrow):
     new_id = create_unverified_village(conn, MASAKA, "Lwanda", None, None)
     result = match_village(conn, "Masaka", "Lwanda", **narrow)
     assert result.status == "unique"
     assert result.best.village_id == new_id
+
+
+@pytest.mark.parametrize("fragment", ["Ky", "Kya", "k"])
+def test_short_fragment_gets_no_village_match(conn, fragment):
+    assert match_village(conn, "Masaka", fragment).status == "none"
+
+
+def test_village_cache_expires(conn, monkeypatch):
+    first = places._district_villages(conn, "Masaka")
+    conn.execute("delete from villages where lower(district) = 'masaka'")
+    assert places._district_villages(conn, "Masaka") == first
+    now = places.time.monotonic()
+    monkeypatch.setattr(places.time, "monotonic", lambda: now + places.VILLAGE_CACHE_TTL_SECS + 1)
+    assert places._district_villages(conn, "Masaka") == ()

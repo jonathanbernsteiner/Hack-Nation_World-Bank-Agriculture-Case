@@ -1,9 +1,16 @@
 """The SYNTHETIC Uganda season (#20): sizes, labels, value lists, price anchors and planted cases."""
 
+import csv
+import hashlib
+import json
+import os
 import re
 import statistics
+import subprocess
+import sys
 from collections import defaultdict
-from datetime import timedelta
+from datetime import date, timedelta, timezone
+from pathlib import Path
 
 import pytest
 from test_supabase_schema import check_lists
@@ -12,6 +19,7 @@ from farm_ledger import BuyerType, Currency, Kind, PaidHow, Symptom, Unit
 from farm_ledger.db import ENTRY_FIELDS
 from farm_ledger.enums import CoffeeForm, CoffeeType
 from synthetic import AS_OF, anchor_price, generate_season, price_anchors
+from synthetic.anchors import CSV_PATH
 
 # Spec section 5: plausible UGX per kg per form.
 BANDS = {"kiboko": (2000, 15000), "faq": (5000, 25000), "parchment": (6000, 30000),
@@ -217,3 +225,173 @@ def test_evidence_quotes_are_substrings_of_a_farmer_line(season):
             quote = entry["evidence_quote"]
             assert any(quote in line and quote != line for line in farmer_lines), quote
             assert 1 <= len(quote.split()) <= 12
+
+
+# --- Review regression tests (PR #36, cycle 1) ---
+
+REPO = Path(__file__).resolve().parents[2]
+SERVER = REPO / "server"
+KAMPALA = timezone(timedelta(hours=3))  # Uganda has no DST
+AREA_LEVELS = ("district", "sub_county", "parish", "village")  # spec section 5, outermost first
+MIN_SALES = MIN_FARMERS = 3
+VIEW_MIN_CONFIDENCE = 0.6
+DIAGNOSIS_MIN_CONFIDENCE = 0.6  # spec section 7, verify step 7
+SALE_KG = {"kiboko": (150, 600), "faq": (80, 300), "parchment": (60, 250)}  # issue #20 scope, per sale
+YIELD_DROP = 0.7  # a 30% drop or more
+TWIG_BORER = "black_coffee_twig_borer"  # the disease row lands with #45
+
+
+def coffee_sale_prices(season):
+    """(farmer, village, form, sale_date, ugx_per_kg) as the coffee_sale_prices view (spec section 4) yields them."""
+    for call, farmer, village, entry in sales(season):
+        confidence = 1 if entry["confidence"] is None else entry["confidence"]
+        if (entry["crop"] == "coffee" and entry["currency"] == "UGX" and (entry["amount_kg"] or 0) > 0
+                and (entry["price_total"] or 0) > 0 and entry["coffee_form"] != "other"
+                and entry["quote_verified"] is not False and confidence >= VIEW_MIN_CONFIDENCE):
+            day = entry["date_sold"] or call.received_at.astimezone(KAMPALA).date()
+            yield farmer, village, entry["coffee_form"], day, per_kg(entry)
+
+
+def area_median(season, home, form):
+    """Spec section 5: (level, prices) at the first level from village outwards with >=3 sales by >=3 farmers.
+
+    Rows are restricted to the home district, the band and the 365 days ending at AS_OF (the same
+    `sale_date > as_of - 365` window as #44's spot-check SQL). (None, []) means the national fallback.
+    """
+    low, high = BANDS[form]
+    rows = [(f, v, price) for f, v, fm, day, price in coffee_sale_prices(season)
+            if fm == form and v.district == home.district and low <= price <= high
+            and AS_OF - timedelta(days=365) < day <= AS_OF]
+    for depth in range(len(AREA_LEVELS), 0, -1):
+        area = AREA_LEVELS[:depth]
+        hits = [(f, price) for f, v, price in rows
+                if all(getattr(v, a) == getattr(home, a) for a in area)]
+        if len(hits) >= MIN_SALES and len({f.pin for f, _ in hits}) >= MIN_FARMERS:
+            return area[-1], [price for _, price in hits], {f.pin for f, _ in hits}
+    return None, [], set()
+
+
+def village_named(season, name):
+    (village,) = [v for v in season.villages if v.village == name]
+    return village
+
+
+def test_kyabakuza_kiboko_median_through_the_view_and_level_rules(season):
+    level, prices, farmers = area_median(season, village_named(season, "Kyabakuza"), "kiboko")
+    assert level == "village"
+    assert len(prices) >= 10 and len(farmers) >= 3
+    assert 5700 <= statistics.median(prices) <= 6100  # unrounded, like percentile_cont in #44
+
+
+def test_v2_kiboko_median_falls_back_to_parish(season):
+    level, _, farmers = area_median(season, season.villages[1], "kiboko")
+    assert level == "parish"
+    assert not any(f.village == 1 for f in season.farmers if f.pin in farmers)  # V2 sells FAQ, not kiboko
+
+
+def test_zombo_falls_back_to_the_national_reference(season):
+    zombo = village_named(season, "Ora")
+    assert zombo.district == "Zombo"
+    assert area_median(season, zombo, zombo.form.value)[0] is None
+
+
+def test_price_anchor_csv_has_one_row_per_consecutive_month():
+    # price_anchors() builds a dict, so a duplicated month row would silently replace the other one
+    with CSV_PATH.open(newline="") as f:
+        months = [row["month"] for row in csv.DictReader(f)]
+    expected, day = [], date(2024, 10, 1)
+    while day <= date(2026, 9, 1):
+        expected.append(f"{day.year}-{day.month:02d}")
+        day = date(day.year + day.month // 12, day.month % 12 + 1, 1)
+    assert months == expected
+
+
+def test_likely_disease_ids_exist_and_survive_verify(season):
+    rows = json.loads((REPO / "data" / "coffee-diseases.json").read_text())
+    known = {row["id"] for row in rows} | {TWIG_BORER}
+    for call in season.calls:
+        for entry in call.entries:
+            if entry["likely_disease"] is None:
+                continue
+            assert entry["likely_disease"] in known, entry["likely_disease"]
+            # below 0.6, verify rewrites the diagnosis to not_sure and the planted cluster disappears
+            assert entry["disease_confidence"] >= DIAGNOSIS_MIN_CONFIDENCE, entry["likely_disease"]
+
+
+def test_no_pin_in_any_transcript(season):
+    for call in season.calls:
+        pin = season.farmers[call.farmer].pin
+        texts = [call.transcript_sw, call.transcript_en, *(ln[k] for ln in call.transcript_lines for k in ("sw", "en"))]
+        assert not any(pin in text for text in texts), pin
+        assert any(ln["role"] == "farmer" and ln["en"] == "[PIN]" for ln in call.transcript_lines)
+
+
+def season_digest(hash_seed: str) -> str:
+    code = ("import hashlib; from synthetic import generate_season; "
+            "print(hashlib.sha256(repr(generate_season()).encode()).hexdigest())")
+    env = {**os.environ, "PYTHONHASHSEED": hash_seed}
+    done = subprocess.run([sys.executable, "-c", code], cwd=SERVER, env=env, capture_output=True,
+                          text=True, timeout=120, check=True)
+    return done.stdout.strip()
+
+
+def test_generation_is_identical_across_processes(season):
+    here = hashlib.sha256(repr(season).encode()).hexdigest()
+    assert season_digest("0") == season_digest("4242") == here
+
+
+def season_start(village, label):
+    name, year = label.split("-")
+    (definition,) = [s for s in village.seasons if s.label == name]
+    return date(int(year), definition.start_month, 1)
+
+
+@pytest.mark.xfail(
+    strict=True, raises=AssertionError,
+    reason="PR #36 review cycle 1, finding 1: only one yield-drop farmer is planted",
+)
+def test_two_farmers_with_yield_drop_and_problem_reports(season):
+    harvests = defaultdict(dict)
+    for call in season.calls:
+        if call.season:
+            harvests[call.farmer][call.season] = call.entries[0]["yield_amount"]
+    reporters = {c.farmer for c in season.calls if c.entries[0]["kind"] == "observation"}
+    dropped = set()
+    for farmer, by_season in harvests.items():
+        for label, kg in by_season.items():
+            name, year = label.split("-")
+            before = by_season.get(f"{name}-{int(year) - 1}")
+            if before and kg <= YIELD_DROP * before:
+                dropped.add(farmer)
+    assert len(dropped & reporters) >= 2
+
+
+@pytest.mark.xfail(
+    strict=True, raises=AssertionError,
+    reason="PR #36 review cycle 1, finding 2: MIN_LOT_KG lifts small lots above the harvest",
+)
+def test_season_sales_never_exceed_the_harvest(season):
+    harvest, sold = {}, defaultdict(int)
+    for call in season.calls:
+        farmer = season.farmers[call.farmer]
+        if call.season:
+            harvest[(call.farmer, season_start(season.villages[farmer.village], call.season))] = \
+                call.entries[0]["yield_amount"]
+    for call, farmer, village, entry in sales(season):
+        if entry["amount_kg"] is None:
+            continue
+        starts = [start for (f, start) in harvest if f == call.farmer and start <= entry["date_sold"]]
+        sold[(call.farmer, max(starts))] += entry["amount_kg"]
+    over = {key: (harvest[key], kg) for key, kg in sold.items() if kg > harvest[key]}
+    assert not over
+
+
+@pytest.mark.xfail(
+    strict=True, raises=AssertionError,
+    reason="PR #36 review cycle 1, finding 3: sale sizes outside the issue's per-form ranges",
+)
+def test_sale_sizes_within_issue_ranges(season):
+    outside = [(village.form.value, entry["amount_kg"]) for _, _, village, entry in sales(season)
+               if entry["amount_kg"] is not None
+               and not SALE_KG[village.form.value][0] <= entry["amount_kg"] <= SALE_KG[village.form.value][1]]
+    assert not outside

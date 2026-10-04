@@ -233,3 +233,102 @@ def test_external_number_never_in_any_output():
         {"caller_id": FAKE_NUMBER, "note": f"call {FAKE_NUMBER}"}
     )
     assert FAKE_NUMBER not in repr(scrub_tool_results(data))
+
+
+# --- Review cycle 1 regression tests (#57) ---
+
+TOOL_SECRET_SENTINEL = "SENTINEL_TOOL_SECRET"
+
+
+def _tool_turn(tool_name, params, result, request_id="r", **extra):
+    call = {"request_id": request_id, "tool_name": tool_name, "params_as_json": json.dumps(params), **extra}
+    res = {"request_id": request_id, "tool_name": tool_name, "result_value": json.dumps(result), "is_error": False}
+    return _turn("agent", "Ngoja kidogo.", 4, tool_calls=[call], tool_results=[res])
+
+
+def test_every_pin_attempt_is_redacted_not_only_the_last():
+    data = _payload(
+        [
+            _turn("user", "PIN ni moja mbili tatu nne", 1),
+            _tool_turn("identify_farmer", {"pin": "1234"}, {"status": "not_found", "attempts_left": 2}, "a"),
+            _turn("user", "Samahani, ni 9001", 6),
+            _tool_turn("identify_farmer", {"pin": "9001"}, {"status": "found"}, "b"),
+        ]
+    )
+    assert collect_pins(data) == {"1234", "9001"}
+    assert [ln["sw"] for ln in to_lines(data)][::2] == ["PIN ni [PIN]", "Samahani, ni [PIN]"]
+
+
+def test_spec_register_result_redacts_pin_and_pin_digits_sw():
+    result = {"status": "registered", "pin": "4831", "pin_digits_sw": "nne, nane, tatu, moja", "village_known": True}
+    data = _payload([_tool_turn("register_farmer", {"first_name": "Mukasa"}, result)])
+    (scrubbed,) = scrub_tool_results(data)
+    assert scrubbed["result"]["pin"] == "[PIN]" and scrubbed["result"]["pin_digits_sw"] == "[PIN]"
+    assert scrubbed["result"]["status"] == "registered"
+    assert "4831" not in repr(scrubbed) and "nane" not in repr(scrubbed)
+
+
+def test_tool_details_headers_and_body_never_reach_scrubbed_output():
+    details = {
+        "type": "webhook",
+        "headers": {"X-Hotline-Tool-Secret": TOOL_SECRET_SENTINEL},
+        "body": json.dumps({"pin": "9001", "call_sid": "CAfake", "caller": FAKE_NUMBER}),
+    }
+    data = _payload([_tool_turn("identify_farmer", {"pin": "9001"}, {"status": "found"}, tool_details=details)])
+    blob = repr(scrub_tool_results(data)) + repr(to_lines(data))
+    for leaked in (TOOL_SECRET_SENTINEL, "9001", "CAfake", FAKE_NUMBER, "tool_details", "headers"):
+        assert leaked not in blob, leaked
+
+
+def test_pin_with_leading_zero_is_matched_as_string():
+    data = _payload(
+        [_turn("user", "sifuri moja mbili tatu", 1), _tool_turn("identify_farmer", {"pin": "0123"}, {"status": "found"})]
+    )
+    assert collect_pins(data) == {"0123"}
+    assert to_lines(data)[0]["sw"] == "[PIN]"
+
+
+@pytest.mark.parametrize("text", ["Bei ni 19001 kwa gunia", "Nimeuza 90010", "kilo 900 tu"])
+def test_pin_inside_or_part_of_another_number_is_not_redacted(text):
+    assert redact_pins(_lines(text), {"9001"})[0]["sw"] == text
+
+
+def test_render_never_reintroduces_pin():
+    rendered = render(to_lines(_tool_payload()))
+    assert "4831" not in rendered and "9001" not in rendered and "nne, nane" not in rendered
+    assert rendered.count("[PIN]") == 3
+
+
+@pytest.mark.xfail(strict=True, reason="review cycle 1 finding 1: _GAP misses pause punctuation; drop marker once fixed")
+@pytest.mark.parametrize(
+    "text",
+    [
+        "PIN ni nne… nane… tatu… moja asante",
+        "PIN ni nne — nane — tatu — moja asante",
+        "PIN ni 4 – 8 – 3 – 1 asante",
+        "PIN ni nne; nane; tatu; moja asante",
+        "PIN ni 4/8/3/1 asante",
+    ],
+)
+def test_pin_with_pause_punctuation_between_digits_is_redacted(text):
+    assert redact_pins(_lines(text), {"4831"})[0]["sw"] == "PIN ni [PIN] asante"
+
+
+@pytest.mark.xfail(strict=True, reason="review cycle 1 finding 2: result looked up only in the call's own turn")
+def test_tool_result_logged_in_a_later_turn_is_paired_with_its_call():
+    call = {"request_id": "r1", "tool_name": "identify_farmer", "params_as_json": json.dumps({"pin": "9001"})}
+    result = {"request_id": "r1", "tool_name": "identify_farmer", "result_value": json.dumps({"median": 5300})}
+    data = _payload(
+        [
+            _turn("agent", "Ngoja.", 4, tool_calls=[call], tool_results=[]),
+            _turn("agent", None, 5, tool_calls=[], tool_results=[{**result, "is_error": False}]),
+        ]
+    )
+    (scrubbed,) = scrub_tool_results(data)
+    assert scrubbed["result"] == {"median": 5300}
+
+
+@pytest.mark.xfail(strict=True, reason="review cycle 1 finding 3: partial-run head/tail anchored to the wrong run edge")
+def test_pin_head_after_another_digit_word_is_redacted():
+    (out,) = redact_pins(_lines("kilo moja, tisa sifuri sifuri"), {"9001"})
+    assert "tisa sifuri sifuri" not in out["sw"]

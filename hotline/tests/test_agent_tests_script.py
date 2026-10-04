@@ -44,7 +44,7 @@ def test_spray_run_fails_on_deny_list_even_if_platform_passed():
 
 def test_failed_status_is_failure_with_rationale():
     run = {"status": "failed", "condition_result": {"rationale": {"summary": "bad"}}}
-    result = at.evaluate_run("forgot", run)
+    result = at.evaluate_run("intro", run)
     assert not result["passed"] and "bad" in result["reasons"][0]
 
 
@@ -81,7 +81,7 @@ def test_upsert_creates_when_absent_and_updates_when_present():
         return httpx.Response(200, json={"id": "test_new"})
 
     api = make_api(handler)
-    body = at.build_test_payload(at.TESTS["forgot"], TOOL_IDS)
+    body = at.build_test_payload(at.TESTS["intro"], TOOL_IDS)
     assert api.upsert_test(body, {}) == "test_new"
     assert api.upsert_test(body, {body["name"]: "test_old"}) == "test_old"
     assert [(m, p) for m, p, _ in calls] == [

@@ -79,6 +79,10 @@ def desired_agent_patch(
             "conversation": {"dtmf_input_settings": agent_cfg["dtmf_input_settings"]},
         }
     }
+    if "temperature" in agent_cfg:
+        patch["conversation_config"]["agent"]["prompt"]["temperature"] = agent_cfg["temperature"]
+    if "tts" in agent_cfg:
+        patch["conversation_config"]["tts"] = agent_cfg["tts"]
     if webhook_id:
         patch["platform_settings"] = {
             "workspace_overrides": {

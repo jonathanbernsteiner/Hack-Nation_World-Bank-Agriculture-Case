@@ -4,7 +4,7 @@ Creates or updates (matched by name, all prefixed `hotline-`) three tests on the
 workspace, runs them against ELEVENLABS_AGENT_ID, prints pass/fail per test and
 writes a PIN-redacted JSON report. Exit code 0 only if every selected test passes.
 
-Run from hotline/:  uv run python scripts/agent_tests.py [--only happy|forgot|spray]
+Run from hotline/:  uv run python scripts/agent_tests.py [--only happy|intro|spray]
 """
 
 from __future__ import annotations
@@ -53,11 +53,11 @@ REDACTED = "[PIN]"
 
 TESTS: dict[str, dict] = {
     "happy": {
-        "name": "hotline-happy-pin-identify",
+        "name": "hotline-happy-silent-identify",
         "type": "tool",
         "chat_history": [
-            {"role": "agent", "message": "Hello and welcome. Please press your four-digit PIN, then the hash key, or tell me your PIN.", "time_in_call_secs": 0},
-            {"role": "user", "message": "My PIN is nine zero zero one, 9001", "time_in_call_secs": 6},
+            {"role": "agent", "message": "Hi Nakato! I'm your farm agent, here to help you with your coffee in Kyabakuza. How are things going?", "time_in_call_secs": 0},
+            {"role": "user", "message": "Hi! Things are okay. What's the coffee price looking like?", "time_in_call_secs": 6},
         ],
         "tool_call_parameters": {
             "parameters": [{"path": "body.pin", "eval": {"type": "regex", "pattern": "9001"}}],
@@ -82,25 +82,25 @@ TESTS: dict[str, dict] = {
         "simulation_max_turns": 6,
         "tool_mock_config": {"mocking_strategy": "all", "fallback_strategy": "raise_error"},
     },
-    "forgot": {
-        "name": "hotline-forgot-pin-asks-location",
+    "intro": {
+        "name": "hotline-intro-no-questions-about-identity",
         "type": "llm",
         "chat_history": [
-            {"role": "agent", "message": "Hello and welcome. Please press your four-digit PIN, then the hash key, or tell me your PIN.", "time_in_call_secs": 0},
-            {"role": "user", "message": "I forgot", "time_in_call_secs": 5},
+            {"role": "agent", "message": "Hi Nakato! I'm your farm agent, here to help you with your coffee in Kyabakuza. How are things going?", "time_in_call_secs": 0},
+            {"role": "user", "message": "Hello, I want to know the coffee price.", "time_in_call_secs": 5},
         ],
         "success_condition": (
-            "The agent reassures the caller who forgot the PIN and starts collecting identifying details, asking for "
-            "their name (or name, district and village together). Asking for one detail at a time is fine. It does not "
-            "invent a PIN, does not ask for the PIN again as the only option, and does not refuse to help."
+            "The agent replies in a friendly, conversational way and helps with the price. It does not ask for the "
+            "caller's name, location, PIN or any code, does not mention a PIN, and does not invent a price figure."
         ),
         "success_examples": [
-            {"type": "success", "response": "No problem. Please tell me your name, your district and your village."},
-            {"type": "success", "response": "Okay, we can find you another way. What is your name, and which district and village do you farm in?"},
+            {"type": "success", "response": "Sure! Let me pull that up for you, one sec."},
+            {"type": "success", "response": "Of course, happy to help. Are you selling kiboko this season?"},
         ],
         "failure_examples": [
-            {"type": "failure", "response": "Sorry, without a PIN I cannot help you. Call again later."},
-            {"type": "failure", "response": "PIN yako ni 1234."},
+            {"type": "failure", "response": "Please enter your four-digit PIN first."},
+            {"type": "failure", "response": "Sure, what's your name and which village are you in?"},
+            {"type": "failure", "response": "The price is 6,000 shillings a kilo."},
         ],
     },
 }

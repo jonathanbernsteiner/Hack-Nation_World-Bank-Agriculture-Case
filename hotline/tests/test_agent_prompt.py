@@ -12,7 +12,7 @@ FIRST_MESSAGE_PATH = HOTLINE_DIR / "agent" / "first_message_en.txt"
 SPEC_PATH = REPO_ROOT / "docs" / "hotline-spec.md"
 
 KNOWLEDGE_MARKER = "<!-- KNOWLEDGE -->"
-TOOL_NAMES = {"identify_farmer", "find_farmer_by_location", "register_farmer", "get_weather_forecast"}
+TOOL_NAMES = {"identify_farmer", "get_weather_forecast"}
 ALLOWED_DOUBLE_BRACE_VARIABLES: set[str] = set()
 MAX_FIRST_MESSAGE_CHARS = 400
 
@@ -65,10 +65,9 @@ def test_no_unknown_double_braces(prompt):
 
 def test_first_message_shape(first_message):
     assert first_message
-    assert "computer" in first_message
+    assert "farm agent" in first_message
     assert len(first_message) < MAX_FIRST_MESSAGE_CHARS
-    for needle in ("I forgot", "I'm new", "record"):
-        assert needle in first_message
+    assert "PIN" not in first_message
 
 
 def test_no_banned_chemical_terms_outside_guardrail_one(prompt):
@@ -80,20 +79,14 @@ def test_no_banned_chemical_terms_outside_guardrail_one(prompt):
 
 @pytest.mark.parametrize(
     "status",
-    ["not_found", "locked", "ambiguous", "possible_duplicate", "need_district", "unknown_location", "unavailable"],
+    ["not_found", "locked", "unavailable"],
 )
 def test_prompt_handles_every_tool_status(prompt, status):
     assert f"`{status}`" in prompt
 
 
 def test_prices_come_from_numeric_fields(prompt):
-    assert "median_ugx_per_kg" in prompt and "`pin`" in prompt
-
-
-def test_first_message_offers_keypad_and_spoken_pin(first_message):
-    # Spec §8: "press or say your four-digit PIN". Keypad delivery on the imported
-    # Twilio number is unverified (#39), so the spoken fallback must be announced.
-    assert "press" in first_message and "say" in first_message
+    assert "median_ugx_per_kg" in prompt and "Never say, ask for or mention a PIN" in prompt
 
 
 def test_sample_lines_carry_no_canned_money_figures(prompt):

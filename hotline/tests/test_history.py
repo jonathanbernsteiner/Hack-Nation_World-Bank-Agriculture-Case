@@ -476,3 +476,61 @@ def test_supabase_location_login_bag_harvest_and_kes_sale_stay_out(db):
     assert [(s["kg"], s["ugx_per_kg"]) for s in out["last_sales"]] == [(200, 6000), (100, None)]
     assert out["problems"] == []
     assert out["nearby_reports"] == []
+
+
+# --- review cycle 3 regressions ---
+
+# Calls on the first and last day of every month-position of coffee year 2026/27. None of them may
+# show a partial total for the oldest year, and the Oct 1 / Sep 30 edges of both years must count.
+WINDOW_AS_OF = ([date(2026, 10, 1)] + [date(2026, m, 15) for m in (10, 11, 12)]
+                + [date(2027, m, 15) for m in range(1, 10)] + [date(2027, 9, 30)])
+EDGE_ROWS = [sale(date(2024, 10, 1), 10, 50_000), sale(date(2025, 9, 30), 20, 100_000),   # 2024/25
+             sale(date(2025, 10, 1), 30, 150_000), sale(date(2026, 9, 30), 40, 200_000)]  # 2025/26
+
+
+@pytest.mark.parametrize("as_of", WINDOW_AS_OF, ids=str)
+def test_history_window_keeps_both_edge_days_of_the_oldest_year_in_every_month(as_of):
+    out = summarize(WindowedConn(EDGE_ROWS), 1, HOME, as_of, totals_only=True)
+    assert [(y["year"], y["sold_kg"]) for y in out["coffee_years"]] == [("2025/26", 70), ("2024/25", 30)]
+
+
+def test_same_parish_name_in_another_sub_county_is_not_the_callers_parish():
+    elsewhere = dict(parish="Kitovu", sub_county="Other SC")
+    assert nearby_reports([obs(10, **elsewhere), obs(11, **elsewhere)], HOME, AS_OF) == []
+    assert nearby_reports([obs(10), obs(11, **elsewhere)], HOME, AS_OF) == []
+
+
+@pytest.mark.supabase
+def test_supabase_history_window_starts_on_oct_1_kampala_two_years_back(db):
+    # as_of 2026-09-30 is in 2025/26, so the window starts 2023-10-01 (Kampala date). The caller has
+    # nothing in 2024/25, so the oldest year shown is 2023/24, and it must be complete.
+    def one(sql, params=()):
+        return db.execute(sql, params).fetchone()[0]
+
+    village = one("insert into villages (region, district, sub_county, parish, village, is_synthetic) "
+                  "values ('Central','C3District','C3SC','C3Parish','C3Village', true) returning id")
+    caller = one("insert into farmers (name, pin_hash, village_id, is_synthetic) "
+                 "values ('C3', 'review3-hash-49', %s, true) returning id", (village,))
+
+    def sale_on(received_at, kg, total, date_sold=None):
+        call = one("insert into calls (farmer_id, is_synthetic, received_at, identified_by) "
+                   "values (%s, true, %s, 'pin') returning id", (caller, received_at))
+        db.execute("insert into entries (call_id, farmer_id, kind, crop, amount_kg, price_total, currency, "
+                   "coffee_form, buyer_type, date_sold, confidence) values "
+                   "(%s, %s, 'sale', 'coffee', %s, %s, 'UGX', 'kiboko', 'middleman', %s, 0.9)",
+                   (call, caller, kg, total, date_sold))
+
+    sale_on("2023-09-30 21:30+00", 40, 200_000)    # 00:30 on 1 Oct 2023 in Kampala: first day, counts
+    sale_on("2023-09-30 20:30+00", 70, 999_000)    # 23:30 on 30 Sep 2023 in Kampala: before the window
+    sale_on("2023-10-05 08:00+03", 80, 999_000, date_sold=date(2023, 9, 30))  # date_sold wins: outside
+    sale_on("2024-10-02 08:00+03", 60, 360_000, date_sold=date(2024, 9, 30))  # last day of 2023/24
+    sale_on("2025-11-01 08:00+03", 100, 600_000)
+
+    out = summarize(db, caller, {"district": "C3District", "sub_county": "C3SC", "parish": "C3Parish"},
+                    AS_OF)
+
+    assert out["coffee_years"] == [
+        {"year": "2025/26", "harvest_kg": 0, "sold_kg": 100, "avg_ugx_per_kg": 6000},
+        {"year": "2023/24", "harvest_kg": 0, "sold_kg": 100, "avg_ugx_per_kg": 5600}]
+    assert [(s["date"], s["kg"]) for s in out["last_sales"]] == [
+        ("2025-11-01", 100), ("2024-09-30", 60), ("2023-10-01", 40)]

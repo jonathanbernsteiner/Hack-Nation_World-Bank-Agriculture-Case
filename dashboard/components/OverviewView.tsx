@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { AlertTriangle, ArrowRight, TrendingDown } from "lucide-react";
 import { useMemo } from "react";
-import { childrenOf, computeWarnings, kpis as computeKpis, median, referenceFor } from "@/lib/aggregate";
+import { childrenOf, computeWarnings, kpis as computeKpis } from "@/lib/aggregate";
 import { formatIndex, formatNumber } from "@/lib/format";
-import type { BuyerType, DashboardData } from "@/lib/types";
+import type { DashboardData } from "@/lib/types";
 import { indexPillClass } from "./FarmersTable";
 import KpiRow from "./KpiRow";
 
@@ -13,38 +13,11 @@ const MAX_WARNINGS = 5;
 const PILL_SHAPE = "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border";
 const TH = "font-medium text-muted px-4 py-3 whitespace-nowrap";
 
-const PRICE_MONTHS = 12;
-
-function monthsAgoCutoff(today: string, months: number): string {
-  const [y, m, d] = today.split("-").map(Number);
-  return new Date(Date.UTC(y, m - 1 - months, d)).toISOString().slice(0, 10);
-}
-
-function buyerIndex(data: DashboardData, buyer: BuyerType): number | null {
-  const cutoff = monthsAgoCutoff(data.today, PRICE_MONTHS);
-  const ratios = data.sales
-    .filter((s) => s.buyerType === buyer && s.date > cutoff)
-    .flatMap((s) => {
-      const ref = referenceFor(data.reference, s.form, s.date.slice(0, 7));
-      return ref ? [s.ugxPerKg / ref] : [];
-    });
-  return median(ratios);
-}
-
-function middlemanClause(data: DashboardData): string | null {
-  const middleman = buyerIndex(data, "middleman");
-  const coop = buyerIndex(data, "cooperative");
-  if (middleman === null || coop === null || coop === 0) return null;
-  const pct = Math.round((1 - middleman / coop) * 100);
-  if (pct === 0) return "middlemen paid the same as cooperatives";
-  return pct > 0 ? `middlemen paid ${pct}% less than cooperatives` : `middlemen paid ${-pct}% more than cooperatives`;
-}
-
 function SectionHeading({ title, href, linkLabel }: { title: string; href: string; linkLabel: string }) {
   return (
     <div className="flex items-center justify-between mb-4 gap-3">
       <h2 className="text-base font-semibold text-ink">{title}</h2>
-      <Link href={href} className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline">
+      <Link href={href} className="inline-flex items-center gap-1 whitespace-nowrap text-sm font-medium text-accent hover:underline">
         {linkLabel} <ArrowRight size={14} />
       </Link>
     </div>
@@ -59,20 +32,6 @@ export default function OverviewView({ data }: { data: DashboardData }) {
     [data, warnings],
   );
   const shown = warnings.slice(0, MAX_WARNINGS);
-  const farmerSplit = useMemo(() => {
-    const synthetic = data.farmers.filter((f) => f.isSynthetic).length;
-    return { live: data.farmers.length - synthetic, synthetic };
-  }, [data.farmers]);
-  const headline = useMemo(() => {
-    const parts = [
-      `${formatNumber(kpis.farmers)} farmers registered in ${kpis.districts} districts`,
-      `${warnings.length} ${warnings.length === 1 ? "pattern needs" : "patterns need"} an officer's check`,
-    ];
-    const clause = middlemanClause(data);
-    if (clause) parts.push(clause);
-    return `${parts.join(" · ")}.`;
-  }, [data, kpis, warnings]);
-
   const hasWarnings = shown.length > 0;
 
   const warningsBlock = (
@@ -94,14 +53,8 @@ export default function OverviewView({ data }: { data: DashboardData }) {
                   <div className="text-sm font-medium text-ink">{w.title}</div>
                   <div className="text-xs text-faint mt-0.5">{w.detail}</div>
                 </div>
-                <span
-                  className={`${PILL_SHAPE} shrink-0 ${
-                    w.severity === "high"
-                      ? "bg-red-50 text-red-700 border-red-200"
-                      : "bg-[#FFFBEB] text-[#F59E0B] border-[#FDE68A]"
-                  }`}
-                >
-                  {w.severity === "high" ? "High" : "Medium"}
+                <span className={`${PILL_SHAPE} shrink-0 whitespace-nowrap bg-[#FFFBEB] text-[#F59E0B] border-[#FDE68A]`}>
+                  Officer check
                 </span>
               </li>
             ))}
@@ -113,11 +66,8 @@ export default function OverviewView({ data }: { data: DashboardData }) {
 
   return (
     <div className="p-4 sm:p-6 flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Overview</h1>
-        <p className="text-sm text-muted mt-1">{headline}</p>
-      </div>
-      <KpiRow kpis={kpis} farmerSplit={farmerSplit} />
+      <h1 className="text-2xl font-bold text-gray-900">Overview</h1>
+      <KpiRow kpis={kpis} />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {warningsBlock}
         <section>

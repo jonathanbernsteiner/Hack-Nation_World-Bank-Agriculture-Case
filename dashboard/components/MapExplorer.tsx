@@ -50,8 +50,7 @@ export default function MapExplorer({ data }: { data: DashboardData }) {
         </div>
       </div>
       <p className="text-xs text-faint">
-        Prices: farmer-reported sales vs national monthly farm-gate reference (UCDA / MAAIF Coffee Department). Map tiles
-        © OpenStreetMap contributors. Synthetic records are labelled.
+        Sources: UCDA / MAAIF, © OpenStreetMap contributors
       </p>
     </div>
   );

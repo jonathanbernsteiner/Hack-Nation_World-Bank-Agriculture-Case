@@ -87,7 +87,7 @@ export default function WeatherCard({ lat, lon }: WeatherCardProps) {
           ))}
         </div>
       )}
-      <p className="text-xs text-faint mt-3">Open-Meteo forecast (CC BY 4.0) · same source the hotline uses</p>
+      <p className="text-xs text-faint mt-3">Open-Meteo</p>
     </div>
   );
 }

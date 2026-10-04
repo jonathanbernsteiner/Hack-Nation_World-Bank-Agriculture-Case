@@ -11,10 +11,6 @@ const CARD = "bg-white border border-line rounded-xl p-5";
 const HEADING = "text-base font-semibold text-ink";
 const TABLE_WRAP = "border border-line rounded-[14px] overflow-hidden";
 const TABLE_SCROLL = "overflow-x-auto";
-const SEVERITY_PILL: Record<Warning["severity"], string> = {
-  high: "bg-red-50 text-red-700 border-red-200",
-  medium: "bg-[#FFFBEB] text-[#F59E0B] border-[#FDE68A]",
-};
 const TH = "font-medium text-muted px-3 py-2 whitespace-nowrap";
 
 const CHILD_HEADINGS: Record<Level, string> = {
@@ -45,20 +41,13 @@ function HeaderCard({ area }: { area: AreaSummary }) {
   const subtitle = area.region ? `${labelLevel(area.level)} · ${area.region}` : labelLevel(area.level);
   return (
     <div className={CARD}>
-      <div className="flex items-center gap-2 flex-wrap">
-        <h2 className="text-xl font-bold text-ink">{area.name}</h2>
-        {area.isSynthetic && (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold border bg-purple-50 text-purple-700 border-purple-200">
-            Includes synthetic
-          </span>
-        )}
-      </div>
+      <h2 className="text-xl font-bold text-ink">{area.name}</h2>
       <div className="text-sm text-muted">{subtitle}</div>
       <div className="grid grid-cols-2 gap-4 mt-4">
         <Stat label="Farmers" value={area.farmers} />
         <Stat label="Villages" value={area.villages} />
         <Stat label="Calls" value={area.calls} />
-        <Stat label="New in 90 days" value={area.newFarmers90d} />
+        <Stat label="New, 90 days" value={area.newFarmers90d} />
       </div>
     </div>
   );
@@ -77,18 +66,13 @@ function WarningRow({ warning, onSelect }: { warning: Warning; onSelect: (path: 
       >
         <Icon size={16} className={`${color} mt-0.5 shrink-0`} />
         <span className="min-w-0 flex-1">
-          <span className="block text-sm font-semibold text-ink">{warning.title}</span>
+          <span className="flex items-start justify-between gap-2">
+            <span className="text-sm font-semibold text-ink">{warning.title}</span>
+            <span className="inline-flex shrink-0 items-center whitespace-nowrap px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-[#FFFBEB] text-[#F59E0B] border-[#FDE68A]">
+              Officer check
+            </span>
+          </span>
           <span className="block text-[13px] text-muted">{warning.detail}</span>
-        </span>
-        <span className="flex flex-col items-end gap-1 shrink-0">
-          <span
-            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${SEVERITY_PILL[warning.severity]}`}
-          >
-            {warning.severity === "high" ? "High" : "Medium"}
-          </span>
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-[#FFFBEB] text-[#F59E0B] border-[#FDE68A]">
-            Needs officer check
-          </span>
         </span>
       </button>
     </li>
@@ -126,7 +110,7 @@ function BuyerRow({ buyer }: { buyer: BuyerPrice }) {
       <div className="flex items-baseline justify-between text-sm gap-2">
         <span className="font-medium text-gray-900">{labelBuyer(buyer.buyer)}</span>
         <span className="text-gray-600">
-          <span className="font-mono">{formatIndex(buyer.priceIndex)}</span> · {buyer.sales} sales
+          <span className="font-mono">{formatIndex(buyer.priceIndex)}</span> · {buyer.sales}
         </span>
       </div>
       <div className="h-2 rounded-full bg-gray-100 mt-1.5">
@@ -136,24 +120,30 @@ function BuyerRow({ buyer }: { buyer: BuyerPrice }) {
   );
 }
 
-function takeaway(buyers: BuyerPrice[]): string | null {
+function signedPct(index: number, base: number): string {
+  const pct = Math.round((index / base - 1) * 100);
+  return pct === 0 ? "0%" : `${pct > 0 ? "+" : "−"}${Math.abs(pct)}%`;
+}
+
+/** Each buyer's price relative to the best-paying one: values only, no prose. */
+function buyerGap(buyers: BuyerPrice[]): { middleman: string; coop: string } | null {
   const middleman = buyers.find((b) => b.buyer === "middleman")?.priceIndex ?? null;
   const coop = buyers.find((b) => b.buyer === "cooperative")?.priceIndex ?? null;
-  if (middleman === null || coop === null || coop === 0) return null;
-  const pct = Math.round(Math.abs(middleman / coop - 1) * 100);
-  if (pct === 0) return "Middlemen and cooperatives paid the same here.";
-  return middleman < coop
-    ? `Middlemen paid ${pct}% less than cooperatives here.`
-    : `Middlemen paid ${pct}% more than cooperatives here.`;
+  if (middleman === null || coop === null) return null;
+  const best = Math.max(middleman, coop);
+  if (best === 0) return null;
+  return { middleman: signedPct(middleman, best), coop: signedPct(coop, best) };
 }
 
 function PricesCard({ area }: { area: AreaSummary }) {
   const forms = area.priceByForm.filter((p) => p.sales > 0);
   const buyers = area.priceByBuyer.filter((b) => b.sales > 0);
-  const sentence = takeaway(area.priceByBuyer);
+  const gap = buyerGap(area.priceByBuyer);
   return (
     <div className={CARD}>
-      <h2 className={`${HEADING} mb-3`}>Prices, last 12 months</h2>
+      <h2 className={`${HEADING} mb-3`} title="Median needs 3 sales from 3 farmers">
+        Prices, 12 months
+      </h2>
       {forms.length === 0 ? (
         <p className="text-sm text-faint text-center py-4">No sales reported in the last 12 months.</p>
       ) : (
@@ -163,18 +153,18 @@ function PricesCard({ area }: { area: AreaSummary }) {
             <thead>
               <tr className="border-b border-line bg-gray-50">
                 <th className={`text-left ${TH}`}>Form</th>
-                <th className={`text-right ${TH}`}>Here (UGX/kg)</th>
-                <th className={`text-right ${TH}`}>National (UGX/kg)</th>
+                <th className={`text-right ${TH}`}>Here, UGX/kg</th>
+                <th className={`text-right ${TH}`}>National</th>
                 <th className={`text-right ${TH}`}>vs national</th>
               </tr>
             </thead>
             <tbody>
               {forms.map((p) => (
                 <tr key={p.form} className="border-b border-gray-100 last:border-b-0">
-                  <td className="px-3 py-2 font-medium text-gray-900">{labelForm(p.form)}</td>
+                  <td className="px-3 py-2 font-medium text-gray-900 whitespace-nowrap">{labelForm(p.form)}</td>
                   <td className="px-3 py-2 text-right font-mono text-gray-700 whitespace-nowrap">{p.median === null ? "—" : formatNumber(p.median)}</td>
                   <td className="px-3 py-2 text-right font-mono text-gray-700 whitespace-nowrap">{p.national === null ? "—" : formatNumber(p.national)}</td>
-                  <td className="px-3 py-2 text-right">{formPill(p)}</td>
+                  <td className="px-3 py-2 text-right whitespace-nowrap">{formPill(p)}</td>
                 </tr>
               ))}
             </tbody>
@@ -184,18 +174,20 @@ function PricesCard({ area }: { area: AreaSummary }) {
       )}
       {buyers.length > 0 && (
         <div className="mt-4">
-          <h3 className="text-sm font-semibold text-ink">Who pays more</h3>
+          <h3 className="text-sm font-semibold text-ink">By buyer</h3>
           <ul>
             {buyers.map((b) => (
               <BuyerRow key={b.buyer} buyer={b} />
             ))}
           </ul>
-          {sentence && <p className="text-sm text-gray-700 mt-1">{sentence}</p>}
+          {gap && (
+            <div className="flex items-center gap-4 mt-1 text-sm font-mono text-gray-700 whitespace-nowrap">
+              <span>Middleman {gap.middleman}</span>
+              <span>Cooperative {gap.coop}</span>
+            </div>
+          )}
         </div>
       )}
-      <p className="text-xs text-faint mt-3">
-        Median needs 3 sales from 3 farmers. National = UCDA / MAAIF monthly farm-gate average.
-      </p>
     </div>
   );
 }
@@ -203,7 +195,7 @@ function PricesCard({ area }: { area: AreaSummary }) {
 function ProblemsCard({ problems }: { problems: AreaSummary["problems90d"] }) {
   return (
     <div className={CARD}>
-      <h2 className={`${HEADING} mb-2`}>Problems reported, last 90 days</h2>
+      <h2 className={`${HEADING} mb-2`}>Problems, 90 days</h2>
       {problems.length === 0 ? (
         <p className="text-sm text-faint">No problems reported in the last 90 days</p>
       ) : (
@@ -255,13 +247,13 @@ function ChildrenCard({
                 onClick={() => onSelect(c.path)}
                 className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 cursor-pointer transition-colors"
               >
-                <td className="px-3 py-2 font-medium text-gray-900">{c.name}</td>
-                <td className="px-3 py-2 text-right font-mono text-gray-700">{formatNumber(c.farmers)}</td>
-                <td className="px-3 py-2 text-right">
+                <td className="px-3 py-2 font-medium text-gray-900 whitespace-nowrap">{c.name}</td>
+                <td className="px-3 py-2 text-right font-mono text-gray-700 whitespace-nowrap">{formatNumber(c.farmers)}</td>
+                <td className="px-3 py-2 text-right whitespace-nowrap">
                   <span className={indexPillClass(c.priceIndex)}>{formatIndex(c.priceIndex)}</span>
                 </td>
                 <td
-                  className={`px-3 py-2 text-right font-mono ${
+                  className={`px-3 py-2 text-right font-mono whitespace-nowrap ${
                     c.warnings.length > 0 ? "text-red-600 font-medium" : "text-gray-300"
                   }`}
                 >

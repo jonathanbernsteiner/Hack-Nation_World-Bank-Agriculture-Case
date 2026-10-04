@@ -32,26 +32,38 @@ function shortDate(iso: string): string {
   return formatDate(iso).slice(0, -5);
 }
 
+const YEAR_SUFFIX = /\s\d{4}$/;
+
+function splitWarning(w: Warning): { title: string; meta: string } {
+  const range = (w.detail.split(" · ")[0] ?? "").replace(/^Reported /, "").replace(YEAR_SUFFIX, "");
+  if (w.kind !== "problem") return { title: w.title, meta: range ? `${w.areaName} district · ${range}` : w.areaName };
+  const [head, tail = ""] = w.title.split(": ");
+  const name = head.replace(/^Suspected /, "");
+  const match = tail.match(/^(\d+ farms?) in (.+)$/);
+  const meta = match ? [match[1], match[2], range] : [tail, range];
+  return { title: name.charAt(0).toUpperCase() + name.slice(1), meta: meta.filter(Boolean).join(" · ") };
+}
+
 function WarningRow({ warning }: { warning: Warning }) {
   const isProblem = warning.kind === "problem";
   const Icon = isProblem ? AlertTriangle : TrendingDown;
+  const { title, meta } = splitWarning(warning);
   return (
     <li className="flex items-center gap-4 px-4 sm:px-6 py-4 border-b border-gray-100 last:border-b-0 hover:bg-slate-50 transition-colors">
       <Icon size={20} className={`shrink-0 ${isProblem ? "text-red-600" : "text-amber-500"}`} />
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-semibold text-gray-900">{warning.title}</div>
-        <div className="text-sm text-muted">{warning.detail}</div>
-        <div className="text-xs text-gray-400 mt-0.5">{warning.path.join(" › ")}</div>
-        <div className="text-xs text-gray-400 mt-0.5">Suspected from phone reports; not confirmed in the field.</div>
+        <div className="text-sm font-semibold text-gray-900">{title}</div>
+        <div className="text-sm text-muted">{meta}</div>
       </div>
-      <div className="flex flex-col items-end gap-2 shrink-0">
-        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${WARNING_PILL}`}>
-          Needs officer check
-        </span>
-        <Link href={`/map?path=${encodeURIComponent(warning.path.join("|"))}`} className="text-xs font-medium text-accent hover:underline whitespace-nowrap">
-          Show on map
-        </Link>
-      </div>
+      <span className={`hidden sm:inline-flex shrink-0 items-center whitespace-nowrap px-2 py-0.5 rounded-full text-[11px] font-semibold border ${WARNING_PILL}`}>
+        Officer check
+      </span>
+      <Link
+        href={`/map?path=${encodeURIComponent(warning.path.join("|"))}`}
+        className="shrink-0 text-xs font-medium text-accent hover:underline whitespace-nowrap"
+      >
+        View on map
+      </Link>
     </li>
   );
 }
@@ -67,14 +79,7 @@ export default function WarningsView({ data }: { data: DashboardData }) {
 
   return (
     <div className="p-4 sm:p-6 flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Warnings</h1>
-        <p className="text-sm text-muted mt-1">
-          {warnings.length === 0
-            ? "No unusual patterns right now."
-            : `${warnings.length} unusual ${warnings.length === 1 ? "pattern needs" : "patterns need"} an extension officer's check.`}
-        </p>
-      </div>
+      <h1 className="text-2xl font-bold text-gray-900">Warnings</h1>
 
       <section>
         <h2 className="text-base font-semibold text-ink mb-4">Active warnings ({warnings.length})</h2>
@@ -92,21 +97,18 @@ export default function WarningsView({ data }: { data: DashboardData }) {
             </ul>
           )}
         </div>
+        <details className="mt-3 text-sm text-gray-600">
+          <summary className="cursor-pointer text-xs font-medium text-muted hover:text-gray-700">How warnings work</summary>
+          <ul className="list-disc pl-5 mt-2 space-y-1">
+            <li>
+              Problem: {PROBLEM_MIN_FARMERS}+ farms in one parish within {PROBLEM_WINDOW_DAYS} days, above the prior {PROBLEM_BASELINE_WEEKS} weeks.
+            </li>
+            <li>
+              Price: district median {Math.round((1 - PRICE_LOW_INDEX) * 100)}%+ below national over {PRICE_WINDOW_DAYS} days ({MIN_SALES}+ sales, {MIN_FARMERS}+ farmers).
+            </li>
+          </ul>
+        </details>
       </section>
-
-      <div className="bg-white border border-line rounded-xl p-6">
-        <h2 className="text-base font-semibold text-ink mb-4">How warnings are raised</h2>
-        <ul className="list-disc pl-5 space-y-2 text-sm text-gray-600">
-          <li>
-            <span className="font-medium text-gray-900">Problem:</span> same problem reported by at least {PROBLEM_MIN_FARMERS} different farms in
-            one parish within {PROBLEM_WINDOW_DAYS} days, and by more farms than in the {PROBLEM_BASELINE_WEEKS} weeks before.
-          </li>
-          <li>
-            <span className="font-medium text-gray-900">Price:</span> a district&apos;s median sale price over {PRICE_WINDOW_DAYS} days is at least{" "}
-            {Math.round((1 - PRICE_LOW_INDEX) * 100)}% below the national reference (needs {MIN_SALES} sales from {MIN_FARMERS} farmers).
-          </li>
-        </ul>
-      </div>
 
       <div className="bg-white border border-line rounded-xl p-6">
         <h2 className="text-base font-semibold text-ink mb-4">Problem reports per week ({WEEKS} weeks)</h2>

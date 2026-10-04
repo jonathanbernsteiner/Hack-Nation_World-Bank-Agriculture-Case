@@ -68,10 +68,7 @@ export default function FarmersTable({ farmers }: FarmersTableProps) {
                   return (
                     <tr key={f.id} className="border-b border-gray-100 last:border-b-0">
                       <td className="px-4 py-3 font-medium text-gray-900">
-                        <span className="inline-flex items-center gap-1.5">
-                          {f.firstName}
-                          {f.isSynthetic && <SyntheticTag />}
-                        </span>
+                        {f.firstName}
                       </td>
                       <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
                         {sale ? (

@@ -26,38 +26,14 @@ function Tile({ icon, value, label, sub }: TileProps) {
   );
 }
 
-export default function KpiRow({ kpis, farmerSplit }: { kpis: Kpis; farmerSplit?: { live: number; synthetic: number } }) {
+export default function KpiRow({ kpis }: { kpis: Kpis }) {
   const icon = (Icon: typeof Users) => <Icon size={20} color="#3B82F6" />;
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <Tile
-        icon={icon(Users)}
-        value={formatNumber(kpis.farmers)}
-        label="Registered farmers"
-        sub={
-          farmerSplit
-            ? `${formatNumber(farmerSplit.live)} live · ${formatNumber(farmerSplit.synthetic)} synthetic · ${kpis.districts} districts`
-            : `in ${kpis.villages} villages, ${kpis.districts} districts · +${kpis.newFarmers30d} in 30 days`
-        }
-      />
-      <Tile
-        icon={icon(Phone)}
-        value={formatNumber(kpis.callsLast30d)}
-        label="Calls in the last 30 days"
-        sub="all registered farmers"
-      />
-      <Tile
-        icon={icon(TrendingUp)}
-        value={formatIndex(kpis.priceIndex)}
-        label="Price vs national"
-        sub="farmer-reported, last 90 days"
-      />
-      <Tile
-        icon={icon(AlertTriangle)}
-        value={formatNumber(kpis.activeWarnings)}
-        label="Active warnings"
-        sub="unusual reports and low prices"
-      />
+      <Tile icon={icon(Users)} value={formatNumber(kpis.farmers)} label="Registered farmers" sub={`in ${kpis.districts} districts`} />
+      <Tile icon={icon(Phone)} value={formatNumber(kpis.callsLast30d)} label="Calls" sub="last 30 days" />
+      <Tile icon={icon(TrendingUp)} value={formatIndex(kpis.priceIndex)} label="Price vs national" sub="farmer-reported, 90 days" />
+      <Tile icon={icon(AlertTriangle)} value={formatNumber(kpis.activeWarnings)} label="Active warnings" sub="need an officer check" />
     </div>
   );
 }

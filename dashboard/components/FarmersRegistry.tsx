@@ -7,25 +7,23 @@ import FarmerPeek from "@/components/FarmerPeek";
 import { registryRows } from "@/lib/registry";
 import type { RegistryRow } from "@/lib/registry";
 import { formatDate, formatIndex, formatNumber, labelBuyer, labelProblem } from "@/lib/format";
-import { indexPillClass, SyntheticTag } from "@/components/FarmersTable";
+import { indexPillClass } from "@/components/FarmersTable";
 import type { BuyerType, DashboardData } from "@/lib/types";
 
 const PAGE_SIZE = 50;
-const NEW_DAYS = 30;
-const INPUT = "text-sm border rounded-lg px-3 py-2 border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors";
+const CONTROL = "h-10 w-full min-w-0 truncate text-sm border rounded-lg px-3 border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors";
 const BTN_SECONDARY = "inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg bg-white border border-line text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-60";
-const TOGGLE = "px-3 py-2 text-sm rounded-lg border inline-flex items-center gap-1.5";
-const TOGGLE_OFF = `${TOGGLE} bg-white text-gray-600 border-gray-200 hover:bg-gray-50`;
-const TOGGLE_ON = `${TOGGLE} bg-red-50 text-red-700 border-red-200`;
 const CHIP = "inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-blue-50 text-blue-700 border border-blue-200";
 const TH = "font-medium text-muted px-4 py-3 whitespace-nowrap";
+const WIDE = "hidden 2xl:table-cell";
+const MAX_PROBLEM_WIDTH = "max-w-[180px]";
 const PRICE_TOLERANCE = 0.03;
 const REGIONS = ["Central", "Eastern", "Northern", "Western"];
 const BUYER_OPTIONS: BuyerType[] = ["middleman", "cooperative", "other"];
 const PRICE_OPTIONS = [
-  { value: "below", label: "Below village by >3%" },
+  { value: "below", label: "Below village" },
   { value: "same", label: "About the same" },
-  { value: "above", label: "Above village by >3%" },
+  { value: "above", label: "Above village" },
   { value: "none", label: "No recent sale" },
 ];
 type SortKey = "registered" | "calls" | "lastSale" | "vsVillage";
@@ -36,11 +34,6 @@ const SORT_VALUE: Record<SortKey, (r: RegistryRow) => string | number | null> = 
   lastSale: (r) => r.lastSale?.date ?? null,
   vsVillage: (r) => r.priceVsVillage,
 };
-
-function addDays(date: string, days: number): string {
-  const [y, m, d] = date.split("-").map(Number);
-  return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
-}
 
 function matchesQuery(row: RegistryRow, needle: string): boolean {
   return [row.firstName, row.village, row.parish, row.subCounty, row.district].some((v) =>
@@ -87,15 +80,6 @@ function Dash() {
   return <span className="text-gray-300">—</span>;
 }
 
-function Stat({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="flex items-baseline gap-1.5">
-      <span className="text-xl font-bold text-gray-900">{formatNumber(value)}</span>
-      <span className="text-sm text-muted">{label}</span>
-    </div>
-  );
-}
-
 function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
     <span className={CHIP}>
@@ -108,23 +92,19 @@ function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
 }
 
 function FarmerTableRow({ row, isSelected, onSelect }: { row: RegistryRow; isSelected: boolean; onSelect: (id: number) => void }) {
+  const [first, ...rest] = row.problems90d.map(labelProblem);
   return (
     <tr
       onClick={() => onSelect(row.id)}
       className={`border-b border-gray-100 cursor-pointer transition-colors ${isSelected ? "bg-blue-50/50" : "hover:bg-gray-50"}`}
     >
-      <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
-        <span className="inline-flex items-center gap-2">
-          {row.firstName}
-          {row.isSynthetic && <SyntheticTag />}
-        </span>
-      </td>
-      <td className="px-4 py-3 text-gray-600 max-w-[180px] truncate">{row.village}</td>
-      <td className="px-4 py-3 text-gray-600 hidden sm:table-cell">{row.parish}</td>
-      <td className="px-4 py-3 text-gray-600 hidden lg:table-cell">{row.subCounty}</td>
-      <td className="px-4 py-3 text-gray-600">{row.district}</td>
-      <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{formatDate(row.registeredAt)}</td>
-      <td className="px-4 py-3 text-right font-mono text-gray-700">{row.callCount}</td>
+      <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">{row.firstName}</td>
+      <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{row.village}</td>
+      <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{row.district}</td>
+      <td className={`px-4 py-3 text-gray-600 whitespace-nowrap ${WIDE}`}>{row.parish}</td>
+      <td className={`px-4 py-3 text-gray-600 whitespace-nowrap ${WIDE}`}>{row.subCounty}</td>
+      <td className="px-4 py-3 text-gray-600 whitespace-nowrap hidden lg:table-cell">{formatDate(row.registeredAt)}</td>
+      <td className="px-4 py-3 text-right font-mono text-gray-700 whitespace-nowrap">{row.callCount}</td>
       <td className="px-4 py-3 text-right whitespace-nowrap">
         {row.lastSale ? (
           <>
@@ -135,11 +115,18 @@ function FarmerTableRow({ row, isSelected, onSelect }: { row: RegistryRow; isSel
           <Dash />
         )}
       </td>
-      <td className="px-4 py-3 text-right">
+      <td className="px-4 py-3 text-right whitespace-nowrap">
         <span className={indexPillClass(row.priceVsVillage)}>{formatIndex(row.priceVsVillage)}</span>
       </td>
-      <td className="px-4 py-3 text-red-600 font-medium">
-        {row.problems90d.length > 0 ? row.problems90d.map(labelProblem).join(", ") : <Dash />}
+      <td className="px-4 py-3 whitespace-nowrap" title={row.problems90d.map(labelProblem).join(", ")}>
+        {first === undefined ? (
+          <Dash />
+        ) : (
+          <span className="inline-flex items-center gap-1.5">
+            <span className={`${MAX_PROBLEM_WIDTH} truncate text-red-600 font-medium`}>{first}</span>
+            {rest.length > 0 && <span className="text-xs text-muted">+{rest.length}</span>}
+          </span>
+        )}
       </td>
     </tr>
   );
@@ -191,13 +178,10 @@ export default function FarmersRegistry({ data }: { data: DashboardData }) {
     () => [...new Set(rows.filter((r) => (!region || r.region === region) && (!district || r.district === district)).map((r) => r.subCounty))].sort(),
     [rows, region, district],
   );
-  const stats = useMemo(() => {
-    const cutoff = addDays(data.today, -NEW_DAYS);
-    return {
-      villages: new Set(rows.map((r) => `${r.district}/${r.subCounty}/${r.parish}/${r.village}`)).size,
-      recent: rows.filter((r) => r.registeredAt.slice(0, 10) > cutoff).length,
-    };
-  }, [rows, data.today]);
+  const villageCount = useMemo(
+    () => new Set(rows.map((r) => `${r.district}/${r.subCounty}/${r.parish}/${r.village}`)).size,
+    [rows],
+  );
 
   const needle = query.trim().toLowerCase();
   const filtered = useMemo(
@@ -237,32 +221,24 @@ export default function FarmersRegistry({ data }: { data: DashboardData }) {
 
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto">
-      <div className="flex items-start justify-between mb-4 gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Farmers</h1>
-          <p className="text-sm text-muted mt-1 max-w-xl">
-            Every first call registers a farmer with their village. First names only; PINs and phone numbers are never shown, and individual records can&apos;t be exported.
-          </p>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-x-8 gap-y-2 mb-6">
-        <Stat value={rows.length} label="registered farmers" />
-        <Stat value={stats.villages} label="villages" />
-        <Stat value={stats.recent} label={`new in the last ${NEW_DAYS} days`} />
+      <div className="flex items-baseline justify-between mb-4 gap-3">
+        <h1 className="text-2xl font-bold text-gray-900">Farmers</h1>
+        <p className="text-sm text-muted whitespace-nowrap">
+          {formatNumber(rows.length)} farmers · {formatNumber(villageCount)} villages
+        </p>
       </div>
 
       <div className="bg-white border border-line rounded-[14px] p-4 mb-6 space-y-3">
-        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3">
-          <div className="relative sm:w-64">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+          <div className="relative min-w-0 sm:col-span-2 lg:col-span-3 xl:col-span-2">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               value={query}
-              placeholder="Search name, village or area"
+              placeholder="Search name or village"
               aria-label="Search name, village or area"
               onChange={(e) => { setQuery(e.target.value); resetPaging(); }}
-              className={`${INPUT} w-full pl-9`}
+              className={`${CONTROL} pl-9`}
             />
           </div>
           <select
@@ -274,7 +250,7 @@ export default function FarmersRegistry({ data }: { data: DashboardData }) {
               if (district && next && !rows.some((r) => r.region === next && r.district === district)) { setDistrict(""); setSubCounty(""); }
               resetPaging();
             }}
-            className={`${INPUT} min-w-[130px]`}
+            className={CONTROL}
           >
             <option value="">All regions</option>
             {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
@@ -283,7 +259,7 @@ export default function FarmersRegistry({ data }: { data: DashboardData }) {
             value={district}
             aria-label="District"
             onChange={(e) => { setDistrict(e.target.value); setSubCounty(""); resetPaging(); }}
-            className={`${INPUT} min-w-[150px]`}
+            className={CONTROL}
           >
             <option value="">All districts</option>
             {districts.map((d) => <option key={d} value={d}>{d}</option>)}
@@ -292,27 +268,28 @@ export default function FarmersRegistry({ data }: { data: DashboardData }) {
             value={subCounty}
             aria-label="Sub-county"
             onChange={(e) => { setSubCounty(e.target.value); resetPaging(); }}
-            className={`${INPUT} min-w-[150px]`}
+            className={CONTROL}
           >
             <option value="">All sub-counties</option>
             {subCounties.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
-          <select value={buyer} aria-label="Last sale buyer" onChange={(e) => { setBuyer(e.target.value); resetPaging(); }} className={`${INPUT} min-w-[150px]`}>
+          <select value={buyer} aria-label="Buyer" onChange={(e) => { setBuyer(e.target.value); resetPaging(); }} className={CONTROL}>
             <option value="">Any buyer</option>
-            {BUYER_OPTIONS.map((b) => <option key={b} value={b}>Last sale to {labelBuyer(b).toLowerCase()}</option>)}
+            {BUYER_OPTIONS.map((b) => <option key={b} value={b}>{labelBuyer(b)}</option>)}
           </select>
-          <select value={priceBucket} aria-label="Price vs village" onChange={(e) => { setPriceBucket(e.target.value); resetPaging(); }} className={`${INPUT} min-w-[170px]`}>
-            <option value="">Price vs village: any</option>
+          <select value={priceBucket} aria-label="Price vs village" onChange={(e) => { setPriceBucket(e.target.value); resetPaging(); }} className={CONTROL}>
+            <option value="">Any price</option>
             {PRICE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
-          <button
-            type="button"
-            aria-pressed={problemsOnly}
-            className={problemsOnly ? TOGGLE_ON : TOGGLE_OFF}
-            onClick={() => { setProblemsOnly(!problemsOnly); resetPaging(); }}
+          <select
+            value={problemsOnly ? "recent" : ""}
+            aria-label="Problems"
+            onChange={(e) => { setProblemsOnly(e.target.value === "recent"); resetPaging(); }}
+            className={CONTROL}
           >
-            Reported a problem (90 days)
-          </button>
+            <option value="">Any problems</option>
+            <option value="recent">Reported in 90 days</option>
+          </select>
         </div>
         {hasFilters && (
           <div className="flex items-start justify-between gap-3 pt-1 border-t border-gray-100">
@@ -321,9 +298,9 @@ export default function FarmersRegistry({ data }: { data: DashboardData }) {
               {region && <Chip label={`Region: ${region}`} onRemove={() => { setRegion(""); resetPaging(); }} />}
               {district && <Chip label={`District: ${district}`} onRemove={() => { setDistrict(""); setSubCounty(""); resetPaging(); }} />}
               {subCounty && <Chip label={`Sub-county: ${subCounty}`} onRemove={() => { setSubCounty(""); resetPaging(); }} />}
-              {buyer && <Chip label={`Last sale: ${labelBuyer(buyer as BuyerType)}`} onRemove={() => { setBuyer(""); resetPaging(); }} />}
+              {buyer && <Chip label={`Buyer: ${labelBuyer(buyer as BuyerType)}`} onRemove={() => { setBuyer(""); resetPaging(); }} />}
               {priceBucket && <Chip label={`Price: ${PRICE_OPTIONS.find((o) => o.value === priceBucket)?.label ?? priceBucket}`} onRemove={() => { setPriceBucket(""); resetPaging(); }} />}
-              {problemsOnly && <Chip label="Reported a problem" onRemove={() => { setProblemsOnly(false); resetPaging(); }} />}
+              {problemsOnly && <Chip label="Problems: 90 days" onRemove={() => { setProblemsOnly(false); resetPaging(); }} />}
             </div>
             <button type="button" onClick={clearAll} className="text-xs font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap shrink-0 pt-2">
               Clear all
@@ -347,10 +324,10 @@ export default function FarmersRegistry({ data }: { data: DashboardData }) {
                   <tr className="border-b border-line bg-gray-50">
                     <th className={`${TH} text-left`}>First name</th>
                     <th className={`${TH} text-left`}>Village</th>
-                    <th className={`${TH} text-left hidden sm:table-cell`}>Parish</th>
-                    <th className={`${TH} text-left hidden lg:table-cell`}>Sub-county</th>
                     <th className={`${TH} text-left`}>District</th>
-                    <SortTh label="Registered" k="registered" sort={sort} onSort={onSort} className={`${TH} text-left`} />
+                    <th className={`${TH} text-left ${WIDE}`}>Parish</th>
+                    <th className={`${TH} text-left ${WIDE}`}>Sub-county</th>
+                    <SortTh label="Registered" k="registered" sort={sort} onSort={onSort} className={`${TH} text-left hidden lg:table-cell`} />
                     <SortTh label="Calls" k="calls" sort={sort} onSort={onSort} className={`${TH} text-right`} />
                     <SortTh label="Last sale (UGX/kg)" k="lastSale" sort={sort} onSort={onSort} className={`${TH} text-right`} />
                     <SortTh label="vs village" k="vsVillage" sort={sort} onSort={onSort} className={`${TH} text-right`} />

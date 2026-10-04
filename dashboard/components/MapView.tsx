@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import L from "leaflet";
 import { CircleMarker, MapContainer, Marker, TileLayer, Tooltip, useMap } from "react-leaflet";
 import type { AreaPath, AreaSummary, MapLayer, Warning } from "@/lib/types";
-import { MIN_FARMERS, MIN_SALES, PRICE_LOW_INDEX, PROBLEM_MIN_FARMERS, PROBLEM_WINDOW_DAYS } from "@/lib/types";
+import { MIN_SALES, PRICE_LOW_INDEX, PROBLEM_MIN_FARMERS, PROBLEM_WINDOW_DAYS } from "@/lib/types";
 import { formatIndex, formatNumber, labelLevel } from "@/lib/format";
 
 interface MapViewProps {
@@ -125,10 +125,10 @@ function AreaTooltip({ area }: { area: AreaSummary }) {
 
 function Legend({ layer }: { layer: MapLayer }) {
   const swatches: { color: string; text: string }[] = [
-    { color: COLOR_OK, text: "at or above national (≥ −3%)" },
+    { color: COLOR_OK, text: "At or above national" },
     { color: COLOR_WARN, text: "3–15% below" },
-    { color: COLOR_BAD, text: "more than 15% below" },
-    { color: COLOR_NONE, text: `not enough sales (needs ${MIN_SALES} sales from ${MIN_FARMERS} farmers)` },
+    { color: COLOR_BAD, text: "Over 15% below" },
+    { color: COLOR_NONE, text: `Under ${MIN_SALES} sales` },
   ];
   return (
     <div className="absolute bottom-4 left-4 z-[1000] max-w-xs rounded-lg border border-line bg-white p-3 text-xs text-gray-600">
@@ -145,8 +145,8 @@ function Legend({ layer }: { layer: MapLayer }) {
       )}
       {layer === "warnings" && (
         <p>
-          Red = at least {PROBLEM_MIN_FARMERS} farms in one parish report the same problem within {PROBLEM_WINDOW_DAYS}{" "}
-          days, or prices ≥{Math.round((1 - PRICE_LOW_INDEX) * 100)}% below national
+          Red: {PROBLEM_MIN_FARMERS}+ farms, same problem, {PROBLEM_WINDOW_DAYS} days, or prices{" "}
+          {Math.round((1 - PRICE_LOW_INDEX) * 100)}%+ below
         </p>
       )}
     </div>

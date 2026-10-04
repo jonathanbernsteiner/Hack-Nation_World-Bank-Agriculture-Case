@@ -21,19 +21,6 @@ const SERIES = [
   { key: "all", name: "All buyers", color: "#3B82F6", dashed: false },
 ] as const;
 
-function buildHeadline(gapPct: number | null, lowCount: number): string {
-  const districtPart =
-    lowCount === 0
-      ? "no district is 15% or more below the national price."
-      : `${lowCount} ${lowCount === 1 ? "district is" : "districts are"} 15% or more below the national price.`;
-  if (gapPct === null) return `Not enough sales yet to compare buyers; ${districtPart}`;
-  const gapPart =
-    gapPct === 0
-      ? "Middlemen paid the same as cooperatives"
-      : `Middlemen paid ${Math.abs(gapPct)}% ${gapPct < 0 ? "less" : "more"} than cooperatives`;
-  return `${gapPart} over the last 12 months; ${districtPart}`;
-}
-
 function Dash() {
   return <span className="text-gray-300">—</span>;
 }
@@ -72,48 +59,42 @@ export default function PricesView({ data }: { data: DashboardData }) {
   const lowCount = districts.filter((d) => d.low).length;
   const hasChart = monthly.some((p) => p.middleman !== null || p.cooperative !== null || p.all !== null);
   const gapLabel = buyers.gapPct === null ? "—" : formatIndex(1 + buyers.gapPct / 100);
-  const headline = buildHeadline(buyers.gapPct, lowCount);
 
   return (
     <div className="p-4 sm:p-6 flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Prices</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          {headline}
-        </p>
-      </div>
+      <h1 className="text-2xl font-bold text-gray-900">Prices</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Tile
           icon={<Scale size={20} color="#3B82F6" />}
           value={gapLabel}
           label="Middlemen vs cooperatives"
-          sub={`median of ${formatNumber(buyers.sales)} sales, last 12 months`}
+          sub="median, 12 months"
         />
         <Tile
           icon={<TrendingDown size={20} color="#3B82F6" />}
           value={range ? `${formatNumber(range.p10)}–${formatNumber(range.p90)}` : "—"}
-          label={`Price range (90 days) · ${TAB_LABEL[form]}`}
-          sub={range ? `UGX/kg, ${TAB_LABEL[form]}, middle ${formatNumber(range.median)}` : `UGX/kg, ${TAB_LABEL[form]}`}
+          label={`Price range · ${TAB_LABEL[form]}`}
+          sub="UGX/kg, 90 days"
         />
         <Tile
           icon={<MapPinned size={20} color="#3B82F6" />}
           value={String(lowCount)}
           label="Districts below national"
-          sub="15% or more under, last 90 days"
+          sub="15%+ below, 90 days"
         />
       </div>
 
       <div className="bg-white border border-line rounded-xl p-6">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-          <h2 className="text-base font-semibold text-ink">Price per kg by buyer: {TAB_LABEL[form]}</h2>
-          <div className="flex gap-1">
+          <h2 className="text-base font-semibold text-ink">Price per kg by buyer</h2>
+          <div className="flex gap-1 shrink-0">
             {FORMS.map((f) => (
               <button
                 key={f}
                 type="button"
                 onClick={() => setForm(f)}
-                className={`px-3 py-1.5 text-sm font-medium border-b-2 transition-colors ${
+                className={`px-3 py-1.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
                   f === form ? "border-accent text-accent" : "border-transparent text-gray-500 hover:text-gray-700"
                 }`}
               >
@@ -142,7 +123,7 @@ export default function PricesView({ data }: { data: DashboardData }) {
                   formatter={(value, name) => [`${formatUgx(typeof value === "number" ? value : null)}/kg`, String(name)]}
                   contentStyle={{ background: "#fff", border: "1px solid #E2E8F0", borderRadius: 8, fontSize: 13 }}
                 />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: 12, whiteSpace: "nowrap" }} />
                 {SERIES.map((s) => (
                   <Line
                     key={s.key}
@@ -163,7 +144,12 @@ export default function PricesView({ data }: { data: DashboardData }) {
       </div>
 
       <div>
-        <h2 className="text-base font-semibold text-ink mb-4">By district</h2>
+        <h2
+          className="text-base font-semibold text-ink mb-4"
+          title={`Median needs ${MIN_SALES} sales from ${MIN_FARMERS} farmers. National reference: UCDA / MAAIF monthly farm-gate averages.`}
+        >
+          By district
+        </h2>
         <div className="bg-white border border-line rounded-[14px] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -172,12 +158,12 @@ export default function PricesView({ data }: { data: DashboardData }) {
                   <th className="text-left font-medium text-muted px-4 py-3 whitespace-nowrap">District</th>
                   <th className="text-left font-medium text-muted px-4 py-3 whitespace-nowrap hidden sm:table-cell">Region</th>
                   <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap">Sales</th>
-                  <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap">vs national (90 days)</th>
-                  <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap">Kiboko (UGX/kg)</th>
-                  <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap hidden md:table-cell">FAQ (UGX/kg)</th>
-                  <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap hidden md:table-cell">Parchment (UGX/kg)</th>
+                  <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap">vs national</th>
+                  <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap">Kiboko</th>
+                  <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap hidden xl:table-cell">FAQ</th>
+                  <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap hidden xl:table-cell">Parchment</th>
                   <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap">Sold to middlemen</th>
-                  <th className="px-4 py-3" />
+                  <th className="px-4 py-3 w-16" />
                 </tr>
               </thead>
               <tbody>
@@ -190,19 +176,19 @@ export default function PricesView({ data }: { data: DashboardData }) {
                 )}
                 {districts.map((d) => (
                   <tr key={d.district} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 font-medium text-gray-900">{d.district}</td>
-                    <td className="px-4 py-3 text-gray-600 hidden sm:table-cell">{d.region}</td>
-                    <td className="px-4 py-3 text-right font-mono text-gray-700">{d.sales}</td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">{d.district}</td>
+                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap hidden sm:table-cell">{d.region}</td>
+                    <td className="px-4 py-3 text-right font-mono text-gray-700 whitespace-nowrap">{d.sales}</td>
+                    <td className="px-4 py-3 text-right whitespace-nowrap">
                       {d.index90d === null ? <Dash /> : <span className={indexPillClass(d.index90d)}>{formatIndex(d.index90d)}</span>}
                     </td>
                     <FormCell values={d.byForm} form="kiboko" />
-                    <FormCell values={d.byForm} form="faq" className="hidden md:table-cell" />
-                    <FormCell values={d.byForm} form="parchment" className="hidden md:table-cell" />
-                    <td className="px-4 py-3 text-right font-mono text-gray-700">
+                    <FormCell values={d.byForm} form="faq" className="hidden xl:table-cell" />
+                    <FormCell values={d.byForm} form="parchment" className="hidden xl:table-cell" />
+                    <td className="px-4 py-3 text-right font-mono text-gray-700 whitespace-nowrap">
                       {d.middlemanShare === null ? <Dash /> : `${d.middlemanShare}%`}
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3 text-right whitespace-nowrap">
                       {d.low && (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-red-50 text-red-700 border-red-200">
                           Low
@@ -215,10 +201,6 @@ export default function PricesView({ data }: { data: DashboardData }) {
             </table>
           </div>
         </div>
-        <p className="text-xs text-faint mt-3">
-          Median needs {MIN_SALES} sales from {MIN_FARMERS} farmers. National reference: UCDA / MAAIF Coffee Department
-          monthly farm-gate averages. Synthetic records are labelled.
-        </p>
       </div>
     </div>
   );

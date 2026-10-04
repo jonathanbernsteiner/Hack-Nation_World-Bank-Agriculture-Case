@@ -169,3 +169,64 @@ def test_allocate_pin_fails_closed_without_salt(monkeypatch):
 
     with pytest.raises(pins.PinSaltMissing):
         pins.allocate_pin(Conn(), rng=random.Random(3))
+
+
+# review cycle 2 regressions
+
+
+def test_allocate_pin_draws_full_4_digit_space_and_tries_exactly_the_limit():
+    class Counting:
+        def __init__(self):
+            self.n = 0
+
+        def randrange(self, start, stop):
+            assert (start, stop) == (0, 10_000)
+            self.n += 1
+            return self.n  # distinct, never reserved
+
+    checked = []
+    with pytest.raises(pins.PinAllocationError):
+        pins.allocate_pin(None, rng=Counting(), is_taken=lambda p: checked.append(p) or True)
+    assert len(checked) == pins.MAX_ALLOCATION_TRIES == 50
+
+
+def test_allocate_pin_reserved_draws_use_up_the_try_budget():
+    # An RNG stuck in 9000-9099 must end in PinAllocationError: no endless loop, no reserved PIN handed out.
+    class Stuck:
+        def __init__(self):
+            self.calls = 0
+
+        def randrange(self, _start, _stop):
+            self.calls += 1
+            if self.calls > 10 * pins.MAX_ALLOCATION_TRIES:
+                raise AssertionError("allocation loop does not stop on reserved draws")
+            return 9001
+
+    rng = Stuck()
+    checked = []
+    with pytest.raises(pins.PinAllocationError):
+        pins.allocate_pin(None, rng=rng, is_taken=lambda p: checked.append(p) or False)
+    assert rng.calls == pins.MAX_ALLOCATION_TRIES
+    assert checked == []
+
+
+def test_pin_errors_never_contain_a_pin(monkeypatch):
+    monkeypatch.setattr(config, "settings", dataclasses.replace(config.settings, ledger_pin_salt=None))
+    with pytest.raises(pins.PinSaltMissing) as missing:
+        pins.hash_pin("4831")
+    assert "4831" not in str(missing.value)
+
+    tried = []
+    with pytest.raises(pins.PinAllocationError) as exhausted:
+        pins.allocate_pin(None, rng=random.Random(7), is_taken=lambda p: tried.append(p) or True)
+    assert tried
+    assert not any(pin in str(exhausted.value) for pin in tried)
+
+
+def test_hash_pin_reads_salt_at_call_time(monkeypatch):
+    # The salt is read per call (not cached at import), so a rotated or late-set salt takes effect at once.
+    monkeypatch.setattr(config, "settings", dataclasses.replace(config.settings, ledger_pin_salt="salt-a"))
+    first = pins.hash_pin("9001")
+    monkeypatch.setattr(config, "settings", dataclasses.replace(config.settings, ledger_pin_salt="salt-b"))
+    assert pins.hash_pin("9001") != first
+    assert pins.hash_pin("9001") == hashlib.sha256(b"salt-b:9001").hexdigest()

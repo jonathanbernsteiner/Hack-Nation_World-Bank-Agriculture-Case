@@ -2,6 +2,7 @@ import base64
 import dataclasses
 import hashlib
 import hmac
+import logging
 import time
 
 import pytest
@@ -238,3 +239,69 @@ def test_basic_auth_malformed_header_401_with_challenge(client, monkeypatch, aut
 def test_basic_auth_password_unset_fails_closed(client, monkeypatch):
     _patch(monkeypatch, demo_user="judge", demo_password=None)
     assert client.get("/demo", headers=_basic("judge", "")).status_code == 401
+
+
+# review cycle 2 regressions
+
+
+@pytest.mark.parametrize(
+    ("path", "value"),
+    [("/tool", TOOL), ("/admin", ADMIN)],
+)
+@pytest.mark.parametrize("name", ["x_hotline_tool_secret", "x_hotline_admin_secret", "X-Hotline-Tool-Secret"])
+def test_secret_in_query_string_never_authenticates(client, monkeypatch, path, value, name):
+    # Secrets come only from headers; a query parameter (which lands in access logs) must not open a route.
+    _patch(monkeypatch, hotline_tool_secret=TOOL, hotline_admin_secret=ADMIN)
+    assert client.get(path, params={name: value}).status_code == 401
+
+
+def test_401_is_generic_and_never_echoes_secrets(client, monkeypatch):
+    _patch(monkeypatch, hotline_tool_secret=TOOL, hotline_admin_secret=ADMIN, demo_user="judge", demo_password="pw-1234")
+    responses = [
+        client.get("/tool", headers={"X-Hotline-Tool-Secret": "guess-1"}),
+        client.get("/admin", headers={"X-Hotline-Admin-Secret": "guess-2"}),
+        client.get("/demo", headers=_basic("judge", "guess-3")),
+    ]
+    for response in responses:
+        assert response.status_code == 401
+        assert response.json() == {"detail": "unauthorized"}
+        dump = response.text + repr(sorted(response.headers.items()))
+        for value in (TOOL, ADMIN, "pw-1234", "judge", "guess-1", "guess-2", "guess-3"):
+            assert value not in dump
+
+
+def test_auth_paths_log_no_secret(client, monkeypatch, caplog):
+    caplog.set_level(logging.DEBUG)
+    _patch(monkeypatch, hotline_tool_secret=TOOL, hotline_admin_secret=ADMIN, demo_user="judge", demo_password="pw-1234")
+    client.get("/tool", headers={"X-Hotline-Tool-Secret": TOOL})
+    client.get("/tool", headers={"X-Hotline-Tool-Secret": "guess-1"})
+    client.get("/admin", headers={"X-Hotline-Admin-Secret": ADMIN})
+    client.get("/demo", headers=_basic("judge", "pw-1234"))
+    client.get("/demo", headers=_basic("judge", "guess-3"))
+    security.verify_elevenlabs_signature(BODY, _sign(BODY, NOW), WEBHOOK, now=NOW)
+    security.verify_elevenlabs_signature(BODY, "t=x,v0=y", WEBHOOK, now=NOW)
+    for value in (TOOL, ADMIN, WEBHOOK, "pw-1234", "guess-1", "guess-3"):
+        assert value not in caplog.text
+
+
+@pytest.mark.parametrize(
+    "header",
+    [
+        f"t={'9' * 5000},v0=ff",  # beyond int()'s digit limit: ValueError path
+        f"t={NOW},v0=\xe9\xe9",  # non-ASCII digest (headers arrive latin-1 decoded)
+        f"t={NOW},v0={KNOWN_HEX},",  # trailing empty field
+        f"t={NOW},v0={KNOWN_HEX[:-1]}",  # truncated digest
+        f"t={NOW},v1={KNOWN_HEX}",  # unknown scheme only
+        f"t={NOW + 1},v0={KNOWN_HEX}",  # digest bound to a different timestamp
+    ],
+    ids=["t-5000-digits", "non-ascii-v0", "trailing-comma", "truncated-v0", "v1-only", "t-off-by-one"],
+)
+def test_signature_hostile_header_returns_false(header):
+    assert security.verify_elevenlabs_signature(BODY, header, WEBHOOK, now=NOW) is False
+
+
+def test_signature_empty_body_is_still_signed():
+    # An empty body signs "t." only; a digest for the real body must not verify an empty one and vice versa.
+    assert security.verify_elevenlabs_signature(b"", _sign(b"", NOW), WEBHOOK, now=NOW)
+    assert not security.verify_elevenlabs_signature(b"", _sign(BODY, NOW), WEBHOOK, now=NOW)
+    assert not security.verify_elevenlabs_signature(BODY, _sign(b"", NOW), WEBHOOK, now=NOW)

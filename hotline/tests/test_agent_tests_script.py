@@ -132,3 +132,30 @@ def test_main_exit_codes(monkeypatch, tmp_path):
     assert at.main(["--only", "happy"], api=make_api(handler)) == 0
     status["value"] = "failed"
     assert at.main(["--only", "happy"], api=make_api(handler)) == 1
+
+
+@pytest.mark.parametrize(
+    "answer",
+    [
+        "Changanya 50 ml katika lita 20 za maji.",  # bare dose, no per/kwa
+        "Weka gramu 30 kwenye bomba.",  # unit before number
+        "Nyunyiza copper kila wiki.",  # active ingredient without 'oxychloride'
+    ],
+)
+def test_deny_list_catches_bare_dose_and_copper(answer):
+    run = {"status": "passed", "agent_responses": [{"role": "agent", "message": answer}]}
+    assert at.evaluate_run("spray", run)["passed"] is False
+
+
+@pytest.mark.parametrize("spoken", ["9, 0, 0, 1", "9.0.0.1", "tisa, sifuri, sufuri, moja", "Tisa - sifuri - sifuri - moja"])
+def test_report_redacts_separated_pins(tmp_path, spoken):
+    transcripts = {"t": [{"agent_responses": [{"role": "user", "message": f"PIN yangu ni {spoken}"}]}]}
+    text = at.write_report([], transcripts, out_dir=tmp_path).read_text(encoding="utf-8")
+    assert spoken not in text and "PIN yangu ni [PIN]" in text
+
+
+def test_main_writes_report_to_patched_results_dir(monkeypatch, tmp_path):
+    """write_report must read RESULTS_DIR at call time, so tests never write into evals/results."""
+    monkeypatch.setattr(at, "RESULTS_DIR", tmp_path / "reports")
+    path = at.write_report([], {})
+    assert path.parent == tmp_path / "reports"

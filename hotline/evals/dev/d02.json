@@ -1,0 +1,193 @@
+{
+  "id": "d02",
+  "is_synthetic": true,
+  "call_date": "2026-09-30",
+  "timezone": "Africa/Kampala",
+  "conversation": {
+    "agent_id": "agent_eval",
+    "conversation_id": "conv_eval_d02",
+    "status": "done",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Habari! Hii ni simu ya kompyuta, si mtu. Mazungumzo haya yanarekodiwa ili kutunza rekodi ya shamba lako. Je, unakubali?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 0,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 9,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Tafadhali bonyeza au sema namba yako ya siri ya tarakimu nne.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 18,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "[PIN]",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 27,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Karibu Namukasa. Bei ya kati ya FAQ Kyotera kwa miezi kumi na miwili iliyopita ni shilingi elfu tisa na mia nane kwa kilo, kutoka ripoti tisa.",
+        "tool_calls": [
+          {
+            "request_id": "toolu_d02_4",
+            "tool_name": "identify_farmer",
+            "params_as_json": "{\"pin\": \"[PIN]\"}",
+            "tool_has_been_called": true,
+            "type": "webhook"
+          }
+        ],
+        "tool_results": [
+          {
+            "request_id": "toolu_d02_4",
+            "tool_name": "identify_farmer",
+            "result_value": "{\"status\": \"found\", \"identified_by\": \"pin\", \"farmer\": {\"first_name\": \"Namukasa\", \"village\": \"Kyotera Town\", \"district\": \"Kyotera\", \"region\": \"Central\", \"coffee_type\": \"robusta\", \"main_form\": \"faq\"}, \"village_price\": {\"form\": \"faq\", \"median_ugx_per_kg\": 9800, \"n_sales\": 9, \"level\": \"parish\", \"area\": \"Kyotera\", \"median_words_sw\": \"elfu tisa na mia nane\"}}",
+            "is_error": false,
+            "tool_has_been_called": true
+          }
+        ],
+        "time_in_call_secs": 36,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Sawa. Wiki iliyopita niliuza kilo mia nne za FAQ. Nilipata shilingi milioni mbili... hapana, milioni tatu na laki sita kwa jumla.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 45,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Umemuuzia nani, na ulilipwa vipi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 54,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Mfanyabiashara anaitwa Kato, wa Kyotera mjini. Alinilipa kwa mobile money.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 63,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Nimeandika: kilo mia nne za FAQ, jumla shilingi milioni tatu na laki sita, wiki iliyopita, kwa mfanyabiashara Kato, mobile money. Sahihi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 72,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, sahihi.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 81,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Je, kuna tatizo lolote kwenye kahawa yako?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 90,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Hapana, miti iko vizuri mwaka huu.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 99,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Vizuri sana. Una swali lingine?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 108,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Hapana, asante.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 117,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Asante sana kwa kupiga simu. Kwaheri!",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 126,
+        "source_medium": null
+      }
+    ],
+    "metadata": {
+      "start_time_unix_secs": 1790752500,
+      "call_duration_secs": 135
+    }
+  },
+  "gold": {
+    "consent": "yes",
+    "entries": [
+      {
+        "kind": "sale",
+        "crop": "coffee",
+        "coffee_form": "faq",
+        "amount_kg": 400,
+        "price_total": 3600000,
+        "currency": "UGX",
+        "date_sold": "2026-09-23",
+        "buyer_type": "middleman",
+        "buyer_name": "Kato",
+        "paid_how": "mobile_money",
+        "amount": 400,
+        "unit": "kg"
+      }
+    ]
+  },
+  "free_text_alts": {
+    "buyer_name": [
+      "Mr Kato",
+      "Mzee Kato"
+    ]
+  },
+  "quote_possible": true,
+  "tags": [
+    "total_only",
+    "laki_milioni",
+    "self_correction",
+    "buyer_name",
+    "last_week",
+    "mobile_money"
+  ],
+  "labeler_notes": "",
+  "review": {
+    "verdict": "approved",
+    "rounds": 2,
+    "reviewer": "claude-opus-5-5"
+  }
+}

@@ -19,6 +19,7 @@ async function callsPage(sql: ReturnType<typeof getSql>, id: number, offset: num
         role: l.role === "farmer" ? "farmer" : "agent",
         sw: l.sw || "",
         en: l.en || "",
+        text: l.en || l.sw || "", // read by peeks still open from before the bilingual transcript; drop later
       }));
       const hasText = Boolean(c.transcript_sw || c.transcript_en);
       return {

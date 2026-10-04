@@ -35,6 +35,7 @@ export const SEARCH_PAGES: readonly PageResult[] = [
   { label: "Farmers", href: "/farmers" },
   { label: "Prices", href: "/prices" },
   { label: "Warnings", href: "/warnings" },
+  { label: "Live call", href: "/call" },
   { label: "Settings", href: "/settings" },
   { label: "Uganda (map)", href: "/map" },
 ];

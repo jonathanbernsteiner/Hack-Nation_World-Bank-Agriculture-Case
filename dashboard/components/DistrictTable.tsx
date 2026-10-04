@@ -96,7 +96,7 @@ function compareBy(key: SortKey, dir: SortDir) {
   };
 }
 
-const TH = "font-medium text-muted px-4 py-3 whitespace-nowrap";
+const TH = "font-medium text-muted px-3 py-3 whitespace-nowrap";
 
 const COLUMNS: { key: SortKey; label: string; align: "left" | "right"; className?: string }[] = [
   { key: "name", label: "District", align: "left" },
@@ -179,18 +179,18 @@ export default function DistrictTable({ data, warnings, columns = ALL_OPTIONAL, 
                   onKeyDown={(e) => e.key === "Enter" && open(r.name)}
                   className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
                 >
-                  <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">{r.name}</td>
-                  <td className="px-4 py-3 text-gray-600 whitespace-nowrap hidden lg:table-cell">{r.region}</td>
-                  <td className="px-4 py-3 text-right font-mono text-gray-700">{formatNumber(r.farmers)}</td>
-                  {showNew && <td className="px-4 py-3 text-right font-mono text-gray-700">{formatNumber(r.new30d)}</td>}
-                  <td className="px-4 py-3 text-right whitespace-nowrap">
+                  <td className="px-3 py-3 font-medium text-gray-900 whitespace-nowrap">{r.name}</td>
+                  <td className="px-3 py-3 text-gray-600 whitespace-nowrap hidden lg:table-cell">{r.region}</td>
+                  <td className="px-3 py-3 text-right font-mono text-gray-700">{formatNumber(r.farmers)}</td>
+                  {showNew && <td className="px-3 py-3 text-right font-mono text-gray-700">{formatNumber(r.new30d)}</td>}
+                  <td className="px-3 py-3 text-right whitespace-nowrap">
                     <span className="font-mono"><IndexValue index={r.index} /></span>
                   </td>
-                  <td className="px-4 py-3 text-right font-mono text-gray-700">
+                  <td className="px-3 py-3 text-right font-mono text-gray-700">
                     {r.middleman === null ? <span className="text-gray-300">—</span> : `${r.middleman}%`}
                   </td>
                   {showWarnings && (
-                    <td className="px-4 py-3 text-right font-mono text-gray-700">
+                    <td className="px-3 py-3 text-right font-mono text-gray-700">
                       {r.warnings > 0 ? r.warnings : <span className="text-gray-300">—</span>}
                     </td>
                   )}

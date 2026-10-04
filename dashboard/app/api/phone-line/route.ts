@@ -31,17 +31,22 @@ function languageOf(number: PhoneNumber): Language | null {
   return id === agents().en ? "en" : id === agents().sw ? "sw" : null;
 }
 
+function switchEnabled(): boolean {
+  return process.env.PHONE_LINE_SWITCH === "1";
+}
+
 export async function GET() {
   try {
     const number = await hotlineNumber();
     if (!number) return Response.json({ error: "no_number" }, { status: 404 });
-    return Response.json({ phoneNumber: number.phone_number, language: languageOf(number) });
+    return Response.json({ phoneNumber: number.phone_number, language: languageOf(number), switchEnabled: switchEnabled() });
   } catch {
     return Response.json({ error: "unavailable" }, { status: 503 });
   }
 }
 
 export async function POST(request: Request) {
+  if (!switchEnabled()) return Response.json({ error: "disabled" }, { status: 403 });
   const { language } = (await request.json().catch(() => ({}))) as { language?: string };
   const agentId = language === "en" || language === "sw" ? agents()[language] : undefined;
   if (!agentId) return Response.json({ error: "bad_language" }, { status: 400 });

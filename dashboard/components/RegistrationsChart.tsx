@@ -76,7 +76,7 @@ export default function RegistrationsChart({ data }: { data: DashboardData }) {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={bars} margin={{ top: 15, right: 20, left: 0, bottom: 0 }}>
             <CartesianGrid stroke="#F1F5F9" vertical={false} />
-            <XAxis dataKey="label" axisLine={false} tickLine={false} tick={TICK} interval={0} />
+            <XAxis dataKey="label" axisLine={false} tickLine={false} tick={TICK} interval="preserveStartEnd" minTickGap={6} />
             <YAxis axisLine={false} tickLine={false} tick={TICK} width={45} allowDecimals={false} />
             <Tooltip content={<Tip />} cursor={{ fill: "#F8FAFC" }} />
             <Bar dataKey="farmers" fill="#3B82F6" radius={[3, 3, 0, 0]} isAnimationActive={false} />

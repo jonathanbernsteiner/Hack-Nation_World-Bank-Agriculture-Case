@@ -45,6 +45,7 @@ export default function GlobalSearch() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<SearchResponse>(emptySearch());
   const [active, setActive] = useState(-1);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const query = text.trim();
   const searchable = query.length >= MIN_QUERY;
@@ -58,7 +59,9 @@ export default function GlobalSearch() {
       }
     };
     const onDown = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+      if (rootRef.current?.contains(e.target as Node)) return;
+      setOpen(false);
+      setIsMobileOpen(false);
     };
     window.addEventListener("keydown", onKey);
     document.addEventListener("mousedown", onDown);
@@ -93,8 +96,13 @@ export default function GlobalSearch() {
     };
   }, [query, searchable]);
 
+  useEffect(() => {
+    if (isMobileOpen) inputRef.current?.focus();
+  }, [isMobileOpen]);
+
   const go = (href: string) => {
     setOpen(false);
+    setIsMobileOpen(false);
     (document.activeElement as HTMLElement | null)?.blur();
     router.push(href);
   };
@@ -102,6 +110,7 @@ export default function GlobalSearch() {
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Escape") {
       setOpen(false);
+      setIsMobileOpen(false);
       inputRef.current?.blur();
     } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       if (!rows.length) return;
@@ -124,11 +133,21 @@ export default function GlobalSearch() {
     .map((g) => ({ g, items: rows.map((r, i) => ({ r, i })).filter(({ r }) => r.group === g) }))
     .filter((x) => x.items.length > 0);
 
+  const formLayout = isMobileOpen ? "flex fixed top-[60px] inset-x-4 z-[60] shadow-lg" : "hidden";
   return (
+    <>
+    <button
+      type="button"
+      aria-label="Search"
+      onClick={() => setIsMobileOpen(true)}
+      className="sm:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100"
+    >
+      <Search size={20} />
+    </button>
     <form
       ref={rootRef}
       role="search"
-      className="absolute left-1/2 -translate-x-1/2 w-48 sm:w-72 md:w-80 xl:w-96 h-10 rounded-3xl border border-[#CBD5E1] bg-white hidden sm:flex items-center gap-2 px-4 focus-within:border-accent"
+      className={`${formLayout} sm:flex sm:absolute sm:inset-x-auto sm:top-auto sm:left-1/2 sm:-translate-x-1/2 sm:shadow-none sm:w-72 md:w-80 xl:w-96 h-10 rounded-3xl border border-[#CBD5E1] bg-white items-center gap-2 px-4 focus-within:border-accent`}
       onSubmit={onSubmit}
     >
       <Search size={18} color="#94A3B8" className="shrink-0" />
@@ -188,5 +207,6 @@ export default function GlobalSearch() {
         </div>
       )}
     </form>
+    </>
   );
 }

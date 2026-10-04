@@ -280,7 +280,7 @@ export default function FarmersRegistry({ data }: { data: DashboardData }) {
         <FilterMenu fields={fields} values={filterValues} onChange={onFilterChange} onClearAll={clearAll} open={isFilterOpen} onOpenChange={setIsFilterOpen} />
         <SortMenu fields={SORT_FIELDS} sortKey={sort.key} dir={sort.dir} onChange={applySort} />
         <p className="ml-auto text-sm text-muted whitespace-nowrap">
-          {formatNumber(rows.length)} farmers · {formatNumber(villageCount)} villages
+          {filtered.length !== rows.length ? `${formatNumber(filtered.length)} of ${formatNumber(rows.length)}` : formatNumber(rows.length)} farmers · {formatNumber(villageCount)} villages
         </p>
       </div>
 

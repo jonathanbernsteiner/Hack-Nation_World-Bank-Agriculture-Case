@@ -94,3 +94,7 @@ export function formatMonth(month: string): string {
   const [y, m] = month.split("-").map(Number);
   return `${MONTHS[m - 1]} ${String(y).slice(2)}`;
 }
+
+export function formatK(v: number): string {
+  return v % 1000 === 0 ? `${v / 1000}k` : `${(v / 1000).toFixed(1)}k`;
+}

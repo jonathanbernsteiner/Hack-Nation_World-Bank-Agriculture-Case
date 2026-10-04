@@ -273,8 +273,8 @@ export default function AreasView({ data }: { data: DashboardData }) {
                     <SortTh label="Farmers" k="farmers" sort={sort} onSort={onSort} className={`${TH} text-right`} />
                     <SortTh label="New 90d" k="new" sort={sort} onSort={onSort} className={`${TH} text-right`} />
                     <SortTh label="Calls" k="calls" sort={sort} onSort={onSort} className={`${TH} text-right`} />
-                    <SortTh label="vs national" k="price" sort={sort} onSort={onSort} className={`${TH} text-right`} />
-                    <th className={`${TH} text-right`}>Middlemen</th>
+                    <SortTh label="vs national, 12 months" k="price" sort={sort} onSort={onSort} className={`${TH} text-right`} />
+                    <th className={`${TH} text-right`}>Middlemen, 12 months</th>
                     <SortTh label="Warnings" k="warnings" sort={sort} onSort={onSort} className={`${TH} text-right`} />
                   </tr>
                 </thead>

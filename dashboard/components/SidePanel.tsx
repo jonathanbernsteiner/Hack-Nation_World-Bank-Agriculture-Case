@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Maximize2, Minimize2, X } from "lucide-react";
 
@@ -17,6 +17,11 @@ interface SidePanelProps {
 
 export default function SidePanel({ title, open, onClose, link, children }: SidePanelProps) {
   const [isFull, setIsFull] = useState(false);
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bodyRef.current?.scrollTo({ top: 0 });
+  }, [title]);
 
   useEffect(() => {
     if (!open) return;
@@ -51,7 +56,7 @@ export default function SidePanel({ title, open, onClose, link, children }: Side
           </button>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-6 bg-white">{children}</div>
+      <div ref={bodyRef} className="flex-1 overflow-y-auto p-6 bg-white">{children}</div>
     </aside>
   );
 }

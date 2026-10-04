@@ -31,6 +31,7 @@ export interface FarmerExtras {
   lat: number | null;
   lon: number | null;
   harvests: { date: string; kg: number }[];
+  isUnavailable?: boolean;
   calls: { id: number; receivedAt: string; status: string; durationSecs: number | null; lines: { role: "farmer" | "agent"; text: string }[] }[];
 }
 
@@ -93,14 +94,16 @@ function Stat({ label, value, sub }: { label: string; value: string; sub: string
   );
 }
 
+const UNAVAILABLE_EXTRAS: FarmerExtras = { lat: null, lon: null, harvests: [], calls: [], isUnavailable: true };
+
 export function useFarmerExtras(farmerId: number): FarmerExtras | null {
   const [extras, setExtras] = useState<{ id: number; data: FarmerExtras } | null>(null);
   useEffect(() => {
     let cancelled = false;
     fetch(`/api/farmer/${farmerId}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => !cancelled && data && setExtras({ id: farmerId, data }))
-      .catch(() => {});
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("farmer extras failed"))))
+      .then((data) => !cancelled && setExtras({ id: farmerId, data }))
+      .catch(() => !cancelled && setExtras({ id: farmerId, data: UNAVAILABLE_EXTRAS }));
     return () => {
       cancelled = true;
     };
@@ -199,7 +202,7 @@ export function RecentCalls({ extras }: { extras: FarmerExtras | null }) {
       {!extras ? (
         <p className="text-sm text-faint">Loading calls…</p>
       ) : extras.calls.length === 0 ? (
-        <p className="text-sm text-faint">No call transcripts yet.</p>
+        <p className="text-sm text-muted">{extras.isUnavailable ? "Call history unavailable." : "No call transcripts yet."}</p>
       ) : (
         <div className="border border-line rounded-xl overflow-hidden divide-y divide-gray-100">
           {extras.calls.map((call, index) => (

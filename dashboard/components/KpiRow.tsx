@@ -20,7 +20,7 @@ function Tile({ icon, value, label, sub }: TileProps) {
         >
           {icon}
         </div>
-        <div className="min-w-0 truncate" style={{ fontSize: 14, fontWeight: 500, color: "#64748B" }}>{label}</div>
+        <div className="min-w-0 line-clamp-2" style={{ fontSize: 14, fontWeight: 500, color: "#64748B" }}>{label}</div>
       </div>
       <div style={{ fontSize: 28, fontWeight: 700, color: "#0F172A", marginTop: 8 }}>{value}</div>
       <div style={{ fontSize: 12, color: "#94A3B8", marginTop: 2 }}>{sub}</div>

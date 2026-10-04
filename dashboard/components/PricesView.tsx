@@ -6,7 +6,7 @@ import { Scale, TrendingDown, MapPinned } from "lucide-react";
 import type { ReactNode } from "react";
 import type { CoffeeForm, DashboardData, Sale } from "@/lib/types";
 import { MIN_FARMERS, MIN_SALES } from "@/lib/types";
-import { formatIndex, formatMonth, formatNumber, formatUgx } from "@/lib/format";
+import { formatIndex, formatK, formatMonth, formatNumber, formatUgx } from "@/lib/format";
 import { buyerComparison, districtPrices, FORMS, monthlyByBuyer, spread } from "@/lib/prices";
 import { useRouter } from "next/navigation";
 import DistrictTable, { middlemanSharePct, priceIndexOfSales } from "./DistrictTable";
@@ -179,7 +179,7 @@ export default function PricesView({ data }: { data: DashboardData }) {
                   axisLine={false}
                   tickLine={false}
                   tick={TICK}
-                  tickFormatter={(v: number) => `${Math.round(v / 1000)}k`}
+                  tickFormatter={formatK}
                 />
                 <Tooltip
                   labelFormatter={(label) => formatMonth(String(label))}

@@ -25,8 +25,8 @@ export default function MapToolbar({ path, layer, onLayer, onSelect }: MapToolba
   const level: Level = LEVELS[Math.min(path.length, LEVELS.length - 1)];
 
   return (
-    <div className="flex flex-nowrap items-center justify-between gap-3 px-4 py-3 border-b border-line">
-      <nav aria-label="Area" className="flex flex-1 min-w-0 items-center gap-1.5 text-sm truncate">
+    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-3 border-b border-line">
+      <nav aria-label="Area" className="flex basis-full sm:basis-0 flex-1 min-w-0 items-center gap-1.5 text-sm truncate">
         {names.map((name, i) => {
           const isLast = i === names.length - 1;
           return (

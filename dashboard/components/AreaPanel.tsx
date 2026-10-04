@@ -116,7 +116,7 @@ function BuyerRow({ buyer }: { buyer: BuyerPrice }) {
       <span className="font-medium text-gray-900">{labelBuyer(buyer.buyer)}</span>
       <span className={indexPillClass(buyer.priceIndex)}>{formatIndex(buyer.priceIndex)}</span>
       <span className="text-gray-600 whitespace-nowrap text-right">
-        {buyer.sales} {buyer.sales === 1 ? "sale" : "sales"}
+        {formatNumber(buyer.sales)} {buyer.sales === 1 ? "sale" : "sales"}
       </span>
     </li>
   );
@@ -216,7 +216,7 @@ function ChildrenCard({
             <tr className="border-b border-line bg-gray-50">
               <th className={`text-left ${TH}`}>Name</th>
               <th className={`text-right ${TH}`}>Farmers</th>
-              <th className={`text-right ${TH}`}>Price vs national</th>
+              <th className={`text-right ${TH}`}>vs national, 12 months</th>
               <th className={`text-right ${TH}`}>Warnings</th>
             </tr>
           </thead>

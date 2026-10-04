@@ -2,7 +2,7 @@
 
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { AreaSummary } from "@/lib/types";
-import { formatMonth, formatUgx, labelForm } from "@/lib/format";
+import { formatK, formatMonth, formatUgx, labelForm } from "@/lib/format";
 
 const CHART_HEIGHT = 220;
 const TICK = { fontSize: 12, fill: "#94A3B8" };
@@ -34,7 +34,7 @@ export default function PriceChart({ area }: PriceChartProps) {
                 axisLine={false}
                 tickLine={false}
                 tick={TICK}
-                tickFormatter={(v: number) => `${Math.round(v / 1000)}k`}
+                tickFormatter={formatK}
               />
               <Tooltip
                 labelFormatter={(label) => formatMonth(String(label))}

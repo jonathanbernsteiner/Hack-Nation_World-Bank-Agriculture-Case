@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { ExternalLink, Maximize2, Minimize2, X } from "lucide-react";
+import { Maximize2, Minimize2, X } from "lucide-react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { farmerDetail } from "@/lib/farmerDetail";
 import type { FarmerDetail } from "@/lib/farmerDetail";
@@ -13,8 +13,6 @@ import { LocationAndYield, MonthlySales, ProfileKpis, RecentCalls, useFarmerExtr
 
 const SECTION_HEADING = "text-base font-semibold text-gray-900 mb-4";
 const TH = "font-medium text-muted px-3 py-2 whitespace-nowrap";
-// Calls, transcripts and sentiment live in the hotline's farmer profile (same team login).
-const HOTLINE_URL = process.env.NEXT_PUBLIC_HOTLINE_URL ?? "https://hack-nation-world-bank-agriculture.vercel.app";
 const ICON_BTN = "p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500";
 const CHART_HEIGHT = 220; // matches Sales by month, which sits beside it
 const BLUE = "#3B82F6";
@@ -50,7 +48,7 @@ function SalesChart({ detail }: { detail: FarmerDetail }) {
     .filter((s) => s.form === form)
     .reverse()
     .map((s) => ({ t: toTime(s.date), price: s.ugxPerKg, national: s.national }));
-  if (points.length < 2) return null;
+  if (points.length < 2) return <p className="text-sm text-muted">Chart needs 2+ sales of one form.</p>;
   return (
     <div>
       <div className="flex gap-4 text-xs text-muted mb-2">
@@ -194,16 +192,6 @@ export default function FarmerPeek({ data, farmerId, onClose }: { data: Dashboar
           <h2 className="text-lg font-semibold text-gray-900">Farmer not found</h2>
         )}
         <div className="flex gap-1 shrink-0">
-          {p && (
-            <a
-              href={`${HOTLINE_URL}/demo/farmer/${farmerId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 mr-1 text-xs font-medium rounded-md bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 transition-colors whitespace-nowrap"
-            >
-              Call log <ExternalLink size={12} />
-            </a>
-          )}
           <button type="button" className={ICON_BTN} aria-label={isFull ? "Shrink panel" : "Expand panel"} onClick={() => setIsFull(!isFull)}>
             {isFull ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
           </button>

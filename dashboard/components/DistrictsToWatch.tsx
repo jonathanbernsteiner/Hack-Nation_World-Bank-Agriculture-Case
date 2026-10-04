@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { formatIndex } from "@/lib/format";
 import type { DashboardData, Sale, Warning } from "@/lib/types";
-import { middlemanSharePct, priceIndexOfSales } from "./DistrictTable";
+import { farmerMedianIndex } from "@/lib/aggregate";
+import { middlemanSharePct } from "./DistrictTable";
 import { indexPillClass } from "./FarmersTable";
 
 const WINDOW_DAYS = 90;
@@ -53,7 +54,7 @@ export function topDistricts(data: DashboardData, warnings: Warning[]): Row[] {
       const sales = salesBy.get(name) ?? [];
       return {
         name,
-        index: priceIndexOfSales(sales, data),
+        index: farmerMedianIndex(sales, data.reference).index,
         middleman: middlemanSharePct(sales),
         warnings: warningsBy.get(name) ?? 0,
       };
@@ -75,12 +76,13 @@ export default function DistrictsToWatch({ data, warnings, onViewAll }: { data: 
         </button>
       </div>
       <div className="bg-white border border-line rounded-[14px] overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-line bg-gray-50">
               <th className={`${TH} text-left`}>District</th>
               <th className={`${TH} text-right`}>vs national, 90 days</th>
-              <th className={`${TH} text-right`}>Middlemen, 90 days</th>
+              <th className={`${TH} text-right hidden sm:table-cell`}>Middlemen, 90 days</th>
               <th className={`${TH} text-right`}>Warnings</th>
             </tr>
           </thead>
@@ -102,7 +104,7 @@ export default function DistrictsToWatch({ data, warnings, onViewAll }: { data: 
                 <td className="px-4 py-2.5 text-right whitespace-nowrap">
                   {r.index === null ? <span className="text-gray-300">—</span> : <span className={indexPillClass(r.index)}>{formatIndex(r.index)}</span>}
                 </td>
-                <td className="px-4 py-2.5 text-right font-mono text-gray-700">
+                <td className="px-4 py-2.5 text-right font-mono text-gray-700 hidden sm:table-cell">
                   {r.middleman === null ? <span className="text-gray-300">—</span> : `${r.middleman}%`}
                 </td>
                 <td className="px-4 py-2.5 text-right font-mono text-gray-700">
@@ -112,6 +114,7 @@ export default function DistrictsToWatch({ data, warnings, onViewAll }: { data: 
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </section>
   );

@@ -59,7 +59,7 @@ function show(value: unknown): string {
 type Language = "en" | "sw";
 const LANGUAGES: { key: Language; label: string }[] = [
   { key: "en", label: "English" },
-  { key: "sw", label: "Swahili" },
+  { key: "sw", label: "Kiswahili" },
 ];
 
 export default function CallView({ agentIds }: { agentIds: Record<Language, string> }) {
@@ -75,6 +75,7 @@ function Call({ agentIds }: { agentIds: Record<Language, string> }) {
   const [language, setLanguage] = useState<Language>("en");
   const [phoneNumber, setPhoneNumber] = useState<string | null>(null);
   const [switching, setSwitching] = useState(false);
+  const [switchEnabled, setSwitchEnabled] = useState(false);
   const agentId = agentIds[language];
 
   useEffect(() => {
@@ -83,6 +84,7 @@ function Call({ agentIds }: { agentIds: Record<Language, string> }) {
       .then((line) => {
         if (!line) return;
         setPhoneNumber(line.phoneNumber);
+        setSwitchEnabled(line.switchEnabled === true);
         if (line.language === "en" || line.language === "sw") setLanguage(line.language);
       })
       .catch(() => {});
@@ -205,7 +207,8 @@ function Call({ agentIds }: { agentIds: Record<Language, string> }) {
                 type="button"
                 role="radio"
                 aria-checked={language === key}
-                disabled={live || switching || !agentIds[key]}
+                disabled={live || switching || !switchEnabled || !agentIds[key]}
+                title={switchEnabled ? undefined : "Language is fixed"}
                 onClick={() => chooseLanguage(key)}
                 className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors disabled:cursor-not-allowed ${
                   language === key ? "bg-navy text-white" : "text-gray-600 hover:text-gray-900 disabled:opacity-50"
@@ -248,9 +251,7 @@ function Call({ agentIds }: { agentIds: Record<Language, string> }) {
       </div>
 
       {!agentId && (
-        <p className="rounded-lg border border-line bg-white px-4 py-3 text-sm text-gray-600">
-          Set {language === "en" ? "ELEVENLABS_AGENT_ID_EN" : "ELEVENLABS_AGENT_ID"} in dashboard/.env.local to enable {language === "en" ? "English" : "Swahili"} calls.
-        </p>
+        <p className="rounded-lg border border-line bg-white px-4 py-3 text-sm text-gray-600">Live calls are not available right now.</p>
       )}
       {error && <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 

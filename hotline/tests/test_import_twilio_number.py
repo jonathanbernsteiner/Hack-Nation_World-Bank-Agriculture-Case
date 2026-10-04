@@ -152,3 +152,60 @@ def test_no_secret_in_output(tmp_path, capsys):
 
 def test_missing_env_exits_2():
     assert itn.main([], env={}) == 2
+
+
+# --- review regressions (#56) ---
+
+
+def test_backup_kept_when_already_imported_even_if_url_unrecognised(tmp_path):
+    """Once ElevenLabs holds the number, a rerun must not replace the backup, whatever the URL looks like."""
+    fake = Fake()
+    run(fake, tmp_path, "--apply")
+    fake.twilio_voice_url = "https://inbound.example-voice.net/hook"  # host without "elevenlabs"
+    assert run(fake, tmp_path, "--apply") == 0
+    assert json.loads((tmp_path / "backup.json").read_text())["voice_url"] == OLD_URL
+
+
+def test_import_rejected_exits_1_without_assign_or_secret(tmp_path, capsys):
+    """A 422 that echoes the request body must not leak the token, and no agent PATCH may follow."""
+    fake = Fake()
+    orig = fake.handler
+
+    def reject_post(request):
+        if request.method == "POST" and request.url.host != "api.twilio.com":
+            fake.requests.append(("POST", request.url.host, request.url.path, {}))
+            return httpx.Response(422, json={"detail": request.content.decode()})
+        return orig(request)
+
+    fake.handler = reject_post
+    assert run(fake, tmp_path, "--apply") == 1
+    out = capsys.readouterr()
+    assert TOKEN not in out.out + out.err and KEY not in out.out + out.err
+    assert "import failed: HTTP 422" in out.err
+    assert [r[0] for r in fake.writes()] == ["POST"]
+    assert (tmp_path / "backup.json").exists()
+
+
+def test_import_response_without_id_or_json_is_a_clean_error(tmp_path, capsys):
+    """Unverified response shapes (no phone_number_id, HTML body) end in exit 1, not a traceback."""
+    for response in (httpx.Response(200, json={"id": "x"}), httpx.Response(200, text="<html>oops</html>")):
+        fake = Fake()
+        orig = fake.handler
+
+        def odd_post(request, response=response):
+            if request.method == "POST" and request.url.host != "api.twilio.com":
+                return response
+            return orig(request)
+
+        fake.handler = odd_post
+        assert run(fake, tmp_path, "--apply") == 1
+        assert "error:" in capsys.readouterr().err
+
+
+def test_restore_deletes_from_elevenlabs_before_writing_twilio(tmp_path):
+    fake = Fake()
+    run(fake, tmp_path, "--apply")
+    start = len(fake.requests)
+    run(fake, tmp_path, "--restore")
+    writes = [(r[0], r[1]) for r in fake.requests[start:] if r[0] != "GET"]
+    assert writes == [("DELETE", "api.elevenlabs.io"), ("POST", "api.twilio.com")]

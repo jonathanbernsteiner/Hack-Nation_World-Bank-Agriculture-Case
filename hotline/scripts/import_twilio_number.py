@@ -50,7 +50,12 @@ def redact_url(url: str | None) -> str:
 def _check(resp: httpx.Response, what: str) -> dict:
     if resp.status_code >= 400:
         raise ImportError_(f"{what} failed: HTTP {resp.status_code}")
-    return resp.json() if resp.content else {}
+    if not resp.content:
+        return {}
+    try:
+        return resp.json()
+    except ValueError as exc:
+        raise ImportError_(f"{what} failed: response was not JSON") from exc
 
 
 class Importer:
@@ -72,10 +77,10 @@ class Importer:
             raise ImportError_(f"Twilio has no incoming number {self.number}")
         return items[0]
 
-    def write_backup(self, tw: dict) -> bool:
-        """Back up the Twilio config; never overwrite a good backup with ElevenLabs' own URL."""
+    def write_backup(self, tw: dict, imported: dict | None = None) -> bool:
+        """Back up the Twilio config; never overwrite a good backup once ElevenLabs owns the number."""
         already_elevenlabs = "elevenlabs" in (tw.get("voice_url") or "")
-        if already_elevenlabs and self.backup_path.exists():
+        if (already_elevenlabs or imported) and self.backup_path.exists():
             return False
         if already_elevenlabs:
             print("warning: number already points at ElevenLabs and no backup exists; restore will not know the old URL")
@@ -111,7 +116,7 @@ class Importer:
                 log.append(f"would import {self.number} as '{NUMBER_LABEL}' and assign agent {agent}")
             log.append("dry run: nothing written (use --apply)")
             return log
-        wrote = self.write_backup(tw)  # always before any ElevenLabs write
+        wrote = self.write_backup(tw, imported)  # always before any ElevenLabs write
         log.append(f"backup {'written' if wrote else 'kept (already imported)'}: {self.backup_path}")
         if imported:
             phone_id = imported["phone_number_id"]
@@ -125,7 +130,9 @@ class Importer:
                 "provider": "twilio",
             }
             created = _check(self.eleven.post(f"{ELEVENLABS_API}/v1/convai/phone-numbers", json=body), "import")
-            phone_id = created["phone_number_id"]
+            phone_id = created.get("phone_number_id")
+            if not phone_id:
+                raise ImportError_("import response has no phone_number_id; check GET /v1/convai/phone-numbers")
             log.append(f"imported ({phone_id})")
         current_agent = (imported or {}).get("assigned_agent") or {}
         if imported and current_agent.get("agent_id") == agent:

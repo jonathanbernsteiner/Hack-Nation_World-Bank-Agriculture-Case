@@ -78,6 +78,7 @@ export interface DashboardData {
   problems: ProblemReport[];
   reference: ReferencePrice[];
   callsLast30d: number;
+  callsPrev30d?: number; // calls in the 30 days before the last 30
   callsTotal: number;
   hasSynthetic: boolean;
 }
@@ -110,8 +111,11 @@ export interface Warning {
   path: AreaPath; // the parish (problem) or district (price) it is about
   level: Level;
   areaName: string;
-  title: string; // e.g. "Black coffee twig borer: 3 farms in Kasaali parish"
-  detail: string; // e.g. "Reported 12–26 Sep 2026 · none in the 12 weeks before"
+  title: string; // problem label only, e.g. "Black coffee twig borer"; price: "Low prices in Kayunga"
+  detail: string; // short meta, e.g. "3 farms · Kasaali parish · 12–26 Sep · none before"
+  farms?: number; // distinct farms reporting (problem) or selling (price)
+  place?: string; // e.g. "Kasaali parish" or the district
+  dateRange?: string; // e.g. "12–26 Sep" (problem warnings)
   lat: number;
   lon: number;
 }
@@ -155,7 +159,9 @@ export interface Kpis {
   districts: number;
   villages: number;
   newFarmers30d: number;
+  newFarmersPrev30d: number; // registered in the 30 days before the last 30
   callsLast30d: number;
+  callsPrev30d: number; // calls in the 30 days before the last 30
   priceIndex: number | null; // national median price index, last 90 days
   activeWarnings: number;
 }

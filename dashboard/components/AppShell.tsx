@@ -18,7 +18,7 @@ export const NAV: NavItem[] = [
   { href: "/farmers", label: "Farmers", icon: Users },
   { href: "/prices", label: "Prices", icon: TrendingUp },
   { href: "/warnings", label: "Warnings", icon: AlertTriangle },
-  { href: "/data", label: "Data & limits", icon: Database },
+  { href: "/data", label: "Data", icon: Database },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

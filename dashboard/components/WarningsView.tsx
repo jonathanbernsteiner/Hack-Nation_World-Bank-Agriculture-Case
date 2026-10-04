@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { useMemo } from "react";
-import { AlertTriangle, CheckCircle2, TrendingDown } from "lucide-react";
+import { useMemo, useState } from "react";
+import { CheckCircle2 } from "lucide-react";
+import WarningRow from "./WarningRow";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { computeWarnings } from "@/lib/aggregate";
 import { formatDate, labelProblem } from "@/lib/format";
@@ -16,62 +16,24 @@ import {
   PROBLEM_MIN_FARMERS,
   PROBLEM_WINDOW_DAYS,
   type DashboardData,
-  type Warning,
 } from "@/lib/types";
 
 const PALETTE = ["#DC2626", "#F59E0B", "#3B82F6", "#8B5CF6"];
 const OTHER_COLOR = "#94A3B8";
 const WEEKS = 26;
 const TABLE_DAYS = 90;
-const TABLE_ROWS = 50;
+const PAGE_SIZE = 25;
 const AXIS_TICK = { fontSize: 12, fill: "#94A3B8" };
-
-const WARNING_PILL = "bg-[#FFFBEB] text-[#F59E0B] border-[#FDE68A]";
 
 function shortDate(iso: string): string {
   return formatDate(iso).slice(0, -5);
-}
-
-const YEAR_SUFFIX = /\s\d{4}$/;
-
-function splitWarning(w: Warning): { title: string; meta: string } {
-  const range = (w.detail.split(" · ")[0] ?? "").replace(/^Reported /, "").replace(YEAR_SUFFIX, "");
-  if (w.kind !== "problem") return { title: w.title, meta: range ? `${w.areaName} district · ${range}` : w.areaName };
-  const [head, tail = ""] = w.title.split(": ");
-  const name = head.replace(/^Suspected /, "");
-  const match = tail.match(/^(\d+ farms?) in (.+)$/);
-  const meta = match ? [match[1], match[2], range] : [tail, range];
-  return { title: name.charAt(0).toUpperCase() + name.slice(1), meta: meta.filter(Boolean).join(" · ") };
-}
-
-function WarningRow({ warning }: { warning: Warning }) {
-  const isProblem = warning.kind === "problem";
-  const Icon = isProblem ? AlertTriangle : TrendingDown;
-  const { title, meta } = splitWarning(warning);
-  return (
-    <li className="flex items-center gap-4 px-4 sm:px-6 py-4 border-b border-gray-100 last:border-b-0 hover:bg-slate-50 transition-colors">
-      <Icon size={20} className={`shrink-0 ${isProblem ? "text-red-600" : "text-amber-500"}`} />
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-semibold text-gray-900">{title}</div>
-        <div className="text-sm text-muted">{meta}</div>
-      </div>
-      <span className={`hidden sm:inline-flex shrink-0 items-center whitespace-nowrap px-2 py-0.5 rounded-full text-[11px] font-semibold border ${WARNING_PILL}`}>
-        Officer check
-      </span>
-      <Link
-        href={`/map?path=${encodeURIComponent(warning.path.join("|"))}`}
-        className="shrink-0 text-xs font-medium text-accent hover:underline whitespace-nowrap"
-      >
-        View on map
-      </Link>
-    </li>
-  );
 }
 
 export default function WarningsView({ data }: { data: DashboardData }) {
   const warnings = useMemo(() => computeWarnings(data), [data]);
   const weekly = useMemo(() => weeklyCounts(data, WEEKS), [data]);
   const rows = useMemo(() => problemsByDistrict(data, TABLE_DAYS), [data]);
+  const [visible, setVisible] = useState(PAGE_SIZE);
 
   const chartData = weekly.weeks.map((w) => ({ week: shortDate(w.weekStart), weekStart: w.weekStart, ...w.counts }));
   const colorOf = (key: string, index: number) => (key === OTHER_KEY ? OTHER_COLOR : PALETTE[index % PALETTE.length]);
@@ -82,7 +44,10 @@ export default function WarningsView({ data }: { data: DashboardData }) {
       <h1 className="text-2xl font-bold text-gray-900">Warnings</h1>
 
       <section>
-        <h2 className="text-base font-semibold text-ink mb-4">Active warnings ({warnings.length})</h2>
+        <h2 className="flex items-center gap-2 text-base font-semibold text-ink mb-4">
+          Active warnings
+          <span className="inline-flex items-center text-xs font-medium rounded-full px-2 py-0.5 bg-gray-100 text-gray-800">{warnings.length}</span>
+        </h2>
         <div className="bg-white border border-line rounded-xl max-h-[480px] overflow-y-auto">
           {warnings.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-gray-400">
@@ -92,7 +57,7 @@ export default function WarningsView({ data }: { data: DashboardData }) {
           ) : (
             <ul>
               {warnings.map((w) => (
-                <WarningRow key={w.id} warning={w} />
+                <WarningRow key={w.id} warning={w} showMapLink />
               ))}
             </ul>
           )}
@@ -130,7 +95,7 @@ export default function WarningsView({ data }: { data: DashboardData }) {
                 />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
                 {weekly.keys.map((key, i) => (
-                  <Bar key={key} dataKey={key} name={nameOf(key)} stackId="problems" fill={colorOf(key, i)} />
+                  <Bar key={key} dataKey={key} name={nameOf(key)} stackId="problems" fill={colorOf(key, i)} isAnimationActive={false} />
                 ))}
               </BarChart>
             </ResponsiveContainer>
@@ -157,7 +122,7 @@ export default function WarningsView({ data }: { data: DashboardData }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.slice(0, TABLE_ROWS).map((r) => (
+                  {rows.slice(0, visible).map((r) => (
                     <tr key={`${r.district}|${r.problem}`} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                       <td className="px-4 py-3 font-medium text-gray-900">{r.district}</td>
                       <td className="px-4 py-3 text-gray-600 hidden sm:table-cell">{r.region}</td>
@@ -172,6 +137,18 @@ export default function WarningsView({ data }: { data: DashboardData }) {
             </div>
           )}
         </div>
+        {rows.length > visible && (
+          <div className="flex items-center justify-between mt-3 text-sm text-gray-500">
+            <span>Showing {visible} of {rows.length}</span>
+            <button
+              type="button"
+              onClick={() => setVisible((n) => n + PAGE_SIZE)}
+              className="px-3 py-1.5 text-sm font-medium rounded-lg bg-white border border-line text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              Show more
+            </button>
+          </div>
+        )}
       </section>
     </div>
   );

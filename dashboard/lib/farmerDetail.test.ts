@@ -38,6 +38,7 @@ describe("farmerDetail", () => {
     expect(d?.villageMedianByForm.faq).toBe(4750);
     expect(d?.sales[0].indexVsVillage).toBeCloseTo(4500 / 4750);
     expect(d?.problems.map((p) => p.problem)).toEqual(["coffee_leaf_rust", "wilting"]);
+    expect(d?.lastSaleVsVillage).toBeCloseTo(4500 / 4750);
     expect(d?.mainBuyer).toBe("middleman");
   });
 });

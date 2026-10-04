@@ -64,8 +64,9 @@ describe("problem warnings", () => {
     const data = makeData({ problems: [report(1, "2026-09-12"), report(2, "2026-09-20"), report(3, "2026-09-26")] });
     const warnings = computeWarnings(data);
     expect(warnings).toHaveLength(1);
-    expect(warnings[0].title).toBe("Suspected coffee leaf rust: 3 farms in P1 parish");
-    expect(warnings[0].detail).toBe("Reported 12–26 Sep 2026 · 0 farms in the 12 weeks before");
+    expect(warnings[0].title).toBe("Coffee leaf rust");
+    expect(warnings[0].detail).toBe("3 farms · P1 parish · 12–26 Sep · none before");
+    expect(warnings[0]).toMatchObject({ farms: 3, place: "P1 parish", dateRange: "12–26 Sep" });
   });
   it("does not fire for 2 farmers", () => {
     expect(computeWarnings(makeData({ problems: [report(1, "2026-09-12"), report(2, "2026-09-20")] }))).toHaveLength(0);
@@ -76,7 +77,7 @@ describe("problem warnings", () => {
     });
     const warnings = computeWarnings(data);
     expect(warnings).toHaveLength(1);
-    expect(warnings[0].detail).toContain("2 farms in the 12 weeks before");
+    expect(warnings[0].detail).toContain("· 2 before");
   });
   it("does not fire when window farms do not exceed baseline farms (3 vs 3)", () => {
     const data = makeData({
@@ -108,7 +109,8 @@ describe("price warnings", () => {
     const low = makeData({ sales: [sale(1, 1, 8500), sale(2, 1, 8500), sale(3, 1, 8500)] });
     const w = computeWarnings(low);
     expect(w).toHaveLength(1);
-    expect(w[0].title).toBe("Prices 15% below national in Kayunga");
+    expect(w[0].title).toBe("Low prices in Kayunga");
+    expect(w[0].detail).toBe("−15% vs national · 3 sales · 90 days");
     const fine = makeData({ sales: [sale(1, 1, 8600), sale(2, 1, 8600), sale(3, 1, 8600)] });
     expect(computeWarnings(fine)).toHaveLength(0);
   });

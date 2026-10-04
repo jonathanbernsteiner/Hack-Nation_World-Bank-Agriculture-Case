@@ -1,8 +1,7 @@
 import type { BuyerType, CoffeeForm, FarmerRow } from "@/lib/types";
 import { formatDate, formatIndex, formatUgx, labelBuyer, labelProblem } from "@/lib/format";
 
-const GREEN_MIN_INDEX = 0.97;
-const AMBER_MIN_INDEX = 0.85;
+const AMBER_MIN_PCT = -14;
 
 const PILL_BASE = "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border whitespace-nowrap";
 const PILL_GREEN = "bg-[#ECFDF5] text-[#10B981] border-[#A7F3D0]";
@@ -10,22 +9,27 @@ const PILL_AMBER = "bg-[#FFFBEB] text-[#F59E0B] border-[#FDE68A]";
 const PILL_RED = "bg-red-50 text-red-700 border-red-200";
 const PILL_NEUTRAL = "bg-[#F1F5F9] text-[#94A3B8] border-[#E2E8F0]";
 
-const SHORT_FORM: Record<CoffeeForm, string> = { kiboko: "kiboko", faq: "FAQ", parchment: "parchment" };
+export type PriceBand = "ok" | "warn" | "bad" | "none";
+
+/** Band by the rounded percent shown: 0% or more ok, -1..-14% warn, -15% or lower bad. */
+export function priceBand(index: number | null): PriceBand {
+  if (index === null) return "none";
+  const pct = Math.round((index - 1) * 100);
+  if (pct >= 0) return "ok";
+  return pct >= AMBER_MIN_PCT ? "warn" : "bad";
+}
+
+const PILL_BY_BAND: Record<PriceBand, string> = { ok: PILL_GREEN, warn: PILL_AMBER, bad: PILL_RED, none: PILL_NEUTRAL };
+
+const SHORT_FORM: Record<CoffeeForm, string> = { kiboko: "Kiboko", faq: "FAQ", parchment: "Parchment" };
+
+export function shortForm(form: CoffeeForm): string {
+  return SHORT_FORM[form];
+}
 
 /** Classes for a bordered pill coloured by price index (1.0 = reference). */
 export function indexPillClass(index: number | null): string {
-  if (index === null) return `${PILL_BASE} ${PILL_NEUTRAL}`;
-  if (index >= GREEN_MIN_INDEX) return `${PILL_BASE} ${PILL_GREEN}`;
-  if (index >= AMBER_MIN_INDEX) return `${PILL_BASE} ${PILL_AMBER}`;
-  return `${PILL_BASE} ${PILL_RED}`;
-}
-
-export function SyntheticTag() {
-  return (
-    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold border bg-purple-50 text-purple-700 border-purple-200">
-      Synthetic
-    </span>
-  );
+  return `${PILL_BASE} ${PILL_BY_BAND[priceBand(index)]}`;
 }
 
 function Dash() {
@@ -43,8 +47,7 @@ interface FarmersTableProps {
 export default function FarmersTable({ farmers }: FarmersTableProps) {
   return (
     <div>
-      <h2 className="text-base font-semibold text-ink">Farmers</h2>
-      <p className="text-xs text-faint mt-1 mb-3">First names only. PINs and phone numbers are never shown.</p>
+      <h2 className="text-base font-semibold text-ink mb-4">Farmers</h2>
       {farmers.length === 0 ? (
         <p className="text-sm text-faint text-center py-6">No farmers registered in this village yet.</p>
       ) : (

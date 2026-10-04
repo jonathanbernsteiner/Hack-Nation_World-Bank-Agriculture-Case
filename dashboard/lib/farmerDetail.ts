@@ -36,6 +36,7 @@ export interface FarmerDetail {
   sales: FarmerSale[]; // newest first
   villageMedianByForm: Partial<Record<CoffeeForm, number | null>>;
   medianVsVillage: number | null;
+  lastSaleVsVillage: number | null; // last sale / village 12-month median for its form (same metric as the Farmers list)
   mainBuyer: BuyerType | null;
   problems: { date: string; problem: string }[]; // newest first
 }
@@ -108,6 +109,7 @@ export function farmerDetail(data: DashboardData, farmerId: number): FarmerDetai
     sales,
     villageMedianByForm: Object.fromEntries(medianByForm) as Partial<Record<CoffeeForm, number | null>>,
     medianVsVillage: median(villageIndexes),
+    lastSaleVsVillage: sales[0]?.indexVsVillage ?? null,
     mainBuyer: mostCommonBuyer(sales),
     problems: data.problems
       .filter((p) => p.farmerId === farmerId)

@@ -4,11 +4,12 @@ import { useMemo, useState } from "react";
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Scale, TrendingDown, MapPinned } from "lucide-react";
 import type { ReactNode } from "react";
-import type { CoffeeForm, DashboardData } from "@/lib/types";
+import type { CoffeeForm, DashboardData, Sale } from "@/lib/types";
 import { MIN_FARMERS, MIN_SALES } from "@/lib/types";
 import { formatIndex, formatMonth, formatNumber, formatUgx } from "@/lib/format";
 import { buyerComparison, districtPrices, FORMS, monthlyByBuyer, spread } from "@/lib/prices";
-import type { PriceByForm } from "@/lib/prices";
+import Link from "next/link";
+import DistrictTable, { middlemanSharePct, priceIndexOfSales } from "./DistrictTable";
 import { indexPillClass } from "./FarmersTable";
 
 const CHART_HEIGHT = 280;
@@ -20,10 +21,6 @@ const SERIES = [
   { key: "cooperative", name: "Cooperatives", color: "#10B981", dashed: false },
   { key: "all", name: "All buyers", color: "#3B82F6", dashed: false },
 ] as const;
-
-function Dash() {
-  return <span className="text-gray-300">—</span>;
-}
 
 function Tile({ icon, value, label, sub }: { icon: ReactNode; value: string; label: string; sub: string }) {
   return (
@@ -41,12 +38,75 @@ function Tile({ icon, value, label, sub }: { icon: ReactNode; value: string; lab
   );
 }
 
-function FormCell({ values, form, className = "" }: { values: PriceByForm; form: CoffeeForm; className?: string }) {
-  const v = values[form];
+const VILLAGE_DAYS = 90;
+const VILLAGE_ROWS = 10;
+const MS_PER_DAY = 86_400_000;
+
+function VillagesLowest({ data }: { data: DashboardData }) {
+  const rows = useMemo(() => {
+    const from = new Date(Date.parse(`${data.today}T00:00:00Z`) - (VILLAGE_DAYS - 1) * MS_PER_DAY).toISOString().slice(0, 10);
+    const byVillage = new Map<number, Sale[]>();
+    for (const s of data.sales) {
+      if (s.date < from || s.date > data.today) continue;
+      byVillage.set(s.villageId, [...(byVillage.get(s.villageId) ?? []), s]);
+    }
+    return data.villages
+      .map((v) => {
+        const sales = byVillage.get(v.id) ?? [];
+        return { village: v, sales: sales.length, index: priceIndexOfSales(sales, data), middleman: middlemanSharePct(sales) };
+      })
+      .filter((r): r is typeof r & { index: number } => r.index !== null)
+      .sort((a, b) => a.index - b.index || b.sales - a.sales)
+      .slice(0, VILLAGE_ROWS);
+  }, [data]);
+
   return (
-    <td className={`px-4 py-3 text-right font-mono text-gray-700 whitespace-nowrap ${className}`}>
-      {v === null ? <Dash /> : formatNumber(v)}
-    </td>
+    <section>
+      <h2
+        className="text-base font-semibold text-ink mb-4"
+        title={`Median needs ${MIN_SALES} sales from ${MIN_FARMERS} farmers.`}
+      >
+        Villages paid least ({VILLAGE_DAYS} days)
+      </h2>
+      <div className="bg-white border border-line rounded-[14px] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-line bg-gray-50">
+                <th className="text-left font-medium text-muted px-4 py-3 whitespace-nowrap">Village</th>
+                <th className="text-left font-medium text-muted px-4 py-3 whitespace-nowrap">District</th>
+                <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap">vs national, 90 days</th>
+                <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap">Middlemen, 90 days</th>
+                <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap">Sales, 90 days</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-10 text-center text-faint">Villages appear once enough sales are reported.</td>
+                </tr>
+              )}
+              {rows.map(({ village: v, sales, index, middleman }) => {
+                const href = `/map?path=${encodeURIComponent([v.district, v.subCounty, v.parish, v.village].join("|"))}`;
+                return (
+                  <tr key={v.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
+                      <Link href={href} className="hover:underline">{v.village}</Link>
+                    </td>
+                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{v.district}</td>
+                    <td className="px-4 py-3 text-right whitespace-nowrap">
+                      <span className={indexPillClass(index)}>{formatIndex(index)}</span>
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono text-gray-700">{middleman === null ? "—" : `${middleman}%`}</td>
+                    <td className="px-4 py-3 text-right font-mono text-gray-700">{sales}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -74,14 +134,14 @@ export default function PricesView({ data }: { data: DashboardData }) {
         <Tile
           icon={<TrendingDown size={20} color="#3B82F6" />}
           value={range ? `${formatNumber(range.p10)}–${formatNumber(range.p90)}` : "—"}
-          label={`Price range · ${TAB_LABEL[form]}`}
-          sub="UGX/kg, 90 days"
+          label={`Typical ${TAB_LABEL[form]} price`}
+          sub="UGX/kg, p10–p90, 90 days"
         />
         <Tile
           icon={<MapPinned size={20} color="#3B82F6" />}
           value={String(lowCount)}
-          label="Districts below national"
-          sub="15%+ below, 90 days"
+          label="Districts 15%+ below national"
+          sub="90 days"
         />
       </div>
 
@@ -113,6 +173,7 @@ export default function PricesView({ data }: { data: DashboardData }) {
                 <XAxis dataKey="month" tickFormatter={formatMonth} axisLine={false} tickLine={false} tick={TICK} />
                 <YAxis
                   width={45}
+                  domain={["auto", "auto"]}
                   axisLine={false}
                   tickLine={false}
                   tick={TICK}
@@ -135,6 +196,7 @@ export default function PricesView({ data }: { data: DashboardData }) {
                     strokeDasharray={s.dashed ? "5 4" : undefined}
                     dot={s.dashed ? false : { r: 3 }}
                     connectNulls
+                    isAnimationActive={false}
                   />
                 ))}
               </LineChart>
@@ -143,65 +205,9 @@ export default function PricesView({ data }: { data: DashboardData }) {
         )}
       </div>
 
-      <div>
-        <h2
-          className="text-base font-semibold text-ink mb-4"
-          title={`Median needs ${MIN_SALES} sales from ${MIN_FARMERS} farmers. National reference: UCDA / MAAIF monthly farm-gate averages.`}
-        >
-          By district
-        </h2>
-        <div className="bg-white border border-line rounded-[14px] overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-line bg-gray-50">
-                  <th className="text-left font-medium text-muted px-4 py-3 whitespace-nowrap">District</th>
-                  <th className="text-left font-medium text-muted px-4 py-3 whitespace-nowrap hidden sm:table-cell">Region</th>
-                  <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap">Sales</th>
-                  <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap">vs national</th>
-                  <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap">Kiboko</th>
-                  <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap hidden xl:table-cell">FAQ</th>
-                  <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap hidden xl:table-cell">Parchment</th>
-                  <th className="text-right font-medium text-muted px-4 py-3 whitespace-nowrap">Sold to middlemen</th>
-                  <th className="px-4 py-3 w-16" />
-                </tr>
-              </thead>
-              <tbody>
-                {districts.length === 0 && (
-                  <tr>
-                    <td colSpan={9} className="px-4 py-10 text-center text-faint">
-                      Districts appear once farmers report sales.
-                    </td>
-                  </tr>
-                )}
-                {districts.map((d) => (
-                  <tr key={d.district} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">{d.district}</td>
-                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap hidden sm:table-cell">{d.region}</td>
-                    <td className="px-4 py-3 text-right font-mono text-gray-700 whitespace-nowrap">{d.sales}</td>
-                    <td className="px-4 py-3 text-right whitespace-nowrap">
-                      {d.index90d === null ? <Dash /> : <span className={indexPillClass(d.index90d)}>{formatIndex(d.index90d)}</span>}
-                    </td>
-                    <FormCell values={d.byForm} form="kiboko" />
-                    <FormCell values={d.byForm} form="faq" className="hidden xl:table-cell" />
-                    <FormCell values={d.byForm} form="parchment" className="hidden xl:table-cell" />
-                    <td className="px-4 py-3 text-right font-mono text-gray-700 whitespace-nowrap">
-                      {d.middlemanShare === null ? <Dash /> : `${d.middlemanShare}%`}
-                    </td>
-                    <td className="px-4 py-3 text-right whitespace-nowrap">
-                      {d.low && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-red-50 text-red-700 border-red-200">
-                          Low
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      <DistrictTable data={data} />
+
+      <VillagesLowest data={data} />
     </div>
   );
 }

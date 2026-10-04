@@ -26,13 +26,31 @@ function Tile({ icon, value, label, sub }: TileProps) {
   );
 }
 
+function arrow(current: number, prev: number | undefined): string {
+  if (prev === undefined || current === prev) return "";
+  return current > prev ? " ▲" : " ▼";
+}
+
+function callsDelta(current: number, prev: number | undefined): string {
+  if (prev === undefined) return "last 30 days";
+  if (prev === 0) return "no calls before";
+  const pct = Math.round((current / prev - 1) * 100);
+  return `${pct >= 0 ? "+" : "−"}${Math.abs(pct)}% vs previous 30`;
+}
+
 export default function KpiRow({ kpis }: { kpis: Kpis }) {
   const icon = (Icon: typeof Users) => <Icon size={20} color="#3B82F6" />;
+  const newSub = `+${formatNumber(kpis.newFarmers30d)} in 30 days${arrow(kpis.newFarmers30d, kpis.newFarmersPrev30d)}`;
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <Tile icon={icon(Users)} value={formatNumber(kpis.farmers)} label="Registered farmers" sub={`in ${kpis.districts} districts`} />
-      <Tile icon={icon(Phone)} value={formatNumber(kpis.callsLast30d)} label="Calls" sub="last 30 days" />
-      <Tile icon={icon(TrendingUp)} value={formatIndex(kpis.priceIndex)} label="Price vs national" sub="farmer-reported, 90 days" />
+      <Tile
+        icon={icon(Users)}
+        value={formatNumber(kpis.farmers)}
+        label="Registered farmers"
+        sub={newSub}
+      />
+      <Tile icon={icon(Phone)} value={formatNumber(kpis.callsLast30d)} label="Calls, 30 days" sub={callsDelta(kpis.callsLast30d, kpis.callsPrev30d)} />
+      <Tile icon={icon(TrendingUp)} value={formatIndex(kpis.priceIndex)} label="Price vs national, 90 days" sub="farmer-reported" />
       <Tile icon={icon(AlertTriangle)} value={formatNumber(kpis.activeWarnings)} label="Active warnings" sub="need an officer check" />
     </div>
   );

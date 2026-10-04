@@ -4,8 +4,7 @@ function Skeleton({ className }: { className: string }) {
 
 export default function Loading() {
   return (
-    <main className="min-h-screen bg-surface pt-14 md:ml-14">
-      <div className="p-4 sm:p-6 flex flex-col gap-6">
+    <div className="p-4 sm:p-6 flex flex-col gap-6">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className="bg-white border border-line rounded-xl p-6">
@@ -26,7 +25,6 @@ export default function Loading() {
             <Skeleton className="w-full h-40" />
           </div>
         </div>
-      </div>
-    </main>
+    </div>
   );
 }

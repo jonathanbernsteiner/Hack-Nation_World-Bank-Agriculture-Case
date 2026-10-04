@@ -5,16 +5,31 @@ import { Maximize2, Minimize2, X } from "lucide-react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { farmerDetail } from "@/lib/farmerDetail";
 import type { FarmerDetail } from "@/lib/farmerDetail";
-import { formatDate, formatIndex, formatNumber, labelBuyer, labelProblem } from "@/lib/format";
-import { indexPillClass } from "@/components/FarmersTable";
-import type { DashboardData } from "@/lib/types";
+import { formatDate, formatIndex, formatMonth, formatNumber, labelBuyer, labelProblem } from "@/lib/format";
+import { indexPillClass, shortForm } from "@/components/FarmersTable";
+import type { CoffeeForm, DashboardData } from "@/lib/types";
 
-const CARD = "bg-white border border-line rounded-[14px] p-5";
+const SECTION_HEADING = "text-base font-semibold text-gray-900 mb-4";
 const TH = "font-medium text-muted px-3 py-2 whitespace-nowrap";
 const ICON_BTN = "p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500";
 const CHART_HEIGHT = 160;
 const BLUE = "#3B82F6";
 const GRAY = "#94A3B8";
+const MS_PER_DAY = 86_400_000;
+
+function mainForm(detail: FarmerDetail): CoffeeForm | null {
+  const counts = new Map<CoffeeForm, number>();
+  for (const s of detail.sales) counts.set(s.form, (counts.get(s.form) ?? 0) + 1);
+  return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+}
+
+function toTime(date: string): number {
+  return Date.parse(`${date.slice(0, 10)}T00:00:00Z`);
+}
+
+function tickLabel(ms: number): string {
+  return formatMonth(new Date(ms).toISOString().slice(0, 7));
+}
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
@@ -26,16 +41,27 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 function SalesChart({ detail }: { detail: FarmerDetail }) {
-  const points = [...detail.sales].reverse().map((s) => ({ date: s.date, price: s.ugxPerKg, national: s.national }));
+  const form = mainForm(detail);
+  const points = [...detail.sales]
+    .filter((s) => s.form === form)
+    .reverse()
+    .map((s) => ({ t: toTime(s.date), price: s.ugxPerKg, national: s.national }));
   if (points.length < 2) return null;
   return (
     <div style={{ height: CHART_HEIGHT }} className="mb-4">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={points} margin={{ top: 5, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid stroke="#F1F5F9" vertical={false} />
-          <XAxis dataKey="date" tickFormatter={(d: string) => formatDate(d).slice(0, 6)} tick={{ fontSize: 11, fill: GRAY }} />
+          <XAxis
+            dataKey="t"
+            type="number"
+            scale="time"
+            domain={["dataMin", "dataMax"]}
+            tickFormatter={(t: number) => tickLabel(t)}
+            tick={{ fontSize: 11, fill: GRAY }}
+          />
           <YAxis width={44} tick={{ fontSize: 11, fill: GRAY }} tickFormatter={(v: number) => formatNumber(v)} domain={["auto", "auto"]} />
-          <Tooltip formatter={(v) => `UGX ${formatNumber(Number(v))}/kg`} labelFormatter={(d) => formatDate(String(d))} />
+          <Tooltip formatter={(v) => `UGX ${formatNumber(Number(v))}/kg`} labelFormatter={(t) => formatDate(new Date(Number(t) + MS_PER_DAY / 2).toISOString())} />
           <Line type="monotone" dataKey="national" name="National reference" stroke={GRAY} strokeDasharray="4 4" dot={false} isAnimationActive={false} />
           <Line type="monotone" dataKey="price" name="Farmer" stroke={BLUE} strokeWidth={2} dot={{ r: 3 }} isAnimationActive={false} />
         </LineChart>
@@ -46,12 +72,12 @@ function SalesChart({ detail }: { detail: FarmerDetail }) {
 
 function SalesCard({ detail }: { detail: FarmerDetail }) {
   return (
-    <section className={CARD}>
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 mb-3">
+    <section>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 mb-4">
         <h3 className="text-base font-semibold text-gray-900">Sales</h3>
         {detail.sales.length > 0 && (
           <div className="flex gap-4 text-xs text-muted whitespace-nowrap">
-            <span>vs village <span className="font-medium text-gray-900">{formatIndex(detail.medianVsVillage)}</span></span>
+            <span>Last sale vs village <span className="font-medium text-gray-900">{formatIndex(detail.lastSaleVsVillage ?? null)}</span></span>
             {detail.mainBuyer && <span>Main buyer <span className="font-medium text-gray-900">{labelBuyer(detail.mainBuyer)}</span></span>}
           </div>
         )}
@@ -78,7 +104,7 @@ function SalesCard({ detail }: { detail: FarmerDetail }) {
                 {detail.sales.map((s, i) => (
                   <tr key={`${s.date}-${i}`} className="border-b border-gray-100">
                     <td className="px-3 py-2 text-gray-600 whitespace-nowrap">{formatDate(s.date)}</td>
-                    <td className="px-3 py-2 text-gray-600 capitalize whitespace-nowrap">{s.form}</td>
+                    <td className="px-3 py-2 text-gray-600 whitespace-nowrap">{shortForm(s.form)}</td>
                     <td className="px-3 py-2 text-right font-mono text-gray-700 whitespace-nowrap">{formatNumber(s.kg)}</td>
                     <td className="px-3 py-2 text-right font-mono text-gray-700 whitespace-nowrap">{formatNumber(s.ugxPerKg)}</td>
                     <td className="px-3 py-2 text-gray-600 whitespace-nowrap">{s.buyerType ? labelBuyer(s.buyerType) : "—"}</td>
@@ -97,8 +123,8 @@ function SalesCard({ detail }: { detail: FarmerDetail }) {
 
 function ProblemsCard({ detail }: { detail: FarmerDetail }) {
   return (
-    <section className={CARD}>
-      <h3 className="text-base font-semibold text-gray-900 mb-2">Problems reported</h3>
+    <section>
+      <h3 className={SECTION_HEADING}>Problems reported</h3>
       {detail.problems.length === 0 ? (
         <p className="text-sm text-muted">No problems reported</p>
       ) : (
@@ -139,7 +165,7 @@ export default function FarmerPeek({ data, farmerId, onClose }: { data: Dashboar
       <div className="flex items-start justify-between gap-3 p-5 border-b border-line">
         {p ? (
           <div className="min-w-0 flex-1">
-            <h2 className="text-xl font-bold text-gray-900 truncate">{p.firstName}</h2>
+            <h2 className="text-lg font-semibold text-gray-900 truncate">{p.firstName}</h2>
             <p className="text-sm text-muted mt-0.5 truncate" title={path}>{path}</p>
             <div className="flex gap-x-6 mt-3">
               <Stat label="Registered" value={formatDate(p.registeredAt)} />
@@ -148,7 +174,7 @@ export default function FarmerPeek({ data, farmerId, onClose }: { data: Dashboar
             </div>
           </div>
         ) : (
-          <h2 className="text-xl font-bold text-gray-900">Farmer not found</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Farmer not found</h2>
         )}
         <div className="flex gap-1 shrink-0">
           <button type="button" className={ICON_BTN} aria-label={isFull ? "Shrink panel" : "Expand panel"} onClick={() => setIsFull(!isFull)}>
@@ -160,7 +186,7 @@ export default function FarmerPeek({ data, farmerId, onClose }: { data: Dashboar
         </div>
       </div>
       {detail && (
-        <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-gray-50">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white">
           <SalesCard detail={detail} />
           <ProblemsCard detail={detail} />
         </div>

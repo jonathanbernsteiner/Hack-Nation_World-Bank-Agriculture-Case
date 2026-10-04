@@ -82,12 +82,25 @@ function centreOf(villages: Village[]): { lat: number; lon: number } {
 
 // ---------- reference prices ----------
 
+const sortedReferenceCache = new WeakMap<ReferencePrice[], ReferencePrice[]>();
+
+function sortedReference(reference: ReferencePrice[]): ReferencePrice[] {
+  const cached = sortedReferenceCache.get(reference);
+  if (cached) return cached;
+  const sorted = [...reference].sort((a, b) => a.month.localeCompare(b.month));
+  sortedReferenceCache.set(reference, sorted);
+  return sorted;
+}
+
 /** Reference for `month`; else the nearest earlier month; else the earliest one. */
 export function referenceFor(reference: ReferencePrice[], form: CoffeeForm, month: string): number | null {
   if (reference.length === 0) return null;
-  const sorted = [...reference].sort((a, b) => a.month.localeCompare(b.month));
-  const earlier = sorted.filter((r) => r.month <= month);
-  const row = earlier.length > 0 ? earlier[earlier.length - 1] : sorted[0];
+  const sorted = sortedReference(reference);
+  let row = sorted[0];
+  for (const r of sorted) {
+    if (r.month > month) break;
+    row = r;
+  }
   return row[form];
 }
 
@@ -239,12 +252,19 @@ export function childrenOf(data: DashboardData, path: AreaPath, allWarnings?: Wa
 
 // ---------- warnings ----------
 
+function formatShortDate(isoDate: string): string {
+  return formatDate(isoDate).replace(/ \d{4}$/, "");
+}
+
+/** "12–26 Sep", "28 Aug – 3 Sep", "12 Sep" (no year). */
 function formatRange(first: string, last: string): string {
-  if (first === last) return formatDate(first);
-  const [y1, m1, d1] = first.split("-");
-  const [y2, m2] = last.split("-");
-  if (y1 === y2 && m1 === m2) return `${Number(d1)}–${formatDate(last)}`;
-  return `${formatDate(first)} – ${formatDate(last)}`;
+  if (first === last) return formatShortDate(first);
+  const [, m1] = first.split("-");
+  const [, m2] = last.split("-");
+  if (first.slice(0, 4) === last.slice(0, 4) && m1 === m2) {
+    return `${Number(first.split("-")[2])}–${formatShortDate(last)}`;
+  }
+  return `${formatShortDate(first)} – ${formatShortDate(last)}`;
 }
 
 function problemWarnings(data: DashboardData): Warning[] {
@@ -273,6 +293,7 @@ function problemWarnings(data: DashboardData): Warning[] {
       .map((id) => villageById.get(id))
       .filter((v): v is Village => v !== undefined);
     const parishName = group.parish[2];
+    const dateRange = formatRange(dates[0], dates[dates.length - 1]);
     warnings.push({
       id: `problem:${key}`,
       kind: "problem",
@@ -280,10 +301,16 @@ function problemWarnings(data: DashboardData): Warning[] {
       path: group.parish,
       level: "parish",
       areaName: parishName,
-      title: `Suspected ${labelProblem(group.problem).toLowerCase()}: ${farmerIds.size} farms in ${parishName} parish`,
-      detail: `Reported ${formatRange(dates[0], dates[dates.length - 1])} · ${
-        group.baseline.size
-      } ${group.baseline.size === 1 ? "farm" : "farms"} in the ${PROBLEM_BASELINE_WEEKS} weeks before`,
+      title: labelProblem(group.problem),
+      detail: [
+        `${farmerIds.size} ${farmerIds.size === 1 ? "farm" : "farms"}`,
+        `${parishName} parish`,
+        dateRange,
+        group.baseline.size === 0 ? "none before" : `${group.baseline.size} before`,
+      ].join(" · "),
+      farms: farmerIds.size,
+      place: `${parishName} parish`,
+      dateRange,
       ...centreOf(reporting),
     });
   }
@@ -299,7 +326,6 @@ function priceWarnings(data: DashboardData): Warning[] {
     const sales = data.sales.filter((s) => ids.has(s.villageId) && s.date >= windowStart && s.date <= data.today);
     const index = priceIndexOf(sales, data.reference);
     if (index === null || index > PRICE_LOW_INDEX) continue;
-    const middlemanShare = Math.round((sales.filter((s) => s.buyerType === "middleman").length / sales.length) * 100);
     warnings.push({
       id: `price:${district}`,
       kind: "price",
@@ -307,8 +333,10 @@ function priceWarnings(data: DashboardData): Warning[] {
       path: [district],
       level: "district",
       areaName: district,
-      title: `Prices ${formatIndex(index).replace(/^−/, "")} below national in ${district}`,
-      detail: `Median of ${sales.length} sales, last ${PRICE_WINDOW_DAYS} days · middlemen bought ${middlemanShare}%`,
+      title: `Low prices in ${district}`,
+      detail: `${formatIndex(index)} vs national · ${sales.length} sales · ${PRICE_WINDOW_DAYS} days`,
+      farms: distinctCount(sales.map((s) => s.farmerId)),
+      place: district,
       ...centreOf(data.villages.filter((v) => v.district === district)),
     });
   }
@@ -324,19 +352,23 @@ export function computeWarnings(data: DashboardData): Warning[] {
 
 // ---------- KPIs and farmer rows ----------
 
-export function kpis(data: DashboardData): Kpis {
+export function kpis(data: DashboardData, warnings?: Warning[]): Kpis {
   const villageIds = new Set(data.farmers.map((f) => f.villageId));
   const farmedVillages = data.villages.filter((v) => villageIds.has(v.id));
   const recentSales = data.sales.filter((s) => s.date > addDays(data.today, -PRICE_WINDOW_DAYS));
   const cutoff = addDays(data.today, -30);
+  const prevCutoff = addDays(data.today, -60);
+  const registeredDay = (f: Farmer) => f.registeredAt.slice(0, 10);
   return {
     farmers: data.farmers.length,
     districts: new Set(farmedVillages.map((v) => v.district)).size,
     villages: farmedVillages.length,
-    newFarmers30d: data.farmers.filter((f) => f.registeredAt.slice(0, 10) > cutoff).length,
+    newFarmers30d: data.farmers.filter((f) => registeredDay(f) > cutoff).length,
+    newFarmersPrev30d: data.farmers.filter((f) => registeredDay(f) > prevCutoff && registeredDay(f) <= cutoff).length,
     callsLast30d: data.callsLast30d,
+    callsPrev30d: data.callsPrev30d ?? 0,
     priceIndex: priceIndexOf(recentSales, data.reference),
-    activeWarnings: computeWarnings(data).length,
+    activeWarnings: (warnings ?? computeWarnings(data)).length,
   };
 }
 

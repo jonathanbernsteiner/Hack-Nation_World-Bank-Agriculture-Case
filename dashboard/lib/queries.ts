@@ -1,3 +1,4 @@
+import { cache } from "react";
 import fs from "node:fs";
 import path from "node:path";
 import { getSql } from "./db";
@@ -57,7 +58,7 @@ export function readReference(): ReferencePrice[] {
     .filter((r) => /^\d{4}-\d{2}$/.test(r.month) && [r.kiboko, r.faq, r.parchment].every(Number.isFinite));
 }
 
-export async function loadDashboardData(): Promise<DashboardData> {
+async function loadDashboardDataUncached(): Promise<DashboardData> {
   const sql = getSql();
 
   const [villageRows, farmerRows, saleRows, problemRows, callRows] = await Promise.all([
@@ -83,7 +84,9 @@ export async function loadDashboardData(): Promise<DashboardData> {
           and coalesce(e.likely_disease, e.symptom) is not null
           and coalesce(e.confidence, 1) >= 0.6 and e.quote_verified is not false`,
     sql`select count(*)::int as total,
-               count(*) filter (where received_at >= now() - interval '30 days')::int as last30
+               count(*) filter (where received_at >= now() - interval '30 days')::int as last30,
+               count(*) filter (where received_at >= now() - interval '60 days'
+                                  and received_at < now() - interval '30 days')::int as prev30
         from calls`,
   ]);
 
@@ -138,7 +141,11 @@ export async function loadDashboardData(): Promise<DashboardData> {
     problems,
     reference: readReference(),
     callsLast30d: Number(callRows[0]?.last30 ?? 0),
+    callsPrev30d: Number(callRows[0]?.prev30 ?? 0),
     callsTotal: Number(callRows[0]?.total ?? 0),
     hasSynthetic: villages.some((v) => v.isSynthetic) || farmers.some((f) => f.isSynthetic),
   };
 }
+
+/** One load per request: every server component calling this shares the result. */
+export const loadDashboardData = cache(loadDashboardDataUncached);

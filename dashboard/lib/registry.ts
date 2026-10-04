@@ -44,7 +44,9 @@ function groupBy<T>(items: T[], key: (item: T) => number): Map<number, T[]> {
   const groups = new Map<number, T[]>();
   for (const item of items) {
     const k = key(item);
-    groups.set(k, [...(groups.get(k) ?? []), item]);
+    const group = groups.get(k);
+    if (group) group.push(item);
+    else groups.set(k, [item]);
   }
   return groups;
 }
@@ -67,7 +69,10 @@ export function registryRows(data: DashboardData): RegistryRow[] {
   for (const farmer of data.farmers) {
     const village = villageById.get(farmer.villageId);
     if (!village) continue;
-    const last = [...(salesByFarmer.get(farmer.id) ?? [])].sort((a, b) => b.date.localeCompare(a.date))[0];
+    const last = (salesByFarmer.get(farmer.id) ?? []).reduce<Sale | undefined>(
+      (best, s) => (best === undefined || s.date > best.date ? s : best),
+      undefined,
+    );
     const med = last
       ? villageMedian((recentSalesByVillage.get(village.id) ?? []).filter((s) => s.form === last.form))
       : null;

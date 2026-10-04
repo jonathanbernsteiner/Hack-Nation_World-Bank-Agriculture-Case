@@ -4,7 +4,7 @@ import LoadError from "@/components/LoadError";
 import { loadDashboardData } from "@/lib/queries";
 import type { DashboardData } from "@/lib/types";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export default async function FarmersPage() {
   let data: DashboardData | null = null;

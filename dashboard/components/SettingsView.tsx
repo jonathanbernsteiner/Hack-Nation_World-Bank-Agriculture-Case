@@ -1,4 +1,3 @@
-import { LogOut } from "lucide-react";
 import {
   MIN_FARMERS,
   MIN_SALES,
@@ -48,18 +47,6 @@ export default function SettingsView() {
       <section>
         <h2 className="text-base font-semibold text-ink mb-4">Warning rules</h2>
         <Rows rows={RULES} />
-      </section>
-      <section>
-        <h2 className="text-base font-semibold text-ink mb-4">Account</h2>
-        <div className="bg-white border border-line rounded-xl px-6 py-4 flex items-center justify-between gap-4">
-          <span className="text-sm text-gray-600">Signed in with the team login</span>
-          <a
-            href="/api/logout"
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg bg-white border border-line text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap"
-          >
-            <LogOut size={14} /> Sign out
-          </a>
-        </div>
       </section>
     </div>
   );

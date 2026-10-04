@@ -19,7 +19,7 @@ const CHIPS: { layer: MapLayer; label: string; Icon: ComponentType<{ size?: numb
   { layer: "warnings", label: "Warnings", Icon: AlertTriangle },
 ];
 
-const CHIP_BASE = "whitespace-nowrap px-3 py-2 text-sm rounded-lg border inline-flex items-center gap-1.5 transition-colors";
+const CHIP_BASE = "shrink-0 whitespace-nowrap px-3 py-2 text-sm rounded-lg border inline-flex items-center gap-1.5 transition-colors";
 const CHIP_OFF = "bg-white text-gray-600 border-gray-200 hover:bg-gray-50";
 const CHIP_ON = "bg-gray-800 text-white border-gray-800";
 const CHIP_ON_ALERT = "bg-red-50 text-red-700 border-red-200";
@@ -29,8 +29,8 @@ export default function MapToolbar({ path, layer, onLayer, onSelect }: MapToolba
   const level: Level = LEVELS[Math.min(path.length, LEVELS.length - 1)];
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-line">
-      <nav aria-label="Area" className="flex min-w-0 items-center gap-1.5 text-sm">
+    <div className="flex flex-nowrap items-center justify-between gap-3 px-4 py-3 border-b border-line">
+      <nav aria-label="Area" className="flex flex-1 min-w-0 items-center gap-1.5 text-sm truncate">
         {names.map((name, i) => {
           const isLast = i === names.length - 1;
           return (
@@ -53,7 +53,7 @@ export default function MapToolbar({ path, layer, onLayer, onSelect }: MapToolba
         <span className="ml-1 text-xs text-faint whitespace-nowrap shrink-0">{labelLevel(level)}</span>
       </nav>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex shrink-0 flex-nowrap items-center gap-2">
         {CHIPS.map(({ layer: chipLayer, label, Icon }) => {
           const isOn = chipLayer === layer;
           const onClass = chipLayer === "warnings" ? CHIP_ON_ALERT : CHIP_ON;

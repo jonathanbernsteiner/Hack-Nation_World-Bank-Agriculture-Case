@@ -30,6 +30,7 @@ export default function PriceChart({ area }: PriceChartProps) {
               <XAxis dataKey="month" tickFormatter={formatMonth} axisLine={false} tickLine={false} tick={TICK} />
               <YAxis
                 width={40}
+                domain={["auto", "auto"]}
                 axisLine={false}
                 tickLine={false}
                 tick={TICK}
@@ -49,6 +50,7 @@ export default function PriceChart({ area }: PriceChartProps) {
                 strokeWidth={2}
                 dot={{ r: 3 }}
                 connectNulls
+                isAnimationActive={false}
               />
               <Line
                 type="monotone"
@@ -59,6 +61,7 @@ export default function PriceChart({ area }: PriceChartProps) {
                 strokeDasharray="5 4"
                 dot={false}
                 connectNulls
+                isAnimationActive={false}
               />
             </LineChart>
           </ResponsiveContainer>

@@ -60,7 +60,7 @@ export default function WeatherCard({ lat, lon }: WeatherCardProps) {
 
   return (
     <div>
-      <h2 className="text-base font-semibold text-ink mb-3">Weather, next 3 days</h2>
+      <h2 className="text-base font-semibold text-ink mb-4">Weather, next 3 days</h2>
       {current === null && (
         <div className="grid grid-cols-3 gap-2">
           {SKELETON_CELLS.map((i) => (

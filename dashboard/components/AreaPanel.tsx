@@ -7,7 +7,7 @@ import FarmersTable, { indexPillClass } from "./FarmersTable";
 import PriceChart from "./PriceChart";
 import WeatherCard from "./WeatherCard";
 
-const CARD = "bg-white border border-line rounded-xl p-5";
+const CARD = "bg-white border border-line rounded-xl p-6";
 const HEADING = "text-base font-semibold text-ink";
 const TABLE_WRAP = "border border-line rounded-[14px] overflow-hidden";
 const TABLE_SCROLL = "overflow-x-auto";
@@ -31,23 +31,27 @@ interface AreaPanelProps {
 function Stat({ label, value }: { label: string; value: number }) {
   return (
     <div>
-      <div className="text-xl font-bold text-ink">{formatNumber(value)}</div>
-      <div className="text-xs text-muted">{label}</div>
+      <div className="text-2xl font-bold text-ink">{formatNumber(value)}</div>
+      <div className="text-sm font-medium text-muted">{label}</div>
     </div>
   );
 }
 
+function subtitleFor(area: AreaSummary): string {
+  if (area.level === "village" && area.path.length === 4) return `${area.path[2]} parish, ${area.path[0]}`;
+  return area.region ? `${labelLevel(area.level)} · ${area.region}` : labelLevel(area.level);
+}
+
 function HeaderCard({ area }: { area: AreaSummary }) {
-  const subtitle = area.region ? `${labelLevel(area.level)} · ${area.region}` : labelLevel(area.level);
   return (
     <div className={CARD}>
-      <h2 className="text-xl font-bold text-ink">{area.name}</h2>
-      <div className="text-sm text-muted">{subtitle}</div>
+      <h2 className="text-lg font-semibold text-ink">{area.name}</h2>
+      <div className="text-sm text-muted">{subtitleFor(area)}</div>
       <div className="grid grid-cols-2 gap-4 mt-4">
         <Stat label="Farmers" value={area.farmers} />
-        <Stat label="Villages" value={area.villages} />
-        <Stat label="Calls" value={area.calls} />
-        <Stat label="New, 90 days" value={area.newFarmers90d} />
+        {area.level !== "village" && <Stat label="Villages" value={area.villages} />}
+        <Stat label="Calls (all time)" value={area.calls} />
+        <Stat label="New 90d" value={area.newFarmers90d} />
       </div>
     </div>
   );
@@ -82,7 +86,7 @@ function WarningRow({ warning, onSelect }: { warning: Warning; onSelect: (path: 
 function WarningsCard({ warnings, onSelect }: { warnings: Warning[]; onSelect: (path: AreaPath) => void }) {
   return (
     <div className={CARD}>
-      <div className="flex items-center gap-2 mb-1">
+      <div className="flex items-center gap-2 mb-4">
         <h2 className={HEADING}>Warnings</h2>
         <span className="inline-flex items-center text-xs font-medium rounded-full px-2 py-0.5 border bg-red-50 text-red-700 border-red-200">
           {warnings.length}
@@ -99,50 +103,29 @@ function WarningsCard({ warnings, onSelect }: { warnings: Warning[]; onSelect: (
 
 function formPill(price: FormPrice) {
   const index = price.median !== null && price.national ? price.median / price.national : null;
-  if (index === null) return <span className={indexPillClass(null)}>not enough sales</span>;
+  if (index === null) return <span className={indexPillClass(null)}>Not enough sales</span>;
   return <span className={indexPillClass(index)}>{formatIndex(index)}</span>;
 }
 
 function BuyerRow({ buyer }: { buyer: BuyerPrice }) {
-  const widthPct = Math.min(100, Math.round((buyer.priceIndex ?? 0) * 100));
   return (
-    <li className="py-2">
-      <div className="flex items-baseline justify-between text-sm gap-2">
-        <span className="font-medium text-gray-900">{labelBuyer(buyer.buyer)}</span>
-        <span className="text-gray-600">
-          <span className="font-mono">{formatIndex(buyer.priceIndex)}</span> · {buyer.sales}
-        </span>
-      </div>
-      <div className="h-2 rounded-full bg-gray-100 mt-1.5">
-        <div className="h-2 rounded-full bg-blue-500" style={{ width: `${widthPct}%` }} />
-      </div>
+    <li className="flex items-center justify-between gap-2 py-2 text-sm">
+      <span className="font-medium text-gray-900">{labelBuyer(buyer.buyer)}</span>
+      <span className="inline-flex items-center gap-2 text-gray-600 whitespace-nowrap">
+        <span className={indexPillClass(buyer.priceIndex)}>{formatIndex(buyer.priceIndex)}</span>
+        vs national · {buyer.sales} {buyer.sales === 1 ? "sale" : "sales"}
+      </span>
     </li>
   );
-}
-
-function signedPct(index: number, base: number): string {
-  const pct = Math.round((index / base - 1) * 100);
-  return pct === 0 ? "0%" : `${pct > 0 ? "+" : "−"}${Math.abs(pct)}%`;
-}
-
-/** Each buyer's price relative to the best-paying one: values only, no prose. */
-function buyerGap(buyers: BuyerPrice[]): { middleman: string; coop: string } | null {
-  const middleman = buyers.find((b) => b.buyer === "middleman")?.priceIndex ?? null;
-  const coop = buyers.find((b) => b.buyer === "cooperative")?.priceIndex ?? null;
-  if (middleman === null || coop === null) return null;
-  const best = Math.max(middleman, coop);
-  if (best === 0) return null;
-  return { middleman: signedPct(middleman, best), coop: signedPct(coop, best) };
 }
 
 function PricesCard({ area }: { area: AreaSummary }) {
   const forms = area.priceByForm.filter((p) => p.sales > 0);
   const buyers = area.priceByBuyer.filter((b) => b.sales > 0);
-  const gap = buyerGap(area.priceByBuyer);
   return (
     <div className={CARD}>
-      <h2 className={`${HEADING} mb-3`} title="Median needs 3 sales from 3 farmers">
-        Prices, 12 months
+      <h2 className={`${HEADING} mb-4`} title="Median needs 3 sales from 3 farmers">
+        Prices, 12 months (UGX/kg)
       </h2>
       {forms.length === 0 ? (
         <p className="text-sm text-faint text-center py-4">No sales reported in the last 12 months.</p>
@@ -153,9 +136,9 @@ function PricesCard({ area }: { area: AreaSummary }) {
             <thead>
               <tr className="border-b border-line bg-gray-50">
                 <th className={`text-left ${TH}`}>Form</th>
-                <th className={`text-right ${TH}`}>Here, UGX/kg</th>
+                <th className={`text-right ${TH}`}>Here</th>
                 <th className={`text-right ${TH}`}>National</th>
-                <th className={`text-right ${TH}`}>vs national</th>
+                <th className={`text-right ${TH}`}>vs nat.</th>
               </tr>
             </thead>
             <tbody>
@@ -174,18 +157,12 @@ function PricesCard({ area }: { area: AreaSummary }) {
       )}
       {buyers.length > 0 && (
         <div className="mt-4">
-          <h3 className="text-sm font-semibold text-ink">By buyer</h3>
+          <h3 className="text-sm font-semibold text-ink mb-1">By buyer</h3>
           <ul>
             {buyers.map((b) => (
               <BuyerRow key={b.buyer} buyer={b} />
             ))}
           </ul>
-          {gap && (
-            <div className="flex items-center gap-4 mt-1 text-sm font-mono text-gray-700 whitespace-nowrap">
-              <span>Middleman {gap.middleman}</span>
-              <span>Cooperative {gap.coop}</span>
-            </div>
-          )}
         </div>
       )}
     </div>
@@ -195,7 +172,7 @@ function PricesCard({ area }: { area: AreaSummary }) {
 function ProblemsCard({ problems }: { problems: AreaSummary["problems90d"] }) {
   return (
     <div className={CARD}>
-      <h2 className={`${HEADING} mb-2`}>Problems, 90 days</h2>
+      <h2 className={`${HEADING} mb-4`}>Problems, 90 days</h2>
       {problems.length === 0 ? (
         <p className="text-sm text-faint">No problems reported in the last 90 days</p>
       ) : (
@@ -206,11 +183,62 @@ function ProblemsCard({ problems }: { problems: AreaSummary["problems90d"] }) {
               className="flex items-center justify-between py-2 text-sm border-b border-divider last:border-b-0"
             >
               <span className="text-gray-900">{labelProblem(p.problem)}</span>
-              <span className="text-gray-600 font-mono">{p.farmers} {p.farmers === 1 ? "farm" : "farms"}</span>
+              <span className="text-gray-600">{p.farmers} {p.farmers === 1 ? "farm" : "farms"}</span>
             </li>
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+const LOOK_COUNT = 5;
+
+function problemFarms(a: AreaSummary): number {
+  return a.problems90d.reduce((sum, p) => sum + p.farmers, 0);
+}
+
+function LookList({ title, rows, onSelect }: { title: string; rows: { area: AreaSummary; value: string }[]; onSelect: (path: AreaPath) => void }) {
+  return (
+    <div>
+      <h3 className="text-sm font-semibold text-ink mb-1">{title}</h3>
+      <ul>
+        {rows.map(({ area, value }) => (
+          <li key={area.path.join("/")}>
+            <button
+              type="button"
+              onClick={() => onSelect(area.path)}
+              className="w-full flex items-center justify-between gap-2 py-2 text-sm text-left border-b border-divider last:border-b-0 hover:bg-gray-50 transition-colors"
+            >
+              <span className="font-medium text-gray-900 truncate">{area.name}</span>
+              <span className="text-gray-600 whitespace-nowrap">{value}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function WhereToLookCard({ childAreas, onSelect }: { childAreas: AreaSummary[]; onSelect: (path: AreaPath) => void }) {
+  const lowPrice = childAreas
+    .filter((c) => c.priceIndex !== null)
+    .sort((a, b) => (a.priceIndex ?? 0) - (b.priceIndex ?? 0))
+    .slice(0, LOOK_COUNT)
+    .map((area) => ({ area, value: `${formatIndex(area.priceIndex)} vs national` }));
+  const problems = childAreas
+    .filter((c) => problemFarms(c) > 0)
+    .sort((a, b) => problemFarms(b) - problemFarms(a))
+    .slice(0, LOOK_COUNT)
+    .map((area) => ({ area, value: `${problemFarms(area)} ${problemFarms(area) === 1 ? "farm" : "farms"}` }));
+  if (lowPrice.length === 0 && problems.length === 0) return null;
+  return (
+    <div className={CARD}>
+      <h2 className={`${HEADING} mb-4`}>Where to look (90 days)</h2>
+      <div className="flex flex-col gap-4">
+        {lowPrice.length > 0 && <LookList title="Lowest prices" rows={lowPrice} onSelect={onSelect} />}
+        {problems.length > 0 && <LookList title="Most problem farms" rows={problems} onSelect={onSelect} />}
+      </div>
     </div>
   );
 }
@@ -226,7 +254,7 @@ function ChildrenCard({
 }) {
   return (
     <div className={CARD}>
-      <h2 className={`${HEADING} mb-3`}>
+      <h2 className={`${HEADING} mb-4`}>
         {CHILD_HEADINGS[childAreas[0].level]} in {area.name}
       </h2>
       <div className={TABLE_WRAP}>
@@ -279,6 +307,7 @@ export default function AreaPanel({ area, childAreas, farmers, onSelect }: AreaP
         <PriceChart area={area} />
       </div>
       <ProblemsCard problems={area.problems90d} />
+      {childAreas.length > 0 && <WhereToLookCard childAreas={childAreas} onSelect={onSelect} />}
       <div className={CARD}>
         <WeatherCard lat={area.lat} lon={area.lon} />
       </div>

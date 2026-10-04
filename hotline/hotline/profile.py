@@ -10,6 +10,7 @@ from hotline import history, prices
 
 KAMPALA_UTC_OFFSET_HOURS = 3  # Uganda has no daylight saving time
 DEFAULT_MAIN_FORM = "kiboko"
+DEFAULT_MAIN_FORM_BY_TYPE = {"robusta": "kiboko", "arabica": "parchment"}
 IDENTIFIED_BY_LOCATION = "location"
 
 _FARMER_SQL = """
@@ -36,9 +37,11 @@ def first_name_of(full_name: str) -> str:
     return parts[0] if parts else ""
 
 
-def _main_form(conn: Any, farmer_id: int) -> str:
+def _main_form(conn: Any, farmer_id: int, coffee_type: str | None) -> str:
     forms = [row[0] for row in conn.execute(_FORMS_SQL, (farmer_id,)).fetchall()]
-    return Counter(forms).most_common(1)[0][0] if forms else DEFAULT_MAIN_FORM
+    if forms:
+        return Counter(forms).most_common(1)[0][0]
+    return DEFAULT_MAIN_FORM_BY_TYPE.get(coffee_type or "", DEFAULT_MAIN_FORM)
 
 
 def _load_farmer(conn: Any, farmer_id: int) -> tuple[dict, dict, bool]:
@@ -78,7 +81,7 @@ def is_synthetic_farmer(conn: Any, farmer_id: int) -> bool:
 
 def build_profile(conn: Any, farmer_id: int, *, as_of: date, identified_by: str) -> dict:
     home, public, _ = _load_farmer(conn, farmer_id)
-    main_form = _main_form(conn, farmer_id)
+    main_form = _main_form(conn, farmer_id, public["coffee_type"])
     is_location = identified_by == IDENTIFIED_BY_LOCATION
     summary = history.summarize(conn, farmer_id, home, as_of, totals_only=is_location)
     profile = {

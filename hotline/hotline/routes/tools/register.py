@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
 from hotline import calls_repo, db, places, pins, profile, security
+from hotline.routes.tools import find
 
 log = logging.getLogger(__name__)
 
@@ -31,16 +32,6 @@ class RegisterRequest(BaseModel):
 
 def pin_digits_sw(pin: str) -> str:
     return ", ".join(DIGIT_WORDS_SW[int(d)] for d in pin)
-
-
-def _resolve_village(conn, district: places.DistrictMatch, req: RegisterRequest) -> tuple[int | None, bool]:
-    """(village_id, known). Unknown villages are created later, unverified."""
-    match = places.match_village(conn, district.district, req.village, req.parish, req.sub_county)
-    if match.status == "unique":
-        return match.best.village_id, True
-    if match.status == "ambiguous":
-        return match.candidates[0].village_id, True
-    return None, False
 
 
 def _has_duplicate(conn, village_id: int, first_name: str) -> bool:
@@ -72,10 +63,16 @@ def register(conn, req: RegisterRequest, conversation_id: str) -> dict:
         return {"status": "need_district"}
     if not first_name or not (req.village or "").strip():
         return {"status": "need_village"}
-    village_id, known = _resolve_village(conn, district, req)
-    if known and _has_duplicate(conn, village_id, first_name):
+    match = places.match_village(conn, district.district, req.village, req.parish, req.sub_county)
+    if match.status == "ambiguous":  # never guess between same-name villages: ask, villages only
+        candidates = [find.village_option(c) for c in match.candidates]
+        return {"status": "ambiguous", "ask": "parish", "candidates": candidates}
+    known = match.status == "unique"
+    if known and _has_duplicate(conn, match.best.village_id, first_name):
         return {"status": "possible_duplicate"}
-    if village_id is None:
+    if known:
+        village_id = match.best.village_id
+    else:  # unknown villages are created unverified so real callers can register anywhere
         village_id = places.create_unverified_village(conn, district, req.village, req.parish, req.sub_county)
     farmer_id, pin = _insert_farmer(conn, first_name.title(), district, village_id)
     calls_repo.upsert_call_identity(

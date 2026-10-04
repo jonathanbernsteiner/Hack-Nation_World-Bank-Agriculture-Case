@@ -26,7 +26,7 @@ class FindRequest(BaseModel):
     call_sid: str | None = None
 
 
-def _candidate(village: places.VillageCandidate) -> dict:
+def village_option(village: places.VillageCandidate) -> dict:
     return {"village": village.village, "parish": village.parish, "sub_county": village.sub_county}
 
 
@@ -54,12 +54,12 @@ def locate(conn, req: FindRequest, conversation_id: str) -> dict:
         return {"status": "not_found"}
     if match.status == "ambiguous":
         ask = _ask_for(match.candidates, req.parish)
-        return {"status": "ambiguous", "ask": ask, "candidates": [_candidate(c) for c in match.candidates]}
+        return {"status": "ambiguous", "ask": ask, "candidates": [village_option(c) for c in match.candidates]}
     hits = [f for f in _farmers_in_village(conn, match.best.village_id) if _same_first_name(spoken_name, f[1])]
     if not hits:
         return {"status": "not_found"}
     if len(hits) > 1:  # same villages-only shape: never reveal that two people share the name
-        return {"status": "ambiguous", "ask": "village", "candidates": [_candidate(match.best)]}
+        return {"status": "ambiguous", "ask": "village", "candidates": [village_option(match.best)]}
     farmer_id, _, is_synthetic = hits[0]
     calls_repo.upsert_call_identity(
         conn, conversation_id, farmer_id=farmer_id, identified_by=IDENTIFIED_BY_LOCATION, is_synthetic=is_synthetic

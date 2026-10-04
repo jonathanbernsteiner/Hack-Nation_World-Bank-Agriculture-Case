@@ -72,7 +72,7 @@ def test_summary_counts_and_seven_days(api):
 def test_null_precipitation_counts_as_zero(api):
     install(FakeOpenMeteo())
     last = api.post(URL, json=MASAKA, headers=HEADERS).json()["days"][6]
-    assert last["rain_mm"] == 0 and last["rain_chance_pct"] == 0
+    assert last["rain_mm"] == 0 and last["rain_chance_pct"] is None
 
 
 def test_summarize_tolerates_short_and_missing_arrays():
@@ -158,7 +158,7 @@ def test_database_error_falls_back_to_district(api, monkeypatch):
     monkeypatch.setattr(route, "farmer_place", boom)
     assert api.post(URL, json=MASAKA, headers=HEADERS).json()["place"] == "Masaka"
     body = api.post(URL, json={"conversation_id": "c"}, headers=HEADERS)
-    assert body.status_code == 200 and body.json() == {"status": "unavailable"}
+    assert body.status_code == 200 and body.json() == {"status": "unknown_location"}
 
 
 def test_district_lookup_is_case_insensitive():
@@ -310,10 +310,15 @@ def test_unconfigured_database_falls_back_to_request_district(api, monkeypatch):
     assert response.json()["status"] == "ok" and response.json()["place"] == "Masaka"
 
 
-@pytest.mark.xfail(strict=True, reason="review cycle 1, finding 1: a missing temperature is reported as 0 degrees C")
 def test_missing_temperature_is_not_reported_as_zero_degrees(api):
     daily = {**DAILY, "temperature_2m_max": [*DAILY["temperature_2m_max"][:6], None],
              "temperature_2m_min": [*DAILY["temperature_2m_min"][:6], None]}
     install(FakeOpenMeteo(daily=daily))
     last = api.post(URL, json=MASAKA, headers=HEADERS).json()["days"][6]
-    assert last.get("tmin_c") != 0 and last.get("tmax_c") != 0
+    assert last["tmin_c"] is None and last["tmax_c"] is None
+
+
+@pytest.mark.parametrize("daily", [{}, {"time": None}])
+def test_payload_without_dates_is_unavailable(api, daily):
+    install(FakeOpenMeteo(daily=daily))
+    assert api.post(URL, json=MASAKA, headers=HEADERS).json() == {"status": "unavailable"}

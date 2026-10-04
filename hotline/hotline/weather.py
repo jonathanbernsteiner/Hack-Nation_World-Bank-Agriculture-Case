@@ -55,13 +55,25 @@ def clear_cache() -> None:
 
 
 def _num(value) -> float:
-    """Open-Meteo returns null for missing values; treat as 0."""
+    """Missing precipitation (null) counts as 0 mm."""
     return float(value) if isinstance(value, int | float) and not isinstance(value, bool) else 0.0
+
+
+def _maybe(value):
+    """Rounded number, or None when the source value is missing (never invent a figure)."""
+    if not isinstance(value, int | float) or isinstance(value, bool):
+        return None
+    return _round(float(value))
 
 
 def _round(value: float):
     rounded = round(value, 1)
     return int(rounded) if rounded == int(rounded) else rounded
+
+
+def _maybe_int(value) -> int | None:
+    number = _maybe(value)
+    return None if number is None else int(round(number))
 
 
 def summarize(daily: dict) -> dict:
@@ -78,9 +90,9 @@ def summarize(daily: dict) -> dict:
         {
             "date": dates[i],
             "rain_mm": _round(_num(rain[i])),
-            "rain_chance_pct": int(round(_num(chance[i]))),
-            "tmin_c": _round(_num(tmin[i])),
-            "tmax_c": _round(_num(tmax[i])),
+            "rain_chance_pct": _maybe_int(chance[i]),
+            "tmin_c": _maybe(tmin[i]),
+            "tmax_c": _maybe(tmax[i]),
         }
         for i in range(len(dates))
     ]
@@ -108,7 +120,10 @@ def _fetch(lat: float, lon: float, client: httpx.Client) -> dict:
         timeout=TIMEOUT_S,
     )
     response.raise_for_status()
-    return summarize(response.json()["daily"])
+    result = summarize(response.json()["daily"])
+    if len(result["days"]) < FORECAST_DAYS:
+        raise ValueError("incomplete forecast")
+    return result
 
 
 def forecast(lat: float, lon: float, now: Callable[[], float] = time.monotonic) -> dict | None:

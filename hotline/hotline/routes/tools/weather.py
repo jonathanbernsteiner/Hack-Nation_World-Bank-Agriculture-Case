@@ -56,26 +56,25 @@ def farmer_place(conversation_id: str | None, conn=None) -> Place | None:
     return Place(centroid[0], centroid[1], district) if centroid else None
 
 
-def _resolve(request: WeatherRequest) -> tuple[Place | None, bool]:
-    """(place, database_failed). A database failure falls through to the district."""
-    database_failed = False
+def _resolve(request: WeatherRequest) -> Place | None:
+    """The farmer's place, else the request district. A database failure falls through."""
     try:
         place = farmer_place(request.conversation_id)
     except Exception as exc:
         logger.warning("weather: farmer lookup failed: %s", type(exc).__name__)
-        place, database_failed = None, True
+        place = None
     if place is None:
         centroid = weather.district_centroid(request.district)
         if centroid:
             place = Place(centroid[0], centroid[1], centroid[2])
-    return place, database_failed
+    return place
 
 
 @router.post("/api/tools/get_weather_forecast", dependencies=[Depends(security.require_tool_secret)])
 def get_weather_forecast(request: WeatherRequest) -> dict:
-    place, database_failed = _resolve(request)
+    place = _resolve(request)
     if place is None:
-        return {"status": "unavailable" if database_failed else "unknown_location"}
+        return {"status": "unknown_location"}
     result = weather.forecast(place.lat, place.lon)
     if result is None:
         return {"status": "unavailable"}

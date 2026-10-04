@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
-import { CircleMarker, MapContainer, Marker, TileLayer, Tooltip, useMap, useMapEvents } from "react-leaflet";
+import { CircleMarker, MapContainer, Marker, TileLayer, Tooltip, useMap } from "react-leaflet";
 import type { AreaPath, AreaSummary, MapLayer, Warning } from "@/lib/types";
 import { PRICE_LOW_INDEX, PROBLEM_MIN_FARMERS, PROBLEM_WINDOW_DAYS } from "@/lib/types";
 import { formatIndex, formatNumber, labelLevel } from "@/lib/format";
@@ -25,10 +25,34 @@ export interface MapContext {
 }
 
 const CONTEXT_VILLAGE_ZOOM = 9; // at or above this zoom the background shows single villages
-const COUNTRY_ZOOM = 7.75; // zooming out to this level returns to the whole-country view
+// Zooming out walks back up the hierarchy (like zooming in walks down):
+const COUNTRY_ZOOM = 8.5; // below this: the whole country (all district bubbles)
+const DISTRICT_ZOOM = 9.75; // below this: at most district level
+const SUB_COUNTY_ZOOM = 11; // below this: at most sub-county level
+const PROGRAMMATIC_MAX_MS = 4000; // a fit/fly animation is over well before this
+
+/** The deepest level that still makes sense at this zoom, as a prefix of the current path. */
+export function pathForZoom(path: AreaPath, zoom: number): AreaPath {
+  if (zoom < COUNTRY_ZOOM) return [];
+  if (zoom < DISTRICT_ZOOM) return path.slice(0, 1);
+  if (zoom < SUB_COUNTY_ZOOM) return path.slice(0, 2);
+  return path;
+}
 
 function ZoomWatcher({ onZoom }: { onZoom: (zoom: number) => void }) {
-  const map = useMapEvents({ zoomend: () => onZoom(map.getZoom()) });
+  const map = useMap();
+  const latest = useRef(onZoom);
+  useEffect(() => {
+    latest.current = onZoom;
+  });
+  // Attach once; re-attaching on every render dropped zoom events.
+  useEffect(() => {
+    const handle = () => latest.current(map.getZoom());
+    map.on("zoomend", handle);
+    return () => {
+      map.off("zoomend", handle);
+    };
+  }, [map]);
   return null;
 }
 
@@ -114,7 +138,17 @@ function labelIcon(text: string): L.DivIcon {
   });
 }
 
-function FitBounds({ areas, selected }: { areas: AreaSummary[]; selected: AreaSummary }) {
+function FitBounds({
+  areas,
+  selected,
+  onProgrammaticZoom,
+  takeSkipFit,
+}: {
+  areas: AreaSummary[];
+  selected: AreaSummary;
+  onProgrammaticZoom: (isActive: boolean) => void;
+  takeSkipFit: () => boolean;
+}) {
   const map = useMap();
   const latest = useRef({ areas, selected });
   const pathKey = selected.path.join("/");
@@ -124,7 +158,11 @@ function FitBounds({ areas, selected }: { areas: AreaSummary[]; selected: AreaSu
   });
 
   useEffect(() => {
+    // A level change caused by the user zooming out keeps the user's view instead of re-fitting.
+    if (takeSkipFit()) return;
     const { areas: current, selected: sel } = latest.current;
+    onProgrammaticZoom(true);
+    map.once("moveend", () => onProgrammaticZoom(false)); // zoomend fires before moveend
     if (current.length === 0) {
       map.flyTo([sel.lat, sel.lon], 12);
       return;
@@ -135,6 +173,7 @@ function FitBounds({ areas, selected }: { areas: AreaSummary[]; selected: AreaSu
     }
     const bounds = L.latLngBounds(current.map((a) => [a.lat, a.lon] as [number, number]));
     map.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refit only when the selected area changes
   }, [map, pathKey]);
 
   return null;
@@ -187,6 +226,13 @@ function Legend({ layer }: { layer: MapLayer }) {
 
 export default function MapView({ areas, selected, layer, warnings, onSelect, context }: MapViewProps) {
   const [zoom, setZoom] = useState(7);
+  const programmatic = useRef(false);
+  const programmaticSince = useRef(0);
+  const skipNextFit = useRef(false);
+  const selectedPath = useRef(selected.path);
+  useEffect(() => {
+    selectedPath.current = selected.path;
+  });
   const isVillage = selected.level === "village";
   const isEmpty = areas.length === 0 && !isVillage;
   const shown = areas.length === 0 && isVillage ? [] : areas;
@@ -206,13 +252,32 @@ export default function MapView({ areas, selected, layer, warnings, onSelect, co
         <TileLayer url={TILE_URL} attribution={TILE_ATTRIBUTION} className="map-tiles-muted" />
         <ZoomTopRight />
         <QuietAttribution />
-        <FitBounds areas={areas} selected={selected} />
+        <FitBounds
+          areas={areas}
+          selected={selected}
+          onProgrammaticZoom={(isActive) => {
+            programmatic.current = isActive;
+            programmaticSince.current = isActive ? Date.now() : 0;
+          }}
+          takeSkipFit={() => {
+            const skip = skipNextFit.current;
+            skipNextFit.current = false;
+            return skip;
+          }}
+        />
 
         <ZoomWatcher
           onZoom={(next) => {
             setZoom(next);
-            // Zooming out to the country view goes back to Uganda, so every district shows again.
-            if (next <= COUNTRY_ZOOM && selected.path.length > 0) onSelect([]);
+            // Our own fit/fly, not the user zooming. The age check covers a fit that never fires moveend.
+            if (programmatic.current && Date.now() - programmaticSince.current < PROGRAMMATIC_MAX_MS) return;
+            programmatic.current = false;
+            const current = selectedPath.current;
+            const target = pathForZoom(current, next);
+            if (target.length < current.length) {
+              skipNextFit.current = true;
+              onSelect(target);
+            }
           }}
         />
 

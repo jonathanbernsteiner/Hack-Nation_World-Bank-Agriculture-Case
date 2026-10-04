@@ -1,8 +1,10 @@
+from dataclasses import replace
 from datetime import date, timedelta
+from types import SimpleNamespace
 
 import pytest
 
-from hotline import prices
+from hotline import bands, prices
 
 AS_OF = date(2026, 10, 3)
 HOME = {"village_id": 1, "village": "Kyabakuza", "parish": "Kyabakuza P", "sub_county": "Kyanamukaaka", "district": "Masaka"}
@@ -151,3 +153,124 @@ def test_load_sale_rows_round_trip(db):
     assert len(rows) == 1 and rows[0]["village_id"] == vid and float(rows[0]["price_total"]) == 590000
     assert prices.load_sale_rows(db, "ZzTestDistrict", date(2026, 10, 3), include_synthetic=False) == []
     assert prices.load_sale_rows(db, "ZzTestDistrict", date(2026, 9, 1), include_synthetic=True) == []
+
+
+# --- Review regression tests (#43) ---
+
+
+def test_three_sales_from_two_farmers_falls_back_to_parish():
+    """Acceptance: 3 sales from 2 farmers does not qualify, even though the sale count does."""
+    village = [sale(1, days_ago=5), sale(1, days_ago=40), sale(2)]
+    assert prices.village_price(village, HOME, "kiboko", AS_OF)["level"] == "national"
+    neighbour = [sale(3, village_id=2, village="Other")]
+    out = prices.village_price(village + neighbour, HOME, "kiboko", AS_OF)
+    assert (out["level"], out["n_sales"], out["n_farmers"]) == ("parish", 4, 3)
+
+
+def test_out_of_band_sale_never_counts_towards_the_threshold():
+    """The band runs before the threshold: a x10 slip cannot be the third farmer of a level."""
+    rows = [sale(1), sale(2), sale(3, per_kg=50_000), sale(4, village_id=2, village="Other")]
+    out = prices.village_price(rows, HOME, "kiboko", AS_OF)
+    assert (out["level"], out["n_sales"], out["n_farmers"]) == ("parish", 3, 3)
+
+
+def test_median_uses_the_bands_defined_in_bands_py(monkeypatch):
+    """bands.py is the only definition; prices.py must read it, not a copy."""
+    assert prices.BANDS is bands.BANDS
+    assert prices.village_price(three_farmers(), HOME, "kiboko", AS_OF)["level"] == "village"
+    monkeypatch.setattr(bands, "BANDS", {**bands.BANDS, "kiboko": (1, 2)})
+    assert prices.village_price(three_farmers(), HOME, "kiboko", AS_OF)["level"] == "national"
+
+
+def test_prices_for_never_carries_farmer_ids():
+    ids = [f"farmer-secret-{i}" for i in range(6)]
+    rows = [sale(f) for f in ids[:3]] + [sale(f, form="faq", per_kg=12_000) for f in ids[3:]]
+    out = prices.prices_for(rows, HOME, "kiboko", AS_OF)
+    assert "farmer-secret" not in repr(out) and "farmer_id" not in repr(out)
+    assert out["village_price"]["level"] == "village" and [o["form"] for o in out["other_prices"]] == ["faq"]
+
+
+class _FakeCursor:
+    def __init__(self, log):
+        self.log = log
+        self.description = [SimpleNamespace(name=n) for n in ("farmer_id", "sale_date", "price_total")]
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return None
+
+    def execute(self, query, params):
+        self.log.append((query, params))
+
+    def fetchall(self):
+        return [(7, AS_OF, 590_000)]
+
+
+class _FakeConn:
+    def __init__(self):
+        self.log = []
+
+    def cursor(self):
+        return _FakeCursor(self.log)
+
+
+def test_load_sale_rows_is_parameterised_with_an_inclusive_365_day_window(monkeypatch):
+    conn = _FakeConn()
+    district = "Masaka'; drop table entries; --"
+    rows = prices.load_sale_rows(conn, district, AS_OF, include_synthetic=False)
+    (query, params), = conn.log
+    assert query.count("%s") == 4 and "Masaka" not in query and "drop" not in query
+    assert "sale_date > %s and sale_date <= %s" in query and "coffee_sale_prices" in query
+    # exclusive lower bound 366 days back == a sale 365 days back is still in
+    assert params == (district, AS_OF - timedelta(days=366), AS_OF, False)
+    assert rows == [{"farmer_id": 7, "sale_date": AS_OF, "price_total": 590_000}]
+    monkeypatch.setattr(prices.config, "settings", replace(prices.config.settings, price_include_synthetic=False))
+    prices.load_sale_rows(conn, "Masaka", AS_OF)
+    assert conn.log[-1][1][-1] is False
+
+
+@pytest.mark.xfail(strict=True, reason="review finding 2: a same-named parish in another sub-county is pooled")
+def test_parish_level_is_scoped_to_the_home_sub_county():
+    """villages is unique on (district, sub_county, parish, village): parish names repeat across sub-counties."""
+    rows = [sale(f, village_id=10 + f, village=f"V{f}", sub_county="Kyesiiga") for f in (1, 2, 3)]
+    out = prices.village_price(rows, HOME, "kiboko", AS_OF)
+    assert (out["level"], out["area"]) == ("district", "Masaka")
+
+
+@pytest.mark.xfail(strict=True, reason="review finding 3: Home/SaleRow from the #43 interface contract are missing")
+def test_home_type_from_the_interface_contract():
+    assert prices.SaleRow is not None
+    home = prices.Home(**HOME)
+    assert prices.village_price(three_farmers(), home, "kiboko", AS_OF)["level"] == "village"
+
+
+@pytest.mark.supabase
+def test_round_trip_three_farmers_give_a_village_median(db):
+    """Acceptance: 3 farmers x 1 sale in one village -> village-level median via load_sale_rows + village_price.
+
+    A 4th farmer sold 366 days back: the SQL window must drop that sale, or the median moves."""
+    as_of = date(2026, 10, 3)
+    home = {"village_id": None, "village": "V43", "parish": "P43", "sub_county": "S43", "district": "ZzReview43"}
+    with db.cursor() as cur:
+        cur.execute("insert into villages (region, district, sub_county, parish, village, is_synthetic) "
+                    "values ('Central', %s, %s, %s, %s, true) returning id",
+                    (home["district"], home["sub_county"], home["parish"], home["village"]))
+        home["village_id"] = cur.fetchone()[0]
+        for i, (per_kg, days_ago) in enumerate([(5_800, 10), (5_900, 365), (6_000, 30), (9_000, 366)]):
+            cur.execute("insert into farmers (name, pin_hash, village_id, is_synthetic) "
+                        "values (%s, %s, %s, true) returning id", (f"R{i}", f"zz-review-43-{i}", home["village_id"]))
+            fid = cur.fetchone()[0]
+            cur.execute("insert into calls (farmer_id, received_at, is_synthetic) values (%s, %s, true) returning id",
+                        (fid, "2026-10-02T10:00:00+03:00"))
+            cid = cur.fetchone()[0]
+            cur.execute("insert into entries (call_id, farmer_id, kind, crop, currency, price_total, amount_kg, "
+                        "coffee_form, date_sold) values (%s, %s, 'sale', 'coffee', 'UGX', %s, 100, 'kiboko', %s)",
+                        (cid, fid, per_kg * 100, as_of - timedelta(days=days_ago)))
+    rows = prices.load_sale_rows(db, home["district"], as_of, include_synthetic=True)
+    assert sorted(r["sale_date"] for r in rows) == [as_of - timedelta(days=d) for d in (365, 30, 10)]
+    out = prices.village_price(rows, home, "kiboko", as_of, include_synthetic=True)
+    assert (out["level"], out["area"], out["n_sales"], out["n_farmers"]) == ("village", "V43", 3, 3)
+    assert out["median_ugx_per_kg"] == 5_900 and out["median_words_sw"] == "elfu tano na mia tisa"
+    assert out["includes_synthetic"] is True

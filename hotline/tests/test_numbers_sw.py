@@ -1,5 +1,8 @@
+from pathlib import Path
+
 import pytest
 
+from hotline.bands import BANDS
 from hotline.numbers_sw import to_words
 
 
@@ -45,3 +48,43 @@ def test_digits_to_words_pin():
 def test_to_words_rejects_bad_input(bad):
     with pytest.raises(ValueError):
         to_words(bad)
+
+
+# --- Review regression tests (#43) ---
+
+
+@pytest.mark.parametrize(
+    ("n", "words"),
+    [(7, "saba"), (20, "ishirini"), (150, "mia moja na hamsini"), (6500, "elfu sita na mia tano")],
+)
+def test_to_words_remaining_acceptance_answers(n, words):
+    """The issue's acceptance list includes 7, 20, 150 and 6500, which the known-answer table skipped."""
+    assert to_words(n) == words
+
+
+def test_laki_form_matches_translate_glossary():
+    """#58 turns "milioni moja na laki nane" back into 1,800,000. The words we speak must be that phrase."""
+    glossary = Path(__file__).resolve().parents[1] / "hotline" / "prompts" / "translate_sw_en.md"
+    assert '"milioni moja na laki nane" -> 1,800,000' in glossary.read_text(encoding="utf-8")
+    assert to_words(1_800_000) == "milioni moja na laki nane"
+
+
+def test_words_are_unique_for_every_price_the_median_can_produce():
+    """Medians are multiples of 50 inside a band (max 30,000), so the caller hears a unique phrase.
+
+    to_words is not one-to-one in general ("elfu kumi na mbili" is both 10,002 and 12,000),
+    so this pins the range that matters."""
+    top = max(high for _, high in BANDS.values())
+    seen: dict[str, int] = {}
+    for n in range(0, top + 1, 50):
+        words = to_words(n)
+        assert words not in seen, f"{n} and {seen.get(words)} both read '{words}'"
+        seen[words] = n
+
+
+@pytest.mark.xfail(strict=True, reason="review finding 1: digits_to_words (issue #43 scope, needed by #53) is missing")
+def test_digits_to_words_reads_a_pin():
+    from hotline.numbers_sw import digits_to_words
+
+    assert digits_to_words("4831") == "nne, nane, tatu, moja"
+    assert digits_to_words("9001") == "tisa, sifuri, sifuri, moja"

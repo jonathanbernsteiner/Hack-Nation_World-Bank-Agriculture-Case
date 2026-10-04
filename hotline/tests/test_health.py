@@ -17,7 +17,6 @@ STUB_ROUTES = [
     ("POST", "/api/calls"),
     ("POST", "/api/jobs/process-pending"),
     ("POST", "/api/calls/conv_123/process"),
-    ("GET", "/demo"),
 ]
 
 

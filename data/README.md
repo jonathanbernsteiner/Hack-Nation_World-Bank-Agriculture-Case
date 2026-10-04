@@ -49,7 +49,7 @@ Built for issue #17. The hotline agent's knowledge file (#46) is built from thes
 
 ## Sources and licences
 
-Every row cites at least one source, and 26 of the 29 problem rows cite three or more. Rows cite these publishers:
+Every problem row (29 of 30) cites at least one source (the `not_sure` fallback states no fact and has none), and 26 of the 29 problem rows cite three or more. Rows cite these publishers:
 
 | Publisher | Rows citing it | Licence |
 |---|---|---|

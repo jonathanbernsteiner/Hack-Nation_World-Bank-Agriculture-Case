@@ -235,5 +235,144 @@ class ReadmeTest(unittest.TestCase):
         self.assertIsNone(re.search(r"gemma|ollama|#29|matcher", text, re.IGNORECASE))
 
 
+# --- Review cycle 2 -----------------------------------------------------------
+# The #46 knowledge file turns these fields into what the agent says on the call
+# ("farmer says", "ask to tell apart", "do now / prevent", "call officer when").
+# officer_note_en and conditions are not in this list: they are for the officer.
+FARMER_FACING_FIELDS = (
+    "farmer_advice_en", "tell_apart_question", "escalate_when", "farmer_words", "key_signs",
+)
+ADVICE_FIELDS = ("farmer_advice_en", "tell_apart_question", "escalate_when")
+# escalate_when is itself the "call the officer when" line, so it may say
+# "call before uprooting"; the other two must never ask for a tree to be destroyed first.
+ACTION_FIELDS = ("farmer_advice_en", "tell_apart_question")
+
+# Guardrail 1, widened with every product, active ingredient and fertiliser that
+# officer_note_en names (copper oxychloride, triazoles, strobilurins, Epsom salts, ...)
+# plus common East African brands, so an officer measure can't leak into farmer text.
+CHEMICAL_TERMS = re.compile(
+    r"\b(?:copper|cuprous|oxychloride|bordeaux|fungicides?|insecticides?|herbicides?|"
+    r"pesticides?|bio-?pesticides?|nematicides?|acaricides?|chlorpyrifos|dursban|"
+    r"glyphosate|roundup|mancozeb|dithane|chlorothalonil|dithianon|captan|triazoles?|"
+    r"triadimefon|bayleton|cyproconazole|hexaconazole|propiconazole|tebuconazole|"
+    r"strobilurins?|azoxystrobin|metalaxyl|ridomil|kocide|nordox|deltamethrin|decis|"
+    r"cypermethrin|lambda-?cyhalothrin|karate|pyrethroids?|pyrethrum|organophosphates?|"
+    r"endosulfan|profenofos|imidacloprid|fipronil|regent|fenitrothion|ethion|rhodocide|"
+    r"ultracide|supracide|aldrin|dieldrin|carbendazim|dimethoate|aluminium phosphide|"
+    r"gastoxin|neem|kaolin|npk|urea|ammonium|sulphate|sulfate|epsom|dolomite|muriate|"
+    r"potash|super\s?phosphate|dose|doses|dosage|mix rate|g/l|ml/l|per litre|per liter)\b",
+    re.IGNORECASE,
+)
+
+# Guardrail 4 also covers burning, removing or pulling out a tree, active or passive.
+TREE = r"(?:(?:the|a|an|any|all|every|this|that|these|those|its|your|dead|dying|sick|affected|infected|infested|attacked|badly|old|whole|diseased|wilted|wilting|coffee)\s+){0,4}trees?\b(?!\s+stumps?)"
+DESTROY_TREE_OBJECT = re.compile(
+    r"\b(?:burn\w*|destroy\w*|remov\w*|pull\w* (?:out|up)|chop\w* (?:\w+ )?down|kill\w*)\s+" + TREE
+    + r"|\btrees?\b(?:\s+\S+){0,4}?\s+(?:burnt|burned|destroyed|removed|pulled (?:out|up)|chopped down|felled|killed)\b",
+    re.IGNORECASE,
+)
+
+# Guardrail 5: never say an urgent (or unsure) problem can wait or skip the officer.
+SKIPS_OFFICER = re.compile(
+    r"\b(?:can wait|no need to|not urgent|nothing to worry|"
+    r"without (?:\w+ ){0,3}(?:the )?(?:extension )?officer|"
+    r"instead of (?:calling|asking|waiting for) the (?:extension )?officer|"
+    r"(?:do not|don't|never) (?:need to )?(?:call|ask|tell|bother|wait for) the (?:extension )?officer)\b",
+    re.IGNORECASE,
+)
+
+# The BRACOL paper names no pathogens, so its "brown leaf spot" is not Phoma (#17 decision).
+BRACOL_ROWS = {"coffee_leaf_rust", "brown_eye_spot", "coffee_leaf_miner"}
+
+
+def field_texts(row, fields):
+    """(field, text) pairs for the given fields; list fields yield one pair per item."""
+    for field in fields:
+        value = row[field]
+        for text in value if isinstance(value, list) else [value]:
+            if text:
+                yield field, text
+
+
+def first_destroy_step(sentence):
+    """Earliest uproot/dig-out/burn/remove-a-tree step in the sentence, or None."""
+    matches = [m for m in (DESTROY_TREE.search(sentence), DESTROY_TREE_OBJECT.search(sentence)) if m]
+    return min(matches, key=lambda m: m.start()) if matches else None
+
+
+class SafetyPatternSelfTest(unittest.TestCase):
+    """The safety regexes must catch known-bad wording, or the data tests prove nothing."""
+
+    def test_patterns_flag_bad_wording(self):
+        for text in ("Spray copper oxychloride.", "Use a triazole.", "Add Epsom salts.",
+                     "Apply 2 doses.", "Mix 50 ml per litre."):
+            self.assertRegex(text, CHEMICAL_TERMS)
+        for text in ("Burn the dead trees where they stand.", "Remove the dying coffee trees.",
+                     "Pull out the sick tree.", "Badly attacked trees must be burnt.",
+                     "Uproot and burn it."):
+            self.assertIsNotNone(first_destroy_step(text), text)
+        for text in ("This can wait until next season.", "There is no need to call anyone.",
+                     "Uproot it without waiting for the extension officer.",
+                     "Do not call the extension officer."):
+            self.assertRegex(text, SKIPS_OFFICER)
+
+    def test_patterns_leave_safe_wording_alone(self):
+        for text in ("Remove old tree stumps and their roots.", "Strip old berries off the trees and burn them.",
+                     "Cut off and destroy badly infested branches.", "Keep or plant shade trees.",
+                     "Kill the grub inside with a wire."):
+            self.assertIsNone(first_destroy_step(text), text)
+        self.assertNotRegex("Feed the trees with manure or compost.", CHEMICAL_TERMS)
+        self.assertNotRegex("Call the extension officer the same day.", SKIPS_OFFICER)
+
+
+class FarmerSafetyCycle2Test(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.rows = load_rows()
+        cls.by_id = {row["id"]: row for row in cls.rows}
+
+    def test_no_chemical_product_or_dose_in_any_farmer_facing_field(self):
+        for row in self.rows:
+            for field, text in field_texts(row, FARMER_FACING_FIELDS):
+                with self.subTest(row=row["id"], field=field):
+                    self.assertEqual([m.group(0) for m in CHEMICAL_TERMS.finditer(text)], [])
+
+    def test_any_tree_destroying_step_comes_after_the_extension_officer(self):
+        for row in self.rows:
+            for field, text in field_texts(row, ACTION_FIELDS):
+                for sentence in SENTENCE_SPLIT.split(text):
+                    destroy = first_destroy_step(sentence)
+                    if destroy is None:
+                        continue
+                    with self.subTest(row=row["id"], field=field, sentence=sentence):
+                        officer = OFFICER.search(sentence)
+                        self.assertIsNotNone(officer, "tree-destroying step without the extension officer")
+                        self.assertLess(officer.start(), destroy.start())
+
+    def test_urgent_and_unsure_problems_never_wait_or_skip_the_officer(self):
+        for row in self.rows:
+            if row["urgency"] != "urgent" and row["id"] != FALLBACK_ID:
+                continue
+            for field, text in field_texts(row, ADVICE_FIELDS):
+                with self.subTest(row=row["id"], field=field):
+                    self.assertIsNone(SKIPS_OFFICER.search(text))
+
+    def test_not_sure_names_no_problem_and_always_escalates(self):
+        row = self.by_id[FALLBACK_ID]
+        for key in ("symptom_categories", "plant_parts", "farmer_words", "key_signs", "look_alikes"):
+            self.assertEqual(row[key], [], key)
+        self.assertTrue(row["escalate_when"].startswith("Always"))
+        advice = row["farmer_advice_en"].lower()
+        for other in self.rows:
+            if other["id"] == FALLBACK_ID:
+                continue
+            with self.subTest(other=other["id"]):
+                self.assertNotIn(other["common_name"].lower(), advice)
+                self.assertNotIn(FALLBACK_ID, other["look_alikes"])
+
+    def test_only_the_three_bracol_classes_are_flagged(self):
+        self.assertEqual({row["id"] for row in self.rows if row["in_bracol"]}, BRACOL_ROWS)
+
+
 if __name__ == "__main__":
     unittest.main()

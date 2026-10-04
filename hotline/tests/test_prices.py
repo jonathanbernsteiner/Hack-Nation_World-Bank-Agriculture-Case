@@ -231,7 +231,6 @@ def test_load_sale_rows_is_parameterised_with_an_inclusive_365_day_window(monkey
     assert conn.log[-1][1][-1] is False
 
 
-@pytest.mark.xfail(strict=True, reason="review finding 2: a same-named parish in another sub-county is pooled")
 def test_parish_level_is_scoped_to_the_home_sub_county():
     """villages is unique on (district, sub_county, parish, village): parish names repeat across sub-counties."""
     rows = [sale(f, village_id=10 + f, village=f"V{f}", sub_county="Kyesiiga") for f in (1, 2, 3)]
@@ -239,7 +238,6 @@ def test_parish_level_is_scoped_to_the_home_sub_county():
     assert (out["level"], out["area"]) == ("district", "Masaka")
 
 
-@pytest.mark.xfail(strict=True, reason="review finding 3: Home/SaleRow from the #43 interface contract are missing")
 def test_home_type_from_the_interface_contract():
     assert prices.SaleRow is not None
     home = prices.Home(**HOME)
@@ -274,3 +272,14 @@ def test_round_trip_three_farmers_give_a_village_median(db):
     assert (out["level"], out["area"], out["n_sales"], out["n_farmers"]) == ("village", "V43", 3, 3)
     assert out["median_ugx_per_kg"] == 5_900 and out["median_words_sw"] == "elfu tano na mia tisa"
     assert out["includes_synthetic"] is True
+
+
+def test_three_sales_do_not_reveal_individual_prices_through_quartiles():
+    rows = [sale(f, per_kg) for f, per_kg in ((1, 4_000), (2, 5_000), (3, 6_500))]
+    out = prices.village_price(rows, HOME, "kiboko", AS_OF)
+    assert out["n_sales"] == 3 and out["p25"] is None and out["p75"] is None
+
+
+def test_drugar_has_a_national_reference():
+    out = prices.village_price([], HOME, "drugar", AS_OF)
+    assert (out["level"], out["median_ugx_per_kg"]) == ("national", 14_500)

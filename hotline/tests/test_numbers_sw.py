@@ -82,9 +82,16 @@ def test_words_are_unique_for_every_price_the_median_can_produce():
         seen[words] = n
 
 
-@pytest.mark.xfail(strict=True, reason="review finding 1: digits_to_words (issue #43 scope, needed by #53) is missing")
 def test_digits_to_words_reads_a_pin():
     from hotline.numbers_sw import digits_to_words
 
     assert digits_to_words("4831") == "nne, nane, tatu, moja"
     assert digits_to_words("9001") == "tisa, sifuri, sifuri, moja"
+
+
+@pytest.mark.parametrize("bad", ["", "12a", "1 2", None, 123])
+def test_digits_to_words_rejects_non_digits(bad):
+    with pytest.raises(ValueError):
+        from hotline.numbers_sw import digits_to_words
+
+        digits_to_words(bad)

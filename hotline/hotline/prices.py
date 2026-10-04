@@ -6,7 +6,7 @@ rows from the coffee_sale_prices view; it takes an explicit connection."""
 import statistics
 from collections.abc import Iterable, Mapping
 from datetime import date, timedelta
-from typing import Any
+from typing import Any, TypedDict
 
 from hotline import config
 from hotline.bands import BANDS, in_band
@@ -16,15 +16,48 @@ WINDOW_DAYS = 365
 MIN_SALES = 3
 MIN_FARMERS = 3
 ROUND_TO_UGX = 50
+MIN_SALES_FOR_QUARTILES = 5  # below this p25/p75 plus the median would reveal single prices
 LEVELS = ("village", "parish", "sub_county", "district")
 NATIONAL_SOURCE_URL = "https://ugandacoffee.go.ug/resource-center/reports/monthly-reports"
-# A reference from the UCDA/MAAIF monthly report, not a village median.
+# A reference from the UCDA monthly report for February 2026 (figures checked against the
+# PDF), not a village median. There is no national red_cherry figure in the report, so a
+# red_cherry caller can get median_ugx_per_kg None at national level.
 NATIONAL_REFERENCE: dict[str, dict[str, Any]] = {
     "kiboko": {"median_ugx_per_kg": 5_750, "month": "2026-02", "source_url": NATIONAL_SOURCE_URL},
     "faq": {"median_ugx_per_kg": 12_250, "month": "2026-02", "source_url": NATIONAL_SOURCE_URL},
     "parchment": {"median_ugx_per_kg": 15_500, "month": "2026-02", "source_url": NATIONAL_SOURCE_URL},
+    "drugar": {"median_ugx_per_kg": 14_500, "month": "2026-02", "source_url": NATIONAL_SOURCE_URL},
 }
 NATIONAL_AREA = "Uganda"
+
+
+
+class Home(TypedDict, total=False):
+    """The caller's home area (spec section 5)."""
+
+    village_id: int | None
+    village: str | None
+    parish: str | None
+    sub_county: str | None
+    district: str | None
+
+
+class SaleRow(TypedDict, total=False):
+    """A row of the coffee_sale_prices view."""
+
+    farmer_id: int
+    is_synthetic: bool
+    coffee_form: str
+    sale_date: date
+    amount_kg: float
+    price_total: float
+    village_id: int | None
+    region: str | None
+    district: str | None
+    sub_county: str | None
+    parish: str | None
+    village: str | None
+
 
 _SALE_COLUMNS = (
     "farmer_id, is_synthetic, coffee_form, sale_date, amount_kg, price_total, "
@@ -72,7 +105,7 @@ def _per_kg(row: Mapping[str, Any]) -> float | None:
         return None
 
 
-def _usable_rows(rows: Iterable[Mapping], home: Mapping, form: str, as_of: date, include_synthetic: bool):
+def _usable_rows(rows: Iterable[SaleRow], home: Home, form: str, as_of: date, include_synthetic: bool):
     start, end = window_for(as_of)
     usable = []
     for row in rows:
@@ -89,22 +122,25 @@ def _usable_rows(rows: Iterable[Mapping], home: Mapping, form: str, as_of: date,
     return usable
 
 
-def _matches(row: Mapping, home: Mapping, level: str) -> bool:
+def _matches(row: Mapping, home: Home, level: str) -> bool:
     if level == "village":
         return home.get("village_id") is not None and row.get("village_id") == home["village_id"]
-    return home.get(level) is not None and row.get(level) == home[level]
+    if home.get(level) is None or row.get(level) != home[level]:
+        return False
+    # parish names repeat across sub-counties, so a parish match needs the same sub-county
+    return level != "parish" or (home.get("sub_county") is not None and row.get("sub_county") == home["sub_county"])
 
 
 def _result(form: str, level: str, area: str, matched: list[tuple[Mapping, float]], as_of: date) -> dict:
     prices = [price for _, price in matched]
-    p25, p75 = _quartiles(prices)
+    p25, p75 = _quartiles(prices) if len(prices) >= MIN_SALES_FOR_QUARTILES else (None, None)
     median = round_ugx(statistics.median(prices))
     start, end = window_for(as_of)
     return {
         "form": form,
         "median_ugx_per_kg": median,
-        "p25": round_ugx(p25),
-        "p75": round_ugx(p75),
+        "p25": None if p25 is None else round_ugx(p25),
+        "p75": None if p75 is None else round_ugx(p75),
         "n_sales": len(matched),
         "n_farmers": len({row["farmer_id"] for row, _ in matched}),
         "level": level,
@@ -137,7 +173,7 @@ def _national(form: str, as_of: date) -> dict:
     }
 
 
-def _local_price(usable: list, home: Mapping, form: str, as_of: date) -> dict | None:
+def _local_price(usable: list, home: Home, form: str, as_of: date) -> dict | None:
     for level in LEVELS:
         matched = [(row, price) for row, price in usable if _matches(row, home, level)]
         farmers = {row["farmer_id"] for row, _ in matched}
@@ -148,8 +184,8 @@ def _local_price(usable: list, home: Mapping, form: str, as_of: date) -> dict | 
 
 
 def village_price(
-    rows: Iterable[Mapping],
-    home: Mapping,
+    rows: Iterable[SaleRow],
+    home: Home,
     form: str,
     as_of: date,
     include_synthetic: bool | None = None,
@@ -163,8 +199,8 @@ def village_price(
 
 
 def prices_for(
-    rows: Iterable[Mapping],
-    home: Mapping,
+    rows: Iterable[SaleRow],
+    home: Home,
     main_form: str,
     as_of: date,
     include_synthetic: bool | None = None,

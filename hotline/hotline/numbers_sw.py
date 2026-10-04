@@ -6,7 +6,10 @@ prompts/translate_sw_en.md, which maps "milioni moja na laki nane" back to 1,800
 - 100,000-999,999: "laki N" for each hundred thousand (100,000 = "laki moja",
   150,000 = "laki moja na elfu hamsini"). We never say "elfu mia moja".
 - 1,000,000 and above: "milioni N" (1,800,000 = "milioni moja na laki nane").
-Parts are joined with " na " (and)."""
+Parts are joined with " na " (and).
+
+Different numbers can give the same words (10,002 and 12,000 both read "elfu kumi na
+mbili"), so round money to the nearest 50 UGX before calling to_words."""
 
 MAX_VALUE = 999_999_999
 
@@ -77,3 +80,13 @@ def to_words(n: int) -> str:
     if rest:
         parts.append(_below_million(rest))
     return _JOIN.join(parts)
+
+
+_DIGIT_WORDS = {"0": "sifuri", **{str(k): v for k, v in _UNITS.items()}}
+
+
+def digits_to_words(digits: str) -> str:
+    """Read digits one by one: "4831" -> "nne, nane, tatu, moja". ValueError if empty or not all 0-9."""
+    if not isinstance(digits, str) or not digits or any(c not in _DIGIT_WORDS for c in digits):
+        raise ValueError("digits_to_words needs a non-empty string of digits 0-9")
+    return ", ".join(_DIGIT_WORDS[c] for c in digits)

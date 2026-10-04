@@ -219,11 +219,6 @@ def test_signature_uses_real_clock_by_default():
     assert not security.verify_elevenlabs_signature(BODY, _sign(BODY, stale), WEBHOOK)
 
 
-@pytest.mark.xfail(
-    raises=OverflowError,
-    strict=True,
-    reason="review cycle 1: huge t raises OverflowError against the float clock; remove marker once fixed",
-)
 @pytest.mark.parametrize("ts", ["9" * 400, "-" + "9" * 400], ids=["huge", "huge-negative"])
 def test_signature_huge_timestamp_returns_false_with_real_clock(ts):
     assert security.verify_elevenlabs_signature(BODY, f"t={ts},v0=ff", WEBHOOK) is False

@@ -88,7 +88,10 @@ def verify_elevenlabs_signature(
         return False
     timestamp, provided = parsed
     current = time.time() if now is None else now
-    if abs(current - timestamp) > tolerance_s:
+    try:
+        if abs(current - timestamp) > tolerance_s:
+            return False
+    except OverflowError:  # absurdly large t cannot be within tolerance
         return False
     signed = f"{timestamp}.".encode() + raw_body
     expected = hmac.new(secret.encode(), signed, hashlib.sha256).hexdigest()

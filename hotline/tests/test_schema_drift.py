@@ -7,8 +7,8 @@ from pathlib import Path
 import psycopg
 import pytest
 
-from hotline.enums import (CallSource, CallStatus, CoffeeForm, CoffeeType, Consent, Currency,
-                           IdentifiedBy, Region)
+from hotline.enums import (Activity, BuyerType, CallSource, CallStatus, CoffeeForm, CoffeeType,
+                           Consent, Currency, IdentifiedBy, Kind, PaidHow, Region, Symptom, Unit)
 
 ROOT = Path(__file__).resolve().parents[2]
 MIGRATIONS = ROOT / "supabase" / "migrations"
@@ -116,3 +116,57 @@ def test_conversation_id_unique_in_database(db, ids):
     db.execute("insert into public.calls (farmer_id, conversation_id) values (%s, 'dup')", (farmer,))
     with pytest.raises(psycopg.errors.UniqueViolation):
         db.execute("insert into public.calls (farmer_id, conversation_id) values (%s, 'dup')", (farmer,))
+
+
+# --- Regression tests from review (#42). ---
+
+MIRRORED_LEDGER_LISTS = {"kind": Kind, "unit": Unit, "buyer_type": BuyerType, "paid_how": PaidHow,
+                         "activity": Activity, "symptom": Symptom}
+
+
+def test_mirrored_ledger_enums_match_sql():
+    """hotline/enums.py copies the server enums; its copies must not drift from the CHECK lists either."""
+    lists = check_lists()
+    for column, enum in MIRRORED_LEDGER_LISTS.items():
+        assert lists[column] == [m.value for m in enum], column
+
+
+def test_districts_csv_header_and_names_are_clean():
+    """places.py (#48) matches district names exactly: one cited comment line, then clean rows."""
+    lines = DISTRICTS.read_text().splitlines()
+    assert [ln for ln in lines if ln.startswith("#")] == lines[:1]
+    assert "license:" in lines[0] and "https://" in lines[0]
+    assert lines[1] == "region,district,lat,lon"
+    names = [r["district"] for r in read_districts()]
+    assert all(name and name == name.strip() for name in names)
+    assert len({name.casefold() for name in names}) == len(names)
+
+
+@pytest.mark.supabase
+@pytest.mark.parametrize("role", ["anon", "authenticated"])
+def test_coffee_sale_prices_is_hidden_from_client_roles(db, role):
+    """The view carries farmer_id and prices; only the server may read it."""
+    db.execute(f"set local role {role}")
+    with pytest.raises(psycopg.errors.InsufficientPrivilege):
+        db.execute("select count(*) from public.coffee_sale_prices")
+
+
+@pytest.mark.supabase
+def test_coffee_sale_prices_drops_unusable_sales(db, ids):
+    """Only verified, confident UGX coffee sales with a known form reach the median (#43)."""
+    village, farmer, call = ids
+    rows = [("UGX", "kiboko", None, None, 5900),   # kept
+            ("KES", "kiboko", None, None, 5900),   # wrong currency
+            ("UGX", "other", None, None, 5900),    # unknown form
+            ("UGX", "kiboko", 0.5, None, 5900),    # low confidence
+            ("UGX", "kiboko", None, False, 5900),  # quote not in transcript
+            ("UGX", "kiboko", None, None, 0)]      # no price
+    for currency, form, confidence, verified, price in rows:
+        db.execute(
+            """insert into public.entries (call_id, farmer_id, kind, crop, currency, price_total,
+                   coffee_form, amount_kg, confidence, quote_verified)
+               values (%s, %s, 'sale', 'coffee', %s, %s, %s, 1, %s, %s)""",
+            (call, farmer, currency, price, form, confidence, verified))
+    kept = db.execute("select coffee_form, ugx_per_kg from public.coffee_sale_prices where farmer_id = %s",
+                      (farmer,)).fetchall()
+    assert kept == [("kiboko", 5900)]

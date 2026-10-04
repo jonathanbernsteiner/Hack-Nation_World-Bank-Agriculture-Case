@@ -142,3 +142,68 @@ def test_deleting_a_farmer_or_call_never_cascades():
     """The synthetic reset (#20) relies on this: deleting a farmer or call that real rows
     point at must fail, not take those rows with it (or orphan them)."""
     assert re.findall(r"on delete (cascade|set null|set default)", all_migrations()) == []
+
+
+# --- Regression tests from review (#42): the Uganda migration must stay additive and keep its contract. ---
+
+COFFEE_SALE_PRICES_COLUMNS = [
+    "entry_id", "farmer_id", "is_synthetic", "coffee_form", "coffee_type", "sale_date", "amount_kg",
+    "price_total", "ugx_per_kg", "village_id", "region", "district", "sub_county", "parish", "village"]
+
+
+def later_migrations():
+    """Each migration after the live ledger one, comments removed."""
+    paths = sorted(MIGRATIONS.glob("*.sql"))
+    return {p.name: re.sub(r"--[^\n]*", "", p.read_text()).lower() for p in paths if p.name > paths[0].name}
+
+
+def test_later_migrations_never_drop_or_rewrite_live_data():
+    """40/416/511 live rows must survive: no drops, truncates, deletes, renames or type changes."""
+    destructive = r"drop (table|column|view|schema)|truncate|delete from|rename |alter column \w+ (set data )?type"
+    for name, text in later_migrations().items():
+        assert re.findall(destructive, text) == [], name
+        for constraint in re.findall(r"drop constraint (?:if exists )?(\w+)", text):
+            assert f"add constraint {constraint} " in text, f"{name}: {constraint} dropped, not re-added"
+
+
+def test_check_swaps_keep_every_value_old_rows_may_hold():
+    """A re-added CHECK may only widen its list (the currency swap must keep KES and USD)."""
+    every = re.findall(r"check\s*\(\s*(\w+)\s+in\s*\(([^)]*)\)\)", uncommented_sql())
+    first = {}
+    for column, values in every:
+        first.setdefault(column, set(re.findall(r"'([^']*)'", values)))
+    for column, latest in check_lists().items():
+        assert first[column] <= set(latest), column
+    assert {"KES", "UGX", "USD", "other"} <= set(check_lists()["currency"])
+
+
+def top_level_items(select_list):
+    """Split a select list on commas that are not inside parentheses."""
+    items, depth, start = [], 0, 0
+    for i, ch in enumerate(select_list):
+        depth += {"(": 1, ")": -1}.get(ch, 0)
+        if ch == "," and depth == 0:
+            items, start = [*items, select_list[start:i]], i + 1
+    return [*items, select_list[start:]]
+
+
+def test_coffee_sale_prices_columns_match_contract():
+    """#43 reads these columns by name; the view must never expose pin_hash or other farmer fields."""
+    text = uncommented_sql()
+    select = re.search(r"create view public\.coffee_sale_prices .*? as\s+select (.*?)\s+from ", text, re.S).group(1)
+    names = [re.split(r"[\s.]", item.strip())[-1] for item in top_level_items(select)]
+    assert names == COFFEE_SALE_PRICES_COLUMNS
+    assert "pin_hash" not in select
+
+
+def test_farmer_id_becomes_nullable_on_calls_and_entries():
+    """Unidentified callers (#11) get a call row and entries before a farmer is known."""
+    text = uncommented_sql()
+    for table in ("calls", "entries"):
+        alters = " ".join(m.group(1) for m in re.finditer(rf"alter table public\.{table}\b(.*?);", text, re.S))
+        assert re.search(r"alter column farmer_id drop not null", alters), table
+
+
+def test_calls_pending_index_is_partial_on_unprocessed():
+    assert re.search(r"create index calls_pending_idx on public\.calls \(status\) where status <> 'processed';",
+                     uncommented_sql())

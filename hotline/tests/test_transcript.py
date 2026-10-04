@@ -154,7 +154,7 @@ def test_pin_in_tool_params_redacts_spoken_pin():
 
 
 def test_dtmf_only_digit_turn_and_spoken_pin_both_redacted():
-    data = _payload([_turn("user", "9001"), _turn("agent", "Umesema tisa sifuri sifuri moja."), _turn("user", "9 0 0 1")])
+    data = _payload([_turn("user", "9001", source_medium="dtmf"), _turn("agent", "Umesema tisa sifuri sifuri moja."), _turn("user", "9 0 0 1")])
     assert [ln["sw"] for ln in to_lines(data)] == ["[PIN]", "Umesema [PIN].", "[PIN]"]
 
 
@@ -518,9 +518,6 @@ def test_double_digit_form_is_redacted(text):
 
 # --- Review cycle 4 regression tests (#57) ---
 
-BARE_NUMBER_IS_PIN = "review cycle 4 finding 2: a bare spoken quantity or price is collected as a PIN"
-
-
 @pytest.mark.parametrize(
     "text",
     [
@@ -578,7 +575,6 @@ def test_unredacted_keypad_turn_is_collected_as_a_pin():
     assert [ln["sw"] for ln in to_lines(data)] == ["[PIN]", "Umesema [PIN]."]
 
 
-@pytest.mark.xfail(strict=True, reason=BARE_NUMBER_IS_PIN)
 def test_bare_numeric_answer_that_is_no_pin_stays_in_every_line():
     data = _payload(
         [
@@ -620,3 +616,15 @@ def test_spaced_labelled_pin_is_redacted_in_tool_result_string(text):
     assert "[PIN]" in blob
     for tail in ("8 3 1", "831", "3 1", "4-8", "48 31"):
         assert tail not in blob, tail
+
+
+def test_bare_price_answer_survives_without_keypad_medium():
+    data = _payload(
+        [
+            _turn("agent", "Uliuza kwa bei gani?", 1),
+            _turn("user", "6000", 2, source_medium="audio"),
+            _turn("agent", "Sawa, 6000 kwa kilo.", 3),
+        ]
+    )
+    assert collect_pins(data) == set()
+    assert [ln["sw"] for ln in to_lines(data)][1:] == ["6000", "Sawa, 6000 kwa kilo."]

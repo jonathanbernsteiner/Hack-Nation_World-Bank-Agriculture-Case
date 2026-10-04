@@ -126,7 +126,11 @@ def collect_pins(data: dict) -> set[str]:
             if isinstance(value, str):
                 pins.update(_labelled_digits(m) for m in _PIN_IN_TEXT.finditer(value))
         message = _message(turn)
-        is_keypad = turn.get("role") == "user" and _DIGITS_ONLY.fullmatch(message)
+        is_keypad = (
+            turn.get("role") == "user"
+            and turn.get("source_medium") == "dtmf"
+            and _DIGITS_ONLY.fullmatch(message)
+        )
         if is_keypad and MIN_PIN_DIGITS <= len(message) <= MAX_PIN_DIGITS:
             pins.add(message)
     return {p for p in pins if len(p) >= MIN_PARTIAL_RUN}

@@ -514,3 +514,82 @@ def test_no_output_contains_any_collected_pin_in_english_or_mixed_form():
 @pytest.mark.parametrize("text", ["PIN ni nine double zero one asante", "PIN ni tisa double sifuri moja asante"])
 def test_double_digit_form_is_redacted(text):
     assert redact_pins(_lines(text), {"9001"})[0]["sw"] == "PIN ni [PIN] asante"
+
+
+# --- Review cycle 4 regression tests (#57) ---
+
+LABEL_SPLITS_PIN = "review cycle 4 finding 1: the 'PIN:' label rule splits a spaced PIN before the run matcher"
+BARE_NUMBER_IS_PIN = "review cycle 4 finding 2: a bare spoken quantity or price is collected as a PIN"
+
+
+@pytest.mark.xfail(strict=True, reason=LABEL_SPLITS_PIN)
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Umesajiliwa. PIN: 4 8 3 1. Asante",
+        "Umesajiliwa. PIN: 4-8-3-1. Asante",
+        "Umesajiliwa. PIN: 48 31. Asante",
+        "Umesajiliwa. pin=4 8 3 1. Asante",
+        'Umesajiliwa. "pin": "4 8 3 1". Asante',
+    ],
+)
+def test_spaced_pin_after_a_pin_label_is_fully_redacted(text):
+    (out,) = redact_pins(_lines(text), {"4831"})
+    assert "[PIN]" in out["sw"]
+    assert not any(ch.isdigit() for ch in out["sw"]), out["sw"]
+
+
+@pytest.mark.xfail(strict=True, reason=LABEL_SPLITS_PIN)
+def test_labelled_spaced_pin_leaks_no_digit_from_lines_or_result_string():
+    say = "Umesajiliwa. PIN: 4 8 3 1."
+    truncated = '{"status":"registered","pin":"4831","say":"' + say  # non-JSON, so the string path runs
+    call = {"request_id": "r", "tool_name": "register_farmer", "params_as_json": json.dumps({"first_name": "M"})}
+    res = {"request_id": "r", "tool_name": "register_farmer", "result_value": truncated, "is_error": False}
+    data = _payload([_turn("agent", "Ngoja.", 4, tool_calls=[call], tool_results=[res]), _turn("agent", say, 6)])
+    assert collect_pins(data) == {"4831"}
+    blob = " ".join([render(to_lines(data)), json.dumps(scrub_tool_results(data), ensure_ascii=False)])
+    for tail in ("8 3 1", "831", "3 1"):
+        assert tail not in blob, tail
+
+
+@pytest.mark.parametrize("text", ["PIN: 5555", "pin=5555", '"pin": "5555"'])
+def test_pin_label_rule_still_redacts_digits_when_no_pin_was_collected(text):
+    # Safety net for a PIN no tool carried; a reorder of the label rule must keep it.
+    assert "5555" not in redact_pins(_lines(text), set())[0]["sw"]
+    assert "5555" not in redact_pins(_lines(text), {"9001"})[0]["sw"]
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("PIN: 9001", "PIN: [PIN]"),
+        ("PIN: tisa sifuri sifuri moja", "PIN: [PIN]"),
+        ("PIN: nine double zero one", "PIN: [PIN]"),
+        ("PIN: 9001, kilo 5900", "PIN: [PIN], kilo 5900"),
+    ],
+)
+def test_labelled_pin_in_word_or_solid_form_is_redacted(text, expected):
+    assert redact_pins(_lines(text), {"9001"})[0]["sw"] == expected
+
+
+def test_unredacted_keypad_turn_is_collected_as_a_pin():
+    # If redact_input is ever off, a dtmf turn arrives as digits and must still count as a PIN.
+    data = _payload(
+        [_turn("user", "9001", 2, source_medium="dtmf"), _turn("agent", "Umesema tisa sifuri sifuri moja.", 3)]
+    )
+    assert collect_pins(data) == {"9001"}
+    assert [ln["sw"] for ln in to_lines(data)] == ["[PIN]", "Umesema [PIN]."]
+
+
+@pytest.mark.xfail(strict=True, reason=BARE_NUMBER_IS_PIN)
+def test_bare_numeric_answer_that_is_no_pin_stays_in_every_line():
+    data = _payload(
+        [
+            _turn("agent", "Ulivuna kilo ngapi mwaka jana?", 1),
+            _turn("user", "1450", 2, source_medium="audio"),
+            _turn("agent", "Sawa, kilo 1450. Uliuza kwa bei gani?", 3),
+            _turn("user", "Niliuza kwa 5900.", 4, source_medium="audio"),
+        ]
+    )
+    assert collect_pins(data) == set()
+    assert [ln["sw"] for ln in to_lines(data)][1:3] == ["1450", "Sawa, kilo 1450. Uliuza kwa bei gani?"]

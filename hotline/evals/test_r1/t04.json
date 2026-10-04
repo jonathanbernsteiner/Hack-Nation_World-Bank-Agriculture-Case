@@ -1,0 +1,190 @@
+{
+  "id": "t04",
+  "is_synthetic": true,
+  "call_date": "2026-10-15",
+  "timezone": "Africa/Kampala",
+  "conversation": {
+    "conversation_id": "conv_t04_r1",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Habari. Mimi ni kompyuta, msaidizi wa simu wa kahawa. Simu hii inarekodiwa ili kutunza kumbukumbu ya shamba lako. Je, unakubali tuendelee?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 0
+      },
+      {
+        "role": "user",
+        "message": "Eeh, ndiyo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 17
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Tafadhali sema namba yako ya siri ya tarakimu nne.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 23
+      },
+      {
+        "role": "user",
+        "message": "[PIN].",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 33
+      },
+      {
+        "role": "agent",
+        "message": "Karibu. Bei ya kati ya FAQ hapa Bududa ni shilingi elfu sita kwa kilo. Je, umeuza kahawa hivi karibuni?",
+        "tool_calls": [
+          {
+            "request_id": "r1",
+            "tool_name": "identify_farmer",
+            "params_as_json": "{\"pin\": \"[PIN]\"}",
+            "tool_has_been_called": true,
+            "type": "webhook"
+          }
+        ],
+        "tool_results": [
+          {
+            "request_id": "r1",
+            "tool_name": "identify_farmer",
+            "is_error": false,
+            "tool_has_been_called": true,
+            "result_value": "{\"status\": \"found\", \"village_price\": {\"form\": \"faq\", \"median_ugx_per_kg\": 6000, \"reports\": 14, \"area\": \"village\"}}"
+          }
+        ],
+        "time_in_call_secs": 40
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, nimeuza... [unclear] ...wakati wa mavuno. Magunia saba ya FAQ.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 54
+      },
+      {
+        "role": "agent",
+        "message": "Ulipata shilingi ngapi kwa jumla, na alinunua nani?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 65
+      },
+      {
+        "role": "user",
+        "message": "Jumla milioni mbili na laki tatu. Alikuja [unclear] mfanyabiashara.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 75
+      },
+      {
+        "role": "agent",
+        "message": "Nimesikia: wakati wa mavuno, magunia saba ya FAQ, jumla milioni mbili na laki tatu, mfanyabiashara. Sahihi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 86
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 100
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Je, una tatizo la kahawa?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 106
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, matawi yanakauka, na kuna vumbi kama unga wa mbao chini. Kuna mashimo madogo kwenye tawi.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 114
+      },
+      {
+        "role": "agent",
+        "message": "Tawi lililoathirika likikatwa, unaona wadudu wadogo weusi ndani?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 128
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, nimeona wadudu wadogo kwenye shimo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 139
+      },
+      {
+        "role": "agent",
+        "message": "Huenda ni kipekecha cha matawi cha kahawa. Kata na uchome matawi yaliyoathirika, na usiyaache shambani. Muone afisa ugani kama litaenea. Kuna swali lingine?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 148
+      },
+      {
+        "role": "user",
+        "message": "Hapana.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 167
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Kwaheri.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 173
+      }
+    ],
+    "metadata": {
+      "start_time_unix_secs": 1792045800
+    }
+  },
+  "gold": {
+    "consent": "yes",
+    "entries": [
+      {
+        "kind": "sale",
+        "crop": "coffee",
+        "coffee_form": "faq",
+        "amount_kg": null,
+        "price_total": 2300000,
+        "currency": "UGX",
+        "date_sold": null,
+        "buyer_type": "middleman",
+        "buyer_name": null,
+        "paid_how": null,
+        "amount": 7,
+        "unit": "bag"
+      },
+      {
+        "kind": "observation",
+        "crop": "coffee",
+        "plot": null,
+        "symptom": "pests",
+        "disease_detected": true,
+        "likely_disease": "black_coffee_twig_borer"
+      }
+    ]
+  },
+  "free_text_alts": {},
+  "quote_possible": true,
+  "tags": [
+    "bags_no_kg",
+    "laki_milioni",
+    "total_only",
+    "vague_date",
+    "asr_noise",
+    "problem_twig_borer"
+  ],
+  "review": {
+    "verdict": "approved",
+    "rounds": 2
+  }
+}

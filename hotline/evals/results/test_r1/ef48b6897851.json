@@ -1,0 +1,251 @@
+{
+  "set": "test_r1",
+  "prompt_sha": "ef48b6897851",
+  "summary": {
+    "calls": 10,
+    "fields_total": 129,
+    "fields_correct": 129,
+    "field_accuracy": 1.0,
+    "phantom_sales": 0,
+    "quotes_total": 18,
+    "quotes_valid": 18,
+    "quote_validity": 1.0,
+    "pass": {
+      "field_accuracy": true,
+      "zero_phantom_sales": true,
+      "quote_validity": true
+    },
+    "passed": true,
+    "error_table": {
+      "by_dimension": [],
+      "by_tag": {
+        "activity_done_vs_planned": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "asr_noise": {
+          "calls": 2,
+          "wrong_fields": 0
+        },
+        "bags_no_kg": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "bags_with_kg": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "both_price_forms": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "buyer_name": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "buyer_type": {
+          "calls": 3,
+          "wrong_fields": 0
+        },
+        "clean_sale": {
+          "calls": 2,
+          "wrong_fields": 0
+        },
+        "code_switching": {
+          "calls": 4,
+          "wrong_fields": 0
+        },
+        "declined_consent": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "echo_median": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "forgot_pin": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "harvest": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "intended_sale": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "laki_milioni": {
+          "calls": 2,
+          "wrong_fields": 0
+        },
+        "last_month": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "last_week": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "mitwalo": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "mobile_money": {
+          "calls": 3,
+          "wrong_fields": 0
+        },
+        "named_month": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "no_sale_trap": {
+          "calls": 3,
+          "wrong_fields": 0
+        },
+        "non_disease_cause": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "not_sold": {
+          "calls": 2,
+          "wrong_fields": 0
+        },
+        "nusu": {
+          "calls": 2,
+          "wrong_fields": 0
+        },
+        "per_kg_only": {
+          "calls": 3,
+          "wrong_fields": 0
+        },
+        "problem_berry_borer": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "problem_cbd": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "problem_leaf_rust": {
+          "calls": 2,
+          "wrong_fields": 0
+        },
+        "problem_twig_borer": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "problem_wilt": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "self_correction": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "spray_name_request": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "total_only": {
+          "calls": 3,
+          "wrong_fields": 0
+        },
+        "two_sales": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "two_weeks_ago": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "vague_date": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "vague_symptom_not_sure": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "weather": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "weather_only": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "weekday_date": {
+          "calls": 1,
+          "wrong_fields": 0
+        },
+        "yesterday": {
+          "calls": 2,
+          "wrong_fields": 0
+        }
+      }
+    }
+  },
+  "calls": [
+    {
+      "id": "t01",
+      "pipeline_error": null,
+      "phantom_sales": 0,
+      "errors": []
+    },
+    {
+      "id": "t02",
+      "pipeline_error": null,
+      "phantom_sales": 0,
+      "errors": []
+    },
+    {
+      "id": "t03",
+      "pipeline_error": null,
+      "phantom_sales": 0,
+      "errors": []
+    },
+    {
+      "id": "t04",
+      "pipeline_error": null,
+      "phantom_sales": 0,
+      "errors": []
+    },
+    {
+      "id": "t05",
+      "pipeline_error": null,
+      "phantom_sales": 0,
+      "errors": []
+    },
+    {
+      "id": "t06",
+      "pipeline_error": null,
+      "phantom_sales": 0,
+      "errors": []
+    },
+    {
+      "id": "t07",
+      "pipeline_error": null,
+      "phantom_sales": 0,
+      "errors": []
+    },
+    {
+      "id": "t08",
+      "pipeline_error": null,
+      "phantom_sales": 0,
+      "errors": []
+    },
+    {
+      "id": "t09",
+      "pipeline_error": null,
+      "phantom_sales": 0,
+      "errors": []
+    },
+    {
+      "id": "t10",
+      "pipeline_error": null,
+      "phantom_sales": 0,
+      "errors": []
+    }
+  ]
+}

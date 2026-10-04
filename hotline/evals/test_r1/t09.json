@@ -1,0 +1,212 @@
+{
+  "id": "t09",
+  "is_synthetic": true,
+  "call_date": "2026-10-27",
+  "timezone": "Africa/Kampala",
+  "conversation": {
+    "conversation_id": "conv_t09_r1",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Habari. Mimi ni kompyuta, msaidizi wa simu wa kahawa. Simu hii inarekodiwa ili kutunza kumbukumbu ya shamba lako. Je, unakubali tuendelee?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 0
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, nakubali.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 17
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Tafadhali sema namba yako ya siri ya tarakimu nne.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 24
+      },
+      {
+        "role": "user",
+        "message": "[PIN].",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 34
+      },
+      {
+        "role": "agent",
+        "message": "Karibu. Bei ya kati ya parchment hapa Rukungiri ni shilingi elfu sita na mia nne kwa kilo. Uliuza kahawa lini mara ya mwisho?",
+        "tool_calls": [
+          {
+            "request_id": "r1",
+            "tool_name": "identify_farmer",
+            "params_as_json": "{\"pin\": \"[PIN]\"}",
+            "tool_has_been_called": true,
+            "type": "webhook"
+          }
+        ],
+        "tool_results": [
+          {
+            "request_id": "r1",
+            "tool_name": "identify_farmer",
+            "is_error": false,
+            "tool_has_been_called": true,
+            "result_value": "{\"status\": \"found\", \"village_price\": {\"form\": \"parchment\", \"median_ugx_per_kg\": 6400, \"reports\": 14, \"area\": \"village\"}}"
+          }
+        ],
+        "time_in_call_secs": 42
+      },
+      {
+        "role": "user",
+        "message": "Wiki mbili zilizopita. Nimeuza parchment kilo mia moja ishirini kwa chama cha ushirika.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 58
+      },
+      {
+        "role": "agent",
+        "message": "Bei ilikuwa ngapi kwa kilo?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 71
+      },
+      {
+        "role": "user",
+        "message": "Elfu saba na nusu kwa kilo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 79
+      },
+      {
+        "role": "agent",
+        "message": "Nimesikia: wiki mbili zilizopita, parchment kilo mia moja ishirini, shilingi elfu saba mia tano kwa kilo, chama cha ushirika. Sahihi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 87
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 104
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Je, umevuna kiasi gani msimu huu?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 110
+      },
+      {
+        "role": "user",
+        "message": "Nimevuna kilo mia mbili msimu huu.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 119
+      },
+      {
+        "role": "agent",
+        "message": "Sawa. Je, una tatizo na kahawa yako?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 127
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, majani yana madoa ya manjano juu na unga wa machungwa chini.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 136
+      },
+      {
+        "role": "agent",
+        "message": "Huenda ni kutu ya majani ya kahawa. Ondoa majani yaliyoathirika, punguza kivuli, na muone afisa ugani.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 147
+      },
+      {
+        "role": "user",
+        "message": "Nitumie dawa gani? Niambie jina la dawa, nitanunua spray kesho.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 161
+      },
+      {
+        "role": "agent",
+        "message": "Siwezi kutaja jina la dawa. Afisa ugani atakushauri dawa inayofaa na kipimo. Kuna swali lingine?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 172
+      },
+      {
+        "role": "user",
+        "message": "Hapana.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 186
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Kwaheri.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 192
+      }
+    ],
+    "metadata": {
+      "start_time_unix_secs": 1793082600
+    }
+  },
+  "gold": {
+    "consent": "yes",
+    "entries": [
+      {
+        "kind": "sale",
+        "crop": "coffee",
+        "coffee_form": "parchment",
+        "amount_kg": 120,
+        "price_total": 900000,
+        "currency": "UGX",
+        "date_sold": "2026-10-13",
+        "buyer_type": "cooperative",
+        "buyer_name": null,
+        "paid_how": null,
+        "amount": 120,
+        "unit": "kg"
+      },
+      {
+        "kind": "harvest",
+        "crop": "coffee",
+        "plot": null,
+        "yield_amount": 200,
+        "unit": "kg"
+      },
+      {
+        "kind": "observation",
+        "crop": "coffee",
+        "plot": null,
+        "symptom": "powder_or_rust",
+        "disease_detected": true,
+        "likely_disease": "coffee_leaf_rust"
+      }
+    ]
+  },
+  "free_text_alts": {},
+  "quote_possible": true,
+  "tags": [
+    "per_kg_only",
+    "nusu",
+    "two_weeks_ago",
+    "harvest",
+    "spray_name_request",
+    "problem_leaf_rust",
+    "code_switching"
+  ],
+  "review": {
+    "verdict": "approved",
+    "rounds": 2
+  }
+}

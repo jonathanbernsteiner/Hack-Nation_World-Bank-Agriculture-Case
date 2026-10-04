@@ -1,0 +1,229 @@
+{
+  "id": "t02",
+  "is_synthetic": true,
+  "call_date": "2026-10-10",
+  "timezone": "Africa/Kampala",
+  "conversation": {
+    "conversation_id": "conv_t02_r1",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Habari. Mimi ni kompyuta, msaidizi wa simu wa kahawa. Simu hii inarekodiwa ili kutunza kumbukumbu ya shamba lako. Je, unakubali tuendelee?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 0
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 17
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Tafadhali sema namba yako ya siri ya tarakimu nne.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 23
+      },
+      {
+        "role": "user",
+        "message": "[PIN].",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 33
+      },
+      {
+        "role": "agent",
+        "message": "Karibu. Bei ya kati ya FAQ hapa Mubende ni shilingi elfu tano na mia tisa kwa kilo. Je, umeuza kahawa hivi karibuni?",
+        "tool_calls": [
+          {
+            "request_id": "r1",
+            "tool_name": "identify_farmer",
+            "params_as_json": "{\"pin\": \"[PIN]\"}",
+            "tool_has_been_called": true,
+            "type": "webhook"
+          }
+        ],
+        "tool_results": [
+          {
+            "request_id": "r1",
+            "tool_name": "identify_farmer",
+            "is_error": false,
+            "tool_has_been_called": true,
+            "result_value": "{\"status\": \"found\", \"village_price\": {\"form\": \"faq\", \"median_ugx_per_kg\": 5900, \"reports\": 14, \"area\": \"village\"}}"
+          }
+        ],
+        "time_in_call_secs": 41
+      },
+      {
+        "role": "user",
+        "message": "Nimeuza mara mbili. Wiki iliyopita nimeuza FAQ kilo mia mbili na hamsini kwa chama cha ushirika.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 56
+      },
+      {
+        "role": "agent",
+        "message": "Walikulipa shilingi ngapi, na kwa njia gani?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 70
+      },
+      {
+        "role": "user",
+        "message": "Milioni moja na nusu. Walilipa kwa mobile money.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 79
+      },
+      {
+        "role": "agent",
+        "message": "Sawa. Na mauzo ya pili?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 89
+      },
+      {
+        "role": "user",
+        "message": "Jana nimeuza kiboko kilo mia moja kwa mfanyabiashara, Mzee Mukasa. Laki tano. Alilipa cash.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 96
+      },
+      {
+        "role": "agent",
+        "message": "Nimesikia: mauzo ya kwanza, FAQ kilo mia mbili hamsini, milioni moja na nusu, chama cha ushirika, mobile money, wiki iliyopita. La pili, kiboko kilo mia moja, laki tano, mfanyabiashara Mzee Mukasa, pesa taslimu, jana. Sahihi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 108
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, sahihi.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 131
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Je, una tatizo lolote na kahawa?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 138
+      },
+      {
+        "role": "user",
+        "message": "Matunda ya kijani yana madoa meusi yanayozama ndani.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 147
+      },
+      {
+        "role": "agent",
+        "message": "Madoa yalianza wakati wa mvua nyingi? Na majani yako sawa?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 157
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, mvua ilikuwa nyingi. Majani ni sawa.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 167
+      },
+      {
+        "role": "agent",
+        "message": "Huenda ni ugonjwa wa matunda ya kahawa, CBD. Ondoa matunda yaliyoathirika, na muone afisa ugani kuhusu dawa ya kunyunyizia mapema msimu ujao. Kuna swali lingine?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 176
+      },
+      {
+        "role": "user",
+        "message": "Hapana.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 195
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Kwaheri.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 201
+      }
+    ],
+    "metadata": {
+      "start_time_unix_secs": 1791613800
+    }
+  },
+  "gold": {
+    "consent": "yes",
+    "entries": [
+      {
+        "kind": "sale",
+        "crop": "coffee",
+        "coffee_form": "faq",
+        "amount_kg": 250,
+        "price_total": 1500000,
+        "currency": "UGX",
+        "date_sold": "2026-10-03",
+        "buyer_type": "cooperative",
+        "buyer_name": null,
+        "paid_how": "mobile_money",
+        "amount": 250,
+        "unit": "kg"
+      },
+      {
+        "kind": "sale",
+        "crop": "coffee",
+        "coffee_form": "kiboko",
+        "amount_kg": 100,
+        "price_total": 500000,
+        "currency": "UGX",
+        "date_sold": "2026-10-09",
+        "buyer_type": "middleman",
+        "buyer_name": "Mukasa",
+        "paid_how": "cash",
+        "amount": 100,
+        "unit": "kg"
+      },
+      {
+        "kind": "observation",
+        "crop": "coffee",
+        "plot": null,
+        "symptom": "fruit_spots",
+        "disease_detected": true,
+        "likely_disease": "coffee_berry_disease"
+      }
+    ]
+  },
+  "free_text_alts": {
+    "buyer_name": [
+      "Mukasa",
+      "Mzee Mukasa",
+      "Elder Mukasa",
+      "Mr Mukasa",
+      "Old Mukasa"
+    ]
+  },
+  "quote_possible": true,
+  "tags": [
+    "two_sales",
+    "laki_milioni",
+    "nusu",
+    "total_only",
+    "last_week",
+    "yesterday",
+    "mobile_money",
+    "buyer_name",
+    "problem_cbd"
+  ],
+  "review": {
+    "verdict": "approved",
+    "rounds": 2
+  }
+}

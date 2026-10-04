@@ -1,0 +1,229 @@
+{
+  "id": "t05",
+  "is_synthetic": true,
+  "call_date": "2026-10-17",
+  "timezone": "Africa/Kampala",
+  "conversation": {
+    "conversation_id": "conv_t05_r1",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Habari. Mimi ni kompyuta, msaidizi wa simu wa kahawa. Simu hii inarekodiwa ili kutunza kumbukumbu ya shamba lako. Je, unakubali tuendelee?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 0
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, sawa.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 17
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Tafadhali sema namba yako ya siri ya tarakimu nne.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 24
+      },
+      {
+        "role": "user",
+        "message": "[PIN].",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 34
+      },
+      {
+        "role": "agent",
+        "message": "Karibu. Bei ya kati ya kiboko hapa Mbarara ni shilingi elfu tano kwa kilo. Uliuza kahawa lini mara ya mwisho?",
+        "tool_calls": [
+          {
+            "request_id": "r1",
+            "tool_name": "identify_farmer",
+            "params_as_json": "{\"pin\": \"[PIN]\"}",
+            "tool_has_been_called": true,
+            "type": "webhook"
+          }
+        ],
+        "tool_results": [
+          {
+            "request_id": "r1",
+            "tool_name": "identify_farmer",
+            "is_error": false,
+            "tool_has_been_called": true,
+            "result_value": "{\"status\": \"found\", \"village_price\": {\"form\": \"kiboko\", \"median_ugx_per_kg\": 5000, \"reports\": 14, \"area\": \"village\"}}"
+          }
+        ],
+        "time_in_call_secs": 42
+      },
+      {
+        "role": "user",
+        "message": "Mwezi wa Julai. Nimeuza kiboko kilo mia moja themanini.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 57
+      },
+      {
+        "role": "agent",
+        "message": "Ulipata shilingi ngapi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 67
+      },
+      {
+        "role": "user",
+        "message": "Mitwalo tisini. Nilipokea kwa mobile money.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 74
+      },
+      {
+        "role": "agent",
+        "message": "Nimesikia: Julai, kiboko kilo mia moja themanini, shilingi laki tisa, mobile money. Sahihi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 83
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, sahihi.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 96
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Je, una tatizo na kahawa yako?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 103
+      },
+      {
+        "role": "user",
+        "message": "Majani yote yamekuwa ya manjano. Miti ni ya zamani, sijaweka mbolea kwa miaka mitatu.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 112
+      },
+      {
+        "role": "agent",
+        "message": "Majani yana madoa au unga wowote, au ni manjano tu kote?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 125
+      },
+      {
+        "role": "user",
+        "message": "Ni manjano tu kote, hakuna madoa.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 135
+      },
+      {
+        "role": "agent",
+        "message": "Sababu kuu huenda ni udongo kukosa rutuba. Weka mbolea ya samadi au mboji, na matandazo. Ulifanya kazi gani shambani hivi karibuni?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 143
+      },
+      {
+        "role": "user",
+        "message": "Jana niliondoa magugu kwenye shamba la juu. Kesho nitaweka mbolea.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 159
+      },
+      {
+        "role": "agent",
+        "message": "Vizuri. Kuna swali lingine?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 169
+      },
+      {
+        "role": "user",
+        "message": "Hapana.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 177
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Kwaheri.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 183
+      }
+    ],
+    "metadata": {
+      "start_time_unix_secs": 1792218600
+    }
+  },
+  "gold": {
+    "consent": "yes",
+    "entries": [
+      {
+        "kind": "sale",
+        "crop": "coffee",
+        "coffee_form": "kiboko",
+        "amount_kg": 180,
+        "price_total": 900000,
+        "currency": "UGX",
+        "date_sold": "2026-07-15",
+        "buyer_type": null,
+        "buyer_name": null,
+        "paid_how": "mobile_money",
+        "amount": 180,
+        "unit": "kg"
+      },
+      {
+        "kind": "observation",
+        "crop": "coffee",
+        "plot": null,
+        "symptom": "yellowing_leaves",
+        "disease_detected": false,
+        "likely_disease": "low_soil_fertility"
+      },
+      {
+        "kind": "activity",
+        "crop": "coffee",
+        "plot": "upper garden",
+        "activity": "weeding",
+        "input": null,
+        "quantity": null
+      }
+    ]
+  },
+  "free_text_alts": {
+    "plot": [
+      "upper garden",
+      "upper plot",
+      "upper field",
+      "upper farm",
+      "the upper garden",
+      "the upper plot",
+      "the upper field",
+      "the upper farm",
+      "upper shamba",
+      "top field",
+      "top garden",
+      "top plot",
+      "top farm"
+    ]
+  },
+  "quote_possible": true,
+  "tags": [
+    "mitwalo",
+    "total_only",
+    "named_month",
+    "mobile_money",
+    "non_disease_cause",
+    "activity_done_vs_planned",
+    "code_switching"
+  ],
+  "review": {
+    "verdict": "approved",
+    "rounds": 2
+  }
+}

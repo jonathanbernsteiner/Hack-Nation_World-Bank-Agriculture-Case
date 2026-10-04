@@ -279,3 +279,123 @@ def test_summarize_against_supabase(db):
         {"year": "2024/25", "harvest_kg": 0, "sold_kg": 100, "avg_ugx_per_kg": 5300}]
     assert out["nearby_reports"] == [{"likely": BORER, "farms": 2, "level": "parish", "last_days": 30}]
     assert "buyer_name" not in json.dumps(out)
+
+
+# --- review cycle 1 regressions ---
+
+CALLER_ID = 987_001
+OTHER_IDS = (987_011, 987_012, 987_013)
+
+
+def leaves(value):
+    """Every dict key and every scalar value in a nested structure."""
+    if isinstance(value, dict):
+        for k, v in value.items():
+            yield k
+            yield from leaves(v)
+    elif isinstance(value, (list, tuple)):
+        for v in value:
+            yield from leaves(v)
+    else:
+        yield value
+
+
+def test_summarize_output_never_carries_ids_names_or_buyer_names():
+    hist = [sale(date(2026, 7, 18), 400, 2_120_000, buyer_name="Ssali Traders", farmer_id=CALLER_ID,
+                 name="Nakato"),
+            {**obs(CALLER_ID, date(2026, 8, 30)), "name": "Nakato"}]
+    near = [{**obs(farmer), "name": f"Neighbour {farmer}", "pin_hash": "deadbeef"} for farmer in OTHER_IDS]
+    out = summarize(FakeConn(hist, near), CALLER_ID, HOME, AS_OF)
+    found = list(leaves(out))
+    assert out["nearby_reports"][0]["farms"] == 3
+    assert not set(found) & {CALLER_ID, *OTHER_IDS}
+    for leaf in found:
+        text = str(leaf).lower()
+        assert not any(bad in text for bad in ("farmer", "name", "pin", "nakato", "ssali", "neighbour",
+                                                 "deadbeef"))
+
+
+def test_caller_never_tips_sub_county_fallback_over_threshold():
+    rows = [obs(CALLER_ID, parish="Kitovu"), obs(OTHER_IDS[0], parish="Other Parish")]
+    assert nearby_reports(rows, HOME, AS_OF, exclude_farmer_id=CALLER_ID) == []
+
+
+def test_new_coffee_year_with_data_shows_new_and_previous_year():
+    rows = [sale(date(2025, 11, 5), 400, 2_400_000), sale(date(2026, 10, 2), 100, 600_000)]
+    assert [y["year"] for y in coffee_years(rows, date(2026, 10, 3))] == ["2026/27", "2025/26"]
+
+
+def test_history_sql_resolves_dates_in_kampala_time():
+    conn = FakeConn([])
+    history.load_history(conn, 42, AS_OF)
+    sql, _ = conn.queries[0]
+    assert "coalesce(e.date_sold, (c.received_at at time zone 'Africa/Kampala')::date)" in sql
+
+
+@pytest.mark.xfail(strict=True, reason="review cycle 1, finding 1: early October drops the older coffee year")
+def test_early_october_still_shows_two_coffee_years():
+    # Demo day is 2026-10-04; the synthetic history covers 2024/25 and 2025/26 and nothing yet in 2026/27.
+    rows = [sale(date(2024, 11, 5), 300, 1_500_000), sale(date(2025, 11, 5), 400, 2_400_000)]
+    assert [y["year"] for y in coffee_years(rows, date(2026, 10, 3))] == ["2025/26", "2024/25"]
+
+
+@pytest.mark.xfail(strict=True, reason="review cycle 1, finding 2: harvests in bags are summed as kg")
+def test_harvest_in_bags_is_not_counted_as_kg():
+    rows = [harvest(date(2025, 11, 5), 1180) | {"unit": "kg"},
+            harvest(date(2026, 5, 5), 12) | {"unit": "bag"}]
+    (year,) = coffee_years(rows, AS_OF)
+    assert year["harvest_kg"] == 1180
+    conn = FakeConn([])
+    history.load_history(conn, 42, AS_OF)
+    assert "e.unit" in conn.queries[0][0]
+
+
+@pytest.mark.xfail(strict=True, reason="review cycle 1, finding 3: location-login entries are review-queue rows")
+def test_location_login_entries_excluded_from_history_and_nearby():
+    conn = FakeConn([], [])
+    history.load_history(conn, 42, AS_OF)
+    history.load_nearby(conn, 42, HOME, AS_OF)
+    assert all("identified_by" in sql for sql, _ in conn.queries)
+
+
+@pytest.mark.xfail(strict=True, reason="review cycle 1, finding 4: non-UGX sales feed ugx_per_kg")
+def test_non_ugx_sale_does_not_feed_ugx_prices():
+    usd = sale(date(2025, 12, 1), 100, 500, currency="USD")
+    (year,) = coffee_years([usd], AS_OF)
+    assert year["avg_ugx_per_kg"] is None
+    assert last_sales([usd])[0]["ugx_per_kg"] is None
+
+
+@pytest.mark.supabase
+def test_supabase_kampala_date_rule_own_rows_and_review_filter(db):
+    def one(sql, params=()):
+        return db.execute(sql, params).fetchone()[0]
+
+    village = one("insert into villages (region, district, sub_county, parish, village, is_synthetic) "
+                  "values ('Central','RevDistrict','RevSC','RevParish','RevVillage', true) returning id")
+    caller, other = (one("insert into farmers (name, pin_hash, village_id, is_synthetic) "
+                         "values (%s, %s, %s, true) returning id", (f"R{i}", f"review-hash-49-{i}", village))
+                     for i in range(2))
+
+    def sale_on(farmer, received_at, kg, total, **extra):
+        call = one("insert into calls (farmer_id, is_synthetic, received_at) values (%s, true, %s) "
+                   "returning id", (farmer, received_at))
+        cols = {"call_id": call, "farmer_id": farmer, "kind": "sale", "crop": "coffee", "amount_kg": kg,
+                "price_total": total, "currency": "UGX", "coffee_form": "kiboko",
+                "buyer_type": "middleman", "confidence": 0.9, **extra}
+        db.execute(f"insert into entries ({', '.join(cols)}) values ({', '.join(['%s'] * len(cols))})",
+                   tuple(cols.values()))
+
+    sale_on(caller, "2025-09-30 22:30+00", 100, 600_000)   # 01:30 on Oct 1 in Kampala -> 2025/26
+    sale_on(caller, "2025-09-30 20:30+00", 50, 250_000)    # 23:30 on Sep 30 in Kampala -> 2024/25
+    sale_on(caller, "2026-01-10 08:00+03", 999, 999_000, quote_verified=False)
+    sale_on(caller, "2026-01-11 08:00+03", 999, 999_000, confidence=0.5)
+    sale_on(other, "2026-01-12 08:00+03", 777, 777_000)
+    home = {"district": "RevDistrict", "sub_county": "RevSC", "parish": "RevParish"}
+
+    out = summarize(db, caller, home, AS_OF)
+
+    assert out["coffee_years"] == [
+        {"year": "2025/26", "harvest_kg": 0, "sold_kg": 100, "avg_ugx_per_kg": 6000},
+        {"year": "2024/25", "harvest_kg": 0, "sold_kg": 50, "avg_ugx_per_kg": 5000}]
+    assert [s["kg"] for s in out["last_sales"]] == [100, 50]

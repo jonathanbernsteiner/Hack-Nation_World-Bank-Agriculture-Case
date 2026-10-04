@@ -1,3 +1,4 @@
+import json
 import re
 from dataclasses import replace
 from datetime import date, timedelta
@@ -7,6 +8,7 @@ from types import SimpleNamespace
 import pytest
 
 from hotline import bands, prices
+from hotline.enums import CoffeeForm
 from hotline.numbers_sw import to_words
 
 AS_OF = date(2026, 10, 3)
@@ -337,3 +339,64 @@ def test_numeric_price_total_from_postgres_gives_the_same_median():
     rows = [{**sale(f), "price_total": Decimal("590000.00"), "amount_kg": 100.0} for f in (1, 2, 3)]
     out = prices.village_price(rows, HOME, "kiboko", AS_OF)
     assert (out["level"], out["median_ugx_per_kg"], out["median_words_sw"]) == ("village", 5_900, "elfu tano na mia tisa")
+
+
+# --- Review cycle 3 regression tests (#43) ---
+
+NATIONAL_KEYS = {"form", "median_ugx_per_kg", "p25", "p75", "n_sales", "n_farmers", "level", "area", "window",
+                 "includes_synthetic", "median_words_sw", "is_reference", "reference_month", "reference_source_url"}
+
+
+def test_village_level_matches_the_home_village_id_not_its_name():
+    """Village names repeat across parishes. Three sales from another "Kyabakuza" in the district are not the
+    caller's village, so the agent must not present them as "in your village"."""
+    namesake = [sale(f, village_id=99, parish="Other P", sub_county="Other S") for f in (1, 2, 3)]
+    out = prices.village_price(namesake, HOME, "kiboko", AS_OF)
+    assert (out["level"], out["area"]) == ("district", "Masaka")
+
+
+@pytest.mark.parametrize(
+    ("home", "level", "area"),
+    [
+        ({"district": "Masaka"}, "district", "Masaka"),
+        ({"village_id": None, "village": None, "parish": None, "sub_county": None, "district": "Masaka"},
+         "district", "Masaka"),
+        ({"village_id": None, "village": "Kyabakuza", "parish": "Kyabakuza P", "sub_county": "Kyanamukaaka",
+          "district": "Masaka"}, "parish", "Kyabakuza P"),
+        ({}, "national_reference", "Uganda"),
+    ],
+)
+def test_partial_home_skips_unknown_levels_without_errors(home, level, area):
+    """Home is a total=False TypedDict: the tools can know only part of a location. A missing or None level is
+    skipped (never matched, never a KeyError), and a home without a village id never gets a village median."""
+    out = prices.village_price(three_farmers(), home, "kiboko", AS_OF)
+    assert (out["level"], out["area"]) == (level, area)
+
+
+def test_tool_payload_is_json_ready_with_enum_form_and_numeric_rows():
+    """Tools forward prices_for to the LLM as JSON. The contract types the form as CoffeeForm, psycopg returns
+    price_total as Decimal and rows are an Iterable: the payload must still serialise, carry whole multiples of
+    50, and never repeat the main form in other_prices."""
+    kiboko = [{**sale(f, per_kg=p), "price_total": Decimal(p * 100), "amount_kg": 100.0}
+              for f, p in zip(range(1, 6), (5_000, 5_500, 5_900, 6_100, 6_400), strict=True)]
+    faq = [{**sale(f, form="faq", per_kg=12_300), "price_total": Decimal("1230000.00")} for f in (6, 7, 8)]
+    out = prices.prices_for(iter(kiboko + faq), HOME, CoffeeForm.KIBOKO, AS_OF)
+    payload = json.loads(json.dumps(out))
+    main = payload["village_price"]
+    assert (main["form"], main["level"], main["p25"], main["median_ugx_per_kg"], main["p75"]) == (
+        "kiboko", "village", 5_500, 5_900, 6_100)
+    assert [(o["form"], o["median_ugx_per_kg"]) for o in payload["other_prices"]] == [("faq", 12_300)]
+    money = [out["village_price"][k] for k in ("median_ugx_per_kg", "p25", "p75")]
+    money += [o["median_ugx_per_kg"] for o in out["other_prices"]]
+    assert all(type(m) is int and m % 50 == 0 for m in money), money
+
+
+def test_national_fallback_shape_is_pinned():
+    """The exact keys the tools forward for a reference: the section 5 keys plus the reference fields, and the
+    level the agent prompt (#46) branches on. Looked up by CoffeeForm as the contract types it."""
+    out = prices.village_price([sale(1), sale(2)], HOME, CoffeeForm.PARCHMENT, AS_OF)
+    assert set(out) == NATIONAL_KEYS
+    assert prices.NATIONAL_LEVEL == "national_reference"
+    assert (out["level"], out["is_reference"], out["area"], out["median_ugx_per_kg"]) == (
+        prices.NATIONAL_LEVEL, True, "Uganda", 15_500)
+    assert json.loads(json.dumps(out))["form"] == "parchment"

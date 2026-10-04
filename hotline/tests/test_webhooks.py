@@ -165,6 +165,9 @@ def test_process_hook_not_scheduled_for_duplicates(client, monkeypatch):
 
 def test_transcript_lines_and_tool_results_are_minimal():
     data = _payload()["data"]
+    data["transcript"][1]["tool_calls"] = [
+        {"tool_name": "identify", "request_id": "r1", "params_as_json": '{"pin":"1234"}'}
+    ]
     data["transcript"][1]["tool_results"] = [
         {"tool_name": "identify", "request_id": "r1", "is_error": False,
          "result_value": '{"status":"ok"}', "params_as_json": '{"pin":"1234"}'}
@@ -175,7 +178,7 @@ def test_transcript_lines_and_tool_results_are_minimal():
     assert [line["i"] for line in lines] == list(range(len(lines)))
     scrubbed = json.loads(params["tool_results"])
     assert scrubbed == [{"tool_name": "identify", "request_id": "r1", "t": 0,
-                         "is_error": False, "result": '{"status":"ok"}'}]
+                         "is_error": False, "result": {"status": "ok"}}]
     assert "1234" not in params["tool_results"]
     assert params["audio_path"] == "elevenlabs:conv_x"
 
@@ -253,10 +256,6 @@ def test_db_in_call_row_keeps_farmer_and_identified_by(rollback_store):
 PIN = "4831"
 PIN_WORDS_SW = "nne, nane, tatu, moja"
 FARMER_PHRASE = "Nimeuza kilo hamsini"
-PIN_REDACTION_PENDING = pytest.mark.xfail(
-    strict=True,
-    reason="PR #84 review: PINs are stored unredacted until the #57 transcript helpers are used",
-)
 
 
 def _with_new_pin(data: dict) -> dict:
@@ -279,14 +278,12 @@ def _with_new_pin(data: dict) -> dict:
     return data
 
 
-@PIN_REDACTION_PENDING
 def test_tool_results_never_store_a_new_pin():
     params = webhooks._row_params("conv_x", _with_new_pin(_payload()["data"]))
     assert PIN not in params["tool_results"]
     assert PIN_WORDS_SW not in params["tool_results"]
 
 
-@PIN_REDACTION_PENDING
 @pytest.mark.parametrize("field", ["lines", "transcript_sw"])
 def test_stored_transcript_never_holds_a_pin(field):
     params = webhooks._row_params("conv_x", _with_new_pin(_payload()["data"]))

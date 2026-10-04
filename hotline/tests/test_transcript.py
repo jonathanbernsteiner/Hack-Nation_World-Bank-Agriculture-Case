@@ -446,7 +446,6 @@ def test_pin_param_with_separators_is_collected_as_digits(pin_param):
     assert to_lines(data)[0]["sw"] == "[PIN]"
 
 
-@pytest.mark.xfail(strict=True, reason="review cycle 3 finding 1: digit-word pin params are not collected")
 @pytest.mark.parametrize(
     "pin_param", ["tisa sifuri sifuri moja", "tisa, sifuri, sifuri, moja", "nine zero zero one", "tisa zero zero one"]
 )
@@ -512,7 +511,6 @@ def test_no_output_contains_any_collected_pin_in_english_or_mixed_form():
             assert form not in blob, form
 
 
-@pytest.mark.xfail(strict=True, reason="review cycle 3 finding 2: 'double'/'triple' digit forms are not expanded")
 @pytest.mark.parametrize("text", ["PIN ni nine double zero one asante", "PIN ni tisa double sifuri moja asante"])
 def test_double_digit_form_is_redacted(text):
     assert redact_pins(_lines(text), {"9001"})[0]["sw"] == "PIN ni [PIN] asante"

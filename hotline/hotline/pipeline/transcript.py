@@ -15,6 +15,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Literal, TypedDict
 
 PIN_TOKEN = "[PIN]"
+MULTIPLIERS = {"double": 2, "triple": 3}
 KAMPALA_TZ = timezone(timedelta(hours=3), "Africa/Kampala")  # no DST in Uganda
 MIN_PIN_DIGITS = 4
 MAX_PIN_DIGITS = 8
@@ -86,7 +87,7 @@ def _walk_pin_values(node: Any) -> Iterable[str]:
     if isinstance(node, dict):
         for key, value in node.items():
             if _PIN_KEY.search(str(key)) and isinstance(value, (str, int)):
-                digits = re.sub(r"\D", "", str(value))
+                digits = "".join(d for d in map(_digits_of, _TOKEN.finditer(str(value))) if d.isdigit())
                 if digits:
                     yield digits
             else:
@@ -135,7 +136,7 @@ def _runs(text: str) -> list[list[re.Match]]:
         token = match.group(0).lower()
         if token == "na":  # "and": allowed between digits, checked by _GAP
             continue
-        if not (token.isdigit() or token in DIGIT_WORDS):
+        if not (token.isdigit() or token in DIGIT_WORDS or token in MULTIPLIERS):
             current = []
             continue
         if current and _GAP.fullmatch(text[current[-1].end() : match.start()]):
@@ -151,15 +152,32 @@ def _digits_of(match: re.Match) -> str:
     return DIGIT_WORDS.get(token, token)
 
 
+def _run_parts(run: list[re.Match]) -> list[str]:
+    """Digit string per token; "double"/"triple" repeat the next digit, so they yield ""."""
+    parts: list[str] = []
+    repeat = 1
+    for m in run:
+        token = m.group(0).lower()
+        if token in MULTIPLIERS:
+            repeat = MULTIPLIERS[token]
+            parts.append("")
+        else:
+            parts.append(_digits_of(m) * repeat)
+            repeat = 1
+    return parts
+
+
 def _pin_spans(run: list[re.Match], pins: list[str]) -> list[tuple[int, int]]:
     """Token index ranges [a, b) of a run that spell a PIN (or a PIN part)."""
-    parts = [_digits_of(m) for m in run]
-    all_words = all(m.group(0).lower() in DIGIT_WORDS for m in run)
+    parts = _run_parts(run)
+    all_words = all(m.group(0).lower() in DIGIT_WORDS or m.group(0).lower() in MULTIPLIERS for m in run)
     spans: list[tuple[int, int]] = []
     for start in range(len(parts)):
         acc = ""
         for end in range(start, len(parts)):
             acc += parts[end]
+            if not parts[end]:  # a dangling "double"/"triple" is not part of a span
+                continue
             if acc in pins:
                 spans.append((start, end + 1))
             elif all_words and end + 1 - start >= MIN_PARTIAL_RUN:

@@ -1,0 +1,848 @@
+{
+  "type": "post_call_transcription",
+  "event_timestamp": 1791082082,
+  "data": {
+    "agent_id": "agent_3601m426r0abf01bs300wb1ssdsp",
+    "agent_name": "Farm record line (draft)",
+    "conversation_id": "conv_7901m42cyshjej6vwnezf9zmg9dc",
+    "status": "done",
+    "user_id": null,
+    "branch_id": "agtbrch_6401m426r28vf93sz54dwxnap420",
+    "version_id": "agtvrsn_5301m426r2bdfsbt8f4t3v6f15nm",
+    "environment": "production",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Habari! Hapa ni rekodi ya shamba ya chama chako cha ushirika. Tafadhali sema namba yako ya siri ya tarakimu nne.",
+        "multivoice_message": null,
+        "tool_calls": [],
+        "tool_results": [],
+        "feedback": null,
+        "llm_override": null,
+        "producing_llm": "claude-sonnet-5-5",
+        "time_in_call_secs": 0,
+        "conversation_turn_metrics": {
+          "metrics": {
+            "convai_ttf_response_since_user_message": {
+              "elapsed_time": 0.0024
+            }
+          },
+          "convai_asr_provider": null,
+          "convai_tts_model": null,
+          "convai_tts_cascade": null
+        },
+        "rag_retrieval_info": null,
+        "llm_usage": null,
+        "interrupted": false,
+        "ignored_as_backchannel": false,
+        "platform_event": null,
+        "original_message": null,
+        "reasoning": [],
+        "source_medium": null,
+        "source_event_id": 1,
+        "used_static_kb_document_ids": [],
+        "analysis": null,
+        "user_identifier": null,
+        "id": null,
+        "compaction": null,
+        "triggered_guardrails": [],
+        "file_input": null,
+        "file_inputs": [],
+        "contextual_update_info": null,
+        "config_snapshot_id": null,
+        "reasoned": false
+      },
+      {
+        "role": "user",
+        "message": "Habari, nataka kuuza kahawa yangu.",
+        "multivoice_message": null,
+        "tool_calls": [],
+        "tool_results": [],
+        "feedback": null,
+        "llm_override": null,
+        "producing_llm": null,
+        "time_in_call_secs": 0,
+        "conversation_turn_metrics": null,
+        "rag_retrieval_info": null,
+        "llm_usage": null,
+        "interrupted": false,
+        "ignored_as_backchannel": false,
+        "platform_event": null,
+        "original_message": null,
+        "reasoning": [],
+        "source_medium": "text",
+        "source_event_id": 2,
+        "used_static_kb_document_ids": [],
+        "analysis": {
+          "user_sentiment_score": 0.0,
+          "user_frustration_score": 0.0
+        },
+        "user_identifier": null,
+        "id": null,
+        "compaction": null,
+        "triggered_guardrails": [],
+        "file_input": null,
+        "file_inputs": [],
+        "contextual_update_info": null,
+        "config_snapshot_id": null,
+        "reasoned": false
+      },
+      {
+        "role": "agent",
+        "message": "Karibu sana. Mimi ninaandika rekodi ya shamba lako, pamoja na mauzo. Kwanza, tafadhali sema namba yako ya siri ya tarakimu nne.",
+        "multivoice_message": null,
+        "tool_calls": [],
+        "tool_results": [],
+        "feedback": null,
+        "llm_override": null,
+        "producing_llm": "claude-sonnet-5-5",
+        "time_in_call_secs": 0,
+        "conversation_turn_metrics": {
+          "metrics": {
+            "convai_llm_service_ttf_sentence": {
+              "elapsed_time": 2.4019
+            },
+            "convai_llm_service_ttfb": {
+              "elapsed_time": 2.367
+            },
+            "convai_llm_service_tt_last_sentence": {
+              "elapsed_time": 2.7705
+            },
+            "convai_ttf_response_since_user_message": {
+              "elapsed_time": 2.7743
+            }
+          },
+          "convai_asr_provider": null,
+          "convai_tts_model": null,
+          "convai_tts_cascade": null
+        },
+        "rag_retrieval_info": null,
+        "llm_usage": {
+          "model_usage": {
+            "claude-sonnet-5-5": {
+              "input": {
+                "tokens": 106,
+                "price": 0.0002
+              },
+              "input_cache_read": {
+                "tokens": 0,
+                "price": 0.0
+              },
+              "input_cache_write": {
+                "tokens": 834,
+                "price": 0.0023
+              },
+              "output_total": {
+                "tokens": 263,
+                "price": 0.0029
+              }
+            }
+          },
+          "detailed_model_usage": [
+            {
+              "config": {
+                "model": "claude-sonnet-5-5",
+                "service_tier": "standard"
+              },
+              "usage": {
+                "input": {
+                  "tokens": 106,
+                  "price": 0.0002
+                },
+                "input_cache_read": {
+                  "tokens": 0,
+                  "price": 0.0
+                },
+                "input_cache_write": {
+                  "tokens": 834,
+                  "price": 0.0023
+                },
+                "output_total": {
+                  "tokens": 263,
+                  "price": 0.0029
+                }
+              }
+            }
+          ]
+        },
+        "interrupted": false,
+        "ignored_as_backchannel": false,
+        "platform_event": null,
+        "original_message": null,
+        "reasoning": [
+          {
+            "summary": null,
+            "provider_redact": false
+          }
+        ],
+        "source_medium": null,
+        "source_event_id": 2,
+        "used_static_kb_document_ids": [],
+        "analysis": null,
+        "user_identifier": null,
+        "id": null,
+        "compaction": null,
+        "triggered_guardrails": [],
+        "file_input": null,
+        "file_inputs": [],
+        "contextual_update_info": null,
+        "config_snapshot_id": null,
+        "reasoned": true
+      },
+      {
+        "role": "user",
+        "message": "Nimeuza kilo hamsini za kahawa kwa shilingi elfu nne kwa kilo.",
+        "multivoice_message": null,
+        "tool_calls": [],
+        "tool_results": [],
+        "feedback": null,
+        "llm_override": null,
+        "producing_llm": null,
+        "time_in_call_secs": 4,
+        "conversation_turn_metrics": null,
+        "rag_retrieval_info": null,
+        "llm_usage": null,
+        "interrupted": false,
+        "ignored_as_backchannel": false,
+        "platform_event": null,
+        "original_message": null,
+        "reasoning": [],
+        "source_medium": "text",
+        "source_event_id": 3,
+        "used_static_kb_document_ids": [],
+        "analysis": {
+          "user_sentiment_score": 0.0,
+          "user_frustration_score": 0.0
+        },
+        "user_identifier": null,
+        "id": null,
+        "compaction": null,
+        "triggered_guardrails": [],
+        "file_input": null,
+        "file_inputs": [],
+        "contextual_update_info": null,
+        "config_snapshot_id": null,
+        "reasoned": false
+      },
+      {
+        "role": "agent",
+        "message": "Asante, nimekusikia. Nitaandika mauzo yako. Lakini kwanza nahitaji namba yako ya siri ya tarakimu nne. Tafadhali isema sasa.",
+        "multivoice_message": null,
+        "tool_calls": [],
+        "tool_results": [],
+        "feedback": null,
+        "llm_override": null,
+        "producing_llm": "claude-sonnet-5-5",
+        "time_in_call_secs": 4,
+        "conversation_turn_metrics": {
+          "metrics": {
+            "convai_llm_service_ttf_sentence": {
+              "elapsed_time": 1.1846
+            },
+            "convai_llm_service_ttfb": {
+              "elapsed_time": 1.0224
+            },
+            "convai_llm_service_tt_last_sentence": {
+              "elapsed_time": 1.6779
+            },
+            "convai_ttf_response_since_user_message": {
+              "elapsed_time": 1.6819
+            }
+          },
+          "convai_asr_provider": null,
+          "convai_tts_model": null,
+          "convai_tts_cascade": null
+        },
+        "rag_retrieval_info": null,
+        "llm_usage": {
+          "model_usage": {
+            "claude-sonnet-5-5": {
+              "input": {
+                "tokens": 410,
+                "price": 0.0009
+              },
+              "input_cache_read": {
+                "tokens": 0,
+                "price": 0.0
+              },
+              "input_cache_write": {
+                "tokens": 834,
+                "price": 0.0023
+              },
+              "output_total": {
+                "tokens": 128,
+                "price": 0.0014
+              }
+            }
+          },
+          "detailed_model_usage": [
+            {
+              "config": {
+                "model": "claude-sonnet-5-5",
+                "service_tier": "standard"
+              },
+              "usage": {
+                "input": {
+                  "tokens": 410,
+                  "price": 0.0009
+                },
+                "input_cache_read": {
+                  "tokens": 0,
+                  "price": 0.0
+                },
+                "input_cache_write": {
+                  "tokens": 834,
+                  "price": 0.0023
+                },
+                "output_total": {
+                  "tokens": 128,
+                  "price": 0.0014
+                }
+              }
+            }
+          ]
+        },
+        "interrupted": false,
+        "ignored_as_backchannel": false,
+        "platform_event": null,
+        "original_message": null,
+        "reasoning": [
+          {
+            "summary": null,
+            "provider_redact": false
+          }
+        ],
+        "source_medium": null,
+        "source_event_id": 3,
+        "used_static_kb_document_ids": [],
+        "analysis": null,
+        "user_identifier": null,
+        "id": null,
+        "compaction": null,
+        "triggered_guardrails": [],
+        "file_input": null,
+        "file_inputs": [],
+        "contextual_update_info": null,
+        "config_snapshot_id": null,
+        "reasoned": true
+      },
+      {
+        "role": "user",
+        "message": "Ni kahawa ya robusta kavu.",
+        "multivoice_message": null,
+        "tool_calls": [],
+        "tool_results": [],
+        "feedback": null,
+        "llm_override": null,
+        "producing_llm": null,
+        "time_in_call_secs": 7,
+        "conversation_turn_metrics": null,
+        "rag_retrieval_info": null,
+        "llm_usage": null,
+        "interrupted": false,
+        "ignored_as_backchannel": false,
+        "platform_event": null,
+        "original_message": null,
+        "reasoning": [],
+        "source_medium": "text",
+        "source_event_id": 4,
+        "used_static_kb_document_ids": [],
+        "analysis": {
+          "user_sentiment_score": 0.0,
+          "user_frustration_score": 0.1
+        },
+        "user_identifier": null,
+        "id": null,
+        "compaction": null,
+        "triggered_guardrails": [],
+        "file_input": null,
+        "file_inputs": [],
+        "contextual_update_info": null,
+        "config_snapshot_id": null,
+        "reasoned": false
+      },
+      {
+        "role": "agent",
+        "message": "Asante, nimeelewa: kahawa ya robusta kavu. Nitaiandika. Lakini bado sijapata namba yako ya siri. Tafadhali sema tarakimu zake nne.",
+        "multivoice_message": null,
+        "tool_calls": [],
+        "tool_results": [],
+        "feedback": null,
+        "llm_override": null,
+        "producing_llm": "claude-sonnet-5-5",
+        "time_in_call_secs": 7,
+        "conversation_turn_metrics": {
+          "metrics": {
+            "convai_llm_service_ttf_sentence": {
+              "elapsed_time": 0.7122
+            },
+            "convai_llm_service_ttfb": {
+              "elapsed_time": 0.5001
+            },
+            "convai_llm_service_tt_last_sentence": {
+              "elapsed_time": 1.1713
+            },
+            "convai_ttf_response_since_user_message": {
+              "elapsed_time": 1.1758
+            }
+          },
+          "convai_asr_provider": null,
+          "convai_tts_model": null,
+          "convai_tts_cascade": null
+        },
+        "rag_retrieval_info": null,
+        "llm_usage": {
+          "model_usage": {
+            "claude-sonnet-5-5": {
+              "input": {
+                "tokens": 558,
+                "price": 0.0012
+              },
+              "input_cache_read": {
+                "tokens": 834,
+                "price": 0.0002
+              },
+              "input_cache_write": {
+                "tokens": 0,
+                "price": 0.0
+              },
+              "output_total": {
+                "tokens": 71,
+                "price": 0.0008
+              }
+            }
+          },
+          "detailed_model_usage": [
+            {
+              "config": {
+                "model": "claude-sonnet-5-5",
+                "service_tier": "standard"
+              },
+              "usage": {
+                "input": {
+                  "tokens": 558,
+                  "price": 0.0012
+                },
+                "input_cache_read": {
+                  "tokens": 834,
+                  "price": 0.0002
+                },
+                "input_cache_write": {
+                  "tokens": 0,
+                  "price": 0.0
+                },
+                "output_total": {
+                  "tokens": 71,
+                  "price": 0.0008
+                }
+              }
+            }
+          ]
+        },
+        "interrupted": false,
+        "ignored_as_backchannel": false,
+        "platform_event": null,
+        "original_message": null,
+        "reasoning": [],
+        "source_medium": null,
+        "source_event_id": 4,
+        "used_static_kb_document_ids": [],
+        "analysis": null,
+        "user_identifier": null,
+        "id": null,
+        "compaction": null,
+        "triggered_guardrails": [],
+        "file_input": null,
+        "file_inputs": [],
+        "contextual_update_info": null,
+        "config_snapshot_id": null,
+        "reasoned": false
+      },
+      {
+        "role": "user",
+        "message": "Asante, kwaheri.",
+        "multivoice_message": null,
+        "tool_calls": [],
+        "tool_results": [],
+        "feedback": null,
+        "llm_override": null,
+        "producing_llm": null,
+        "time_in_call_secs": 9,
+        "conversation_turn_metrics": null,
+        "rag_retrieval_info": null,
+        "llm_usage": null,
+        "interrupted": false,
+        "ignored_as_backchannel": false,
+        "platform_event": null,
+        "original_message": null,
+        "reasoning": [],
+        "source_medium": "text",
+        "source_event_id": 5,
+        "used_static_kb_document_ids": [],
+        "analysis": null,
+        "user_identifier": null,
+        "id": null,
+        "compaction": null,
+        "triggered_guardrails": [],
+        "file_input": null,
+        "file_inputs": [],
+        "contextual_update_info": null,
+        "config_snapshot_id": null,
+        "reasoned": false
+      },
+      {
+        "role": "agent",
+        "message": "Sawa, asante kwa kupiga simu. Sijaweza kuandika mauzo yako kwa sababu sikupata namba ya siri. Tafadhali piga tena ukiwa na namba yako. Kwaheri na uwe na siku njema.",
+        "multivoice_message": null,
+        "tool_calls": [],
+        "tool_results": [],
+        "feedback": null,
+        "llm_override": null,
+        "producing_llm": "claude-sonnet-5-5",
+        "time_in_call_secs": 9,
+        "conversation_turn_metrics": {
+          "metrics": {
+            "convai_llm_service_ttf_sentence": {
+              "elapsed_time": 1.6266
+            },
+            "convai_llm_service_ttfb": {
+              "elapsed_time": 1.3963
+            },
+            "convai_llm_service_tt_last_sentence": {
+              "elapsed_time": 2.389
+            },
+            "convai_ttf_response_since_user_message": {
+              "elapsed_time": 2.3941
+            }
+          },
+          "convai_asr_provider": null,
+          "convai_tts_model": null,
+          "convai_tts_cascade": null
+        },
+        "rag_retrieval_info": null,
+        "llm_usage": {
+          "model_usage": {
+            "claude-sonnet-5-5": {
+              "input": {
+                "tokens": 643,
+                "price": 0.0014
+              },
+              "input_cache_read": {
+                "tokens": 834,
+                "price": 0.0002
+              },
+              "input_cache_write": {
+                "tokens": 0,
+                "price": 0.0
+              },
+              "output_total": {
+                "tokens": 198,
+                "price": 0.0022
+              }
+            }
+          },
+          "detailed_model_usage": [
+            {
+              "config": {
+                "model": "claude-sonnet-5-5",
+                "service_tier": "standard"
+              },
+              "usage": {
+                "input": {
+                  "tokens": 643,
+                  "price": 0.0014
+                },
+                "input_cache_read": {
+                  "tokens": 834,
+                  "price": 0.0002
+                },
+                "input_cache_write": {
+                  "tokens": 0,
+                  "price": 0.0
+                },
+                "output_total": {
+                  "tokens": 198,
+                  "price": 0.0022
+                }
+              }
+            }
+          ]
+        },
+        "interrupted": false,
+        "ignored_as_backchannel": false,
+        "platform_event": null,
+        "original_message": null,
+        "reasoning": [
+          {
+            "summary": null,
+            "provider_redact": false
+          }
+        ],
+        "source_medium": null,
+        "source_event_id": 5,
+        "used_static_kb_document_ids": [],
+        "analysis": null,
+        "user_identifier": null,
+        "id": null,
+        "compaction": null,
+        "triggered_guardrails": [],
+        "file_input": null,
+        "file_inputs": [],
+        "contextual_update_info": null,
+        "config_snapshot_id": null,
+        "reasoned": true
+      }
+    ],
+    "metadata": {
+      "start_time_unix_secs": 1791082063,
+      "accepted_time_unix_secs": 1791082063,
+      "call_duration_secs": 14,
+      "queue_wait_secs": null,
+      "cost": 153,
+      "deletion_settings": {
+        "deletion_time_unix_secs": null,
+        "deleted_logs_at_time_unix_secs": null,
+        "deleted_audio_at_time_unix_secs": null,
+        "deleted_transcript_at_time_unix_secs": null,
+        "delete_transcript_and_pii": false,
+        "delete_audio": false
+      },
+      "feedback": {
+        "type": null,
+        "overall_score": null,
+        "likes": 0,
+        "dislikes": 0,
+        "rating": null,
+        "comment": null
+      },
+      "authorization_method": "public",
+      "charging": {
+        "dev_discount": false,
+        "is_burst": false,
+        "tier": "creator",
+        "llm_usage": {
+          "irreversible_generation": {
+            "model_usage": {
+              "claude-sonnet-5-5": {
+                "input": {
+                  "tokens": 1717,
+                  "price": 0.0038
+                },
+                "input_cache_read": {
+                  "tokens": 1668,
+                  "price": 0.0004
+                },
+                "input_cache_write": {
+                  "tokens": 1668,
+                  "price": 0.0046
+                },
+                "output_total": {
+                  "tokens": 660,
+                  "price": 0.0073
+                }
+              }
+            },
+            "detailed_model_usage": [
+              {
+                "config": {
+                  "model": "claude-sonnet-5-5",
+                  "service_tier": "standard"
+                },
+                "usage": {
+                  "input": {
+                    "tokens": 1717,
+                    "price": 0.0038
+                  },
+                  "input_cache_read": {
+                    "tokens": 1668,
+                    "price": 0.0004
+                  },
+                  "input_cache_write": {
+                    "tokens": 1668,
+                    "price": 0.0046
+                  },
+                  "output_total": {
+                    "tokens": 660,
+                    "price": 0.0073
+                  }
+                }
+              }
+            ]
+          },
+          "initiated_generation": {
+            "model_usage": {
+              "claude-sonnet-5-5": {
+                "input": {
+                  "tokens": 1717,
+                  "price": 0.0038
+                },
+                "input_cache_read": {
+                  "tokens": 1668,
+                  "price": 0.0004
+                },
+                "input_cache_write": {
+                  "tokens": 1668,
+                  "price": 0.0046
+                },
+                "output_total": {
+                  "tokens": 660,
+                  "price": 0.0073
+                }
+              }
+            },
+            "detailed_model_usage": [
+              {
+                "config": {
+                  "model": "claude-sonnet-5-5",
+                  "service_tier": "standard"
+                },
+                "usage": {
+                  "input": {
+                    "tokens": 1717,
+                    "price": 0.0038
+                  },
+                  "input_cache_read": {
+                    "tokens": 1668,
+                    "price": 0.0004
+                  },
+                  "input_cache_write": {
+                    "tokens": 1668,
+                    "price": 0.0046
+                  },
+                  "output_total": {
+                    "tokens": 660,
+                    "price": 0.0073
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "llm_price": 0.016,
+        "llm_charge": 89,
+        "call_charge": 64,
+        "platform_charge": 64,
+        "platform_usage": {
+          "category_usage": {
+            "text_message": {
+              "credits": 64,
+              "price": 0.012,
+              "quantity": 4.0
+            }
+          }
+        },
+        "platform_price": 0.012,
+        "free_minutes_consumed": 0.0,
+        "free_llm_dollars_consumed": 0.0,
+        "tts_usage": {
+          "primary_tts_model": "eleven_v3_conversational",
+          "total_audio_output_seconds": 0.0,
+          "total_characters": 0,
+          "per_voice_usage": []
+        },
+        "asr_usage": {
+          "asr_model": "scribe_realtime",
+          "total_transcription_calls": 0,
+          "total_audio_input_seconds": 0.0
+        },
+        "analysis": null
+      },
+      "phone_call": null,
+      "termination_reason": "Client disconnected: 1000",
+      "error": null,
+      "warnings": [],
+      "main_language": "sw",
+      "rag_usage": null,
+      "text_only": true,
+      "eleven_assistant": {
+        "is_eleven_assistant": false
+      },
+      "initiator_id": null,
+      "conversation_initiation_source": "unknown",
+      "conversation_initiation_source_version": null,
+      "timezone": null,
+      "async_metadata": null,
+      "whatsapp": null,
+      "sms": null,
+      "agent_created_from": "api",
+      "agent_last_updated_from": "api",
+      "voice_rewards": [],
+      "cost_fiat": 0.028
+    },
+    "analysis": {
+      "evaluation_criteria_results": {},
+      "data_collection_results": {},
+      "evaluation_criteria_results_list": [],
+      "data_collection_results_list": [],
+      "call_successful": "success",
+      "call_success_score": null,
+      "transcript_summary": "The user attempted to record a coffee sale, specifying quantity, price, and type. The agent consistently requested a four-digit PIN for verification before processing the transaction. Despite multiple prompts, the user did not provide the PIN and ended the call. Consequently, the agent was unable to record the sale.",
+      "call_summary_title": "Coffee Sale PIN Required",
+      "scoped": [],
+      "sentiment_analysis": {
+        "overall_label": "neutral",
+        "overall_sentiment_score": -0.1,
+        "overall_frustration_score": 0.1,
+        "min_user_sentiment_score": 0.0,
+        "max_user_frustration_score": 0.1,
+        "num_scored_user_turns": 3
+      }
+    },
+    "conversation_initiation_client_data": {
+      "conversation_config_override": {
+        "asr": null,
+        "turn": null,
+        "tts": null,
+        "conversation": {
+          "text_only": true,
+          "max_duration_seconds": null
+        },
+        "agent": null
+      },
+      "custom_llm_extra_body": {},
+      "user_id": null,
+      "source_info": {
+        "source": null,
+        "version": null
+      },
+      "branch_id": null,
+      "environment": null,
+      "starting_workflow_node_id": null,
+      "experiments": [],
+      "procedure_ids": null,
+      "dynamic_variables": {
+        "system__agent_id": "agent_3601m426r0abf01bs300wb1ssdsp",
+        "system__agent_turns": 5,
+        "system__current_agent_turns": 5,
+        "system__current_subagent_turns": 5,
+        "system__current_agent_id": "agent_3601m426r0abf01bs300wb1ssdsp",
+        "system__conversation_id": "conv_7901m42cyshjej6vwnezf9zmg9dc",
+        "system__call_duration_secs": 14,
+        "system__time_utc": "2026-10-04T02:47:57.811218+00:00",
+        "system__timezone": null,
+        "system__time": "Sunday, 02:47 04 October 2026",
+        "system__time_hour": 2,
+        "system__time_minute": 47,
+        "system__time_second": 57,
+        "system__is_text_only": true,
+        "system__channel": "unknown",
+        "system__caller_id": null,
+        "system__called_number": null,
+        "system__call_sid": null,
+        "system__call_id": null,
+        "system__user_id": null,
+        "system__initiator_id": null,
+        "system__environment": "production"
+      },
+      "tool_mock_config": {
+        "mocking_strategy": "none",
+        "fallback_strategy": "raise_error",
+        "mocked_tool_names": []
+      },
+      "tool_mock_overrides": {}
+    },
+    "has_audio": true,
+    "has_user_audio": true,
+    "has_response_audio": true
+  }
+}

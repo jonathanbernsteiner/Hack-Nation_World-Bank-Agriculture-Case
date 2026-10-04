@@ -164,3 +164,168 @@ def test_live_number_words():
     assert "300" in out[0] and "kiboko" in out[0].lower() and "1,800,000" in out[0]
     assert "6,500" in out[2]
     assert "middleman" in out[3].lower()
+
+
+# Review regression tests (#58): pin the API contract, privacy and failure paths.
+
+EXPECTED = ["Hello, what did you grow?", "I sold 300 kilos of kiboko."]
+
+
+def test_only_index_speaker_and_kiswahili_text_reach_the_model():
+    lines = [
+        {"i": 7, "role": "agent", "sw": "Habari?", "t": 1.5, "caller_id": "+256700000000"},
+        SimpleNamespace(i=8, role="farmer", sw="Niliuza kahawa kavu.", t=3.0, phone="+256700000001"),
+    ]
+    client = FakeClient(GOOD)
+    assert tr.translate_lines(lines, client=client) == EXPECTED
+    request = client.calls[0]
+    assert json.loads(request["messages"][0]["content"]) == [
+        {"i": 0, "speaker": "Agent", "text": "Habari?"},
+        {"i": 1, "speaker": "Farmer", "text": "Niliuza kahawa kavu."},
+    ]
+    assert "+256" not in json.dumps(request)
+
+
+def test_every_attempt_sends_only_the_allowed_request_keys():
+    client = FakeClient(BAD, GOOD)
+    tr.translate_lines(LINES, client=client)
+    assert len(client.calls) == 2
+    for kwargs in client.calls:
+        # No temperature, fallbacks, betas or thinking override on any attempt.
+        assert set(kwargs) == {"model", "max_tokens", "system", "messages", "output_config"}
+        assert set(kwargs["output_config"]) == {"effort", "format"}
+        assert kwargs["output_config"]["effort"] == "low"
+        assert kwargs["model"] == "claude-opus-5-5"
+
+
+def test_retry_is_single_turn_and_resends_the_full_transcript():
+    client = FakeClient(BAD, GOOD)
+    tr.translate_lines(LINES, client=client)
+    first, second = (call["messages"] for call in client.calls)
+    assert len(second) == 1 and second[0]["role"] == "user"
+    assert second[0]["content"].startswith(first[0]["content"])
+
+
+def test_refusal_on_the_retry_stops_without_a_third_call():
+    client = FakeClient(BAD, _reply([], stop_reason="refusal", category="bio"))
+    with pytest.raises(tr.TranslationRefused) as info:
+        tr.translate_lines(LINES, client=client)
+    assert info.value.category == "bio"
+    assert len(client.calls) == 2
+
+
+def test_max_tokens_on_the_retry_raises_truncated():
+    client = FakeClient(BAD, _reply([], stop_reason="max_tokens"))
+    with pytest.raises(tr.TranslationTruncated):
+        tr.translate_lines(LINES, client=client)
+    assert len(client.calls) == 2
+
+
+def test_refusal_without_stop_details_has_no_category():
+    reply = SimpleNamespace(stop_reason="refusal", stop_details=None, content=[])
+    with pytest.raises(tr.TranslationRefused) as info:
+        tr.translate_lines(LINES, client=FakeClient(reply))
+    assert info.value.category is None
+
+
+def test_thinking_blocks_before_the_json_are_ignored():
+    thinking = SimpleNamespace(type="thinking", thinking="", signature="sig")
+    reply = SimpleNamespace(stop_reason="end_turn", stop_details=None, content=[thinking, *GOOD.content])
+    assert tr.translate_lines(LINES, client=FakeClient(reply)) == EXPECTED
+
+
+def test_typed_errors_share_the_base_and_never_echo_the_transcript():
+    for cls in (tr.TranslationMisaligned, tr.TranslationRefused, tr.TranslationTruncated, tr.TranslationConfigError):
+        assert issubclass(cls, tr.TranslationError)
+    with pytest.raises(tr.TranslationMisaligned) as info:
+        tr.translate_lines(LINES, client=FakeClient(BAD, BAD))
+    for line in LINES:
+        assert line["sw"] not in str(info.value)
+
+
+@pytest.mark.parametrize("value", [None, ""])
+def test_missing_or_empty_model_env_makes_no_call(monkeypatch, value):
+    if value is None:
+        monkeypatch.delenv(tr.MODEL_ENV)
+    else:
+        monkeypatch.setenv(tr.MODEL_ENV, value)
+    client = FakeClient(GOOD)
+    with pytest.raises(tr.TranslationConfigError):
+        tr.translate_lines(LINES, client=client)
+    assert client.calls == []
+
+
+def test_default_client_uses_spec_timeout_and_retries(monkeypatch):
+    made = []
+
+    def factory(**kwargs):
+        made.append(kwargs)
+        return FakeClient(GOOD)
+
+    monkeypatch.setattr(tr.anthropic, "Anthropic", factory)
+    assert tr.translate_lines(LINES) == EXPECTED
+    assert made == [{"max_retries": 2, "timeout": 120.0}]
+
+
+def test_output_schema_matches_the_spec_contract():
+    schema = tr.TURNS_SCHEMA
+    assert schema["required"] == ["turns"] and schema["additionalProperties"] is False
+    item = schema["properties"]["turns"]["items"]
+    assert set(item["required"]) == {"i", "speaker", "text"}
+    assert item["additionalProperties"] is False
+    assert item["properties"]["i"]["type"] == "integer"
+    assert item["properties"]["speaker"]["enum"] == ["Agent", "Farmer"]
+
+
+@pytest.mark.parametrize(
+    "needle",
+    [
+        "milioni moja na laki nane", "1,800,000", "elfu sita na nusu", "6,500", "mitwalo ebiri", "20,000",
+        "arithmetic", "shilingi", "shillings", "gunia", "bag", "debe", "tin", "kiboko", "mbuni",
+        "kahawa kavu", "kahawa iliyokobolewa", "FAQ", "mchuuzi", "middleman", "verbatim", "[unclear]", "[PIN]",
+    ],
+)
+def test_prompt_keeps_every_spec_translation_rule(needle):
+    assert needle in tr.PROMPT_PATH.read_text(encoding="utf-8")
+
+
+def test_corrupt_or_stale_cache_is_ignored_and_rewritten(tmp_path):
+    tr.translate_lines(LINES, client=FakeClient(GOOD), cache_dir=tmp_path)
+    (path,) = tmp_path.glob("*.json")
+    for bad in ("{not json", json.dumps(["only one"]), json.dumps({"turns": []}), json.dumps([1, 2])):
+        path.write_text(bad, encoding="utf-8")
+        client = FakeClient(GOOD)
+        assert tr.translate_lines(LINES, client=client, cache_dir=tmp_path) == EXPECTED
+        assert len(client.calls) == 1
+    assert json.loads(path.read_text(encoding="utf-8")) == EXPECTED
+
+
+def test_cache_is_keyed_by_transcript_and_model(tmp_path, monkeypatch):
+    tr.translate_lines(LINES, client=FakeClient(GOOD), cache_dir=tmp_path)
+    edited = [LINES[0], {**LINES[1], "sw": "Niliuza kilo mia nne za kiboko."}]
+    client = FakeClient(GOOD)
+    tr.translate_lines(edited, client=client, cache_dir=tmp_path)
+    assert len(client.calls) == 1
+    monkeypatch.setenv(tr.MODEL_ENV, "claude-other-model")
+    client = FakeClient(GOOD)
+    tr.translate_lines(LINES, client=client, cache_dir=tmp_path)
+    assert len(client.calls) == 1
+    assert len(list(tmp_path.glob("*.json"))) == 3
+
+
+def test_failed_translation_is_never_cached(tmp_path):
+    with pytest.raises(tr.TranslationMisaligned):
+        tr.translate_lines(LINES, client=FakeClient(BAD, BAD), cache_dir=tmp_path)
+    with pytest.raises(tr.TranslationRefused):
+        tr.translate_lines(LINES, client=FakeClient(_reply([], stop_reason="refusal")), cache_dir=tmp_path)
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_no_cache_io_without_cache_dir(monkeypatch):
+    def fail(*args, **kwargs):
+        raise AssertionError("the cache was touched without cache_dir")
+
+    monkeypatch.setattr(tr, "_read_cache", fail)
+    monkeypatch.setattr(tr.Path, "write_text", fail)
+    monkeypatch.setattr(tr.Path, "mkdir", fail)
+    assert tr.translate_lines(LINES, client=FakeClient(GOOD)) == EXPECTED

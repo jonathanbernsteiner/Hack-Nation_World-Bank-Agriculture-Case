@@ -88,3 +88,35 @@ def test_config_import_does_not_require_secrets(monkeypatch):
     assert settings.database_url is None
     assert settings.ledger_pin_salt is None
     assert settings.price_include_synthetic is True
+
+
+def test_deep_health_db_failure_reports_error_without_leaking(client, monkeypatch):
+    """Exercise the real _db_status: a failing connect must yield db=error, not a 500,
+    and neither the database URL nor the exception text may reach the response."""
+    url = "postgresql://user:hunter2@pooler.example:6543/postgres"
+    _patch_settings(monkeypatch, hotline_admin_secret=SECRET, ledger_pin_salt=None, database_url=url)
+
+    def failing_connect():
+        raise RuntimeError(f"could not connect to {url}")
+
+    monkeypatch.setattr(main.db, "connect", failing_connect)
+    response = client.get("/api/health?deep=1", headers={HEADER: SECRET})
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok", "db": "error", "salt_fp": None}
+    assert "hunter2" not in response.text
+    assert "pooler.example" not in response.text
+
+
+def test_deep_health_non_ascii_secret_is_401_not_500(client, monkeypatch):
+    """hmac.compare_digest raises TypeError on non-ASCII str; the check must compare bytes."""
+    _patch_settings(monkeypatch, hotline_admin_secret=SECRET)
+    wrong = ("\xe9" * len(SECRET)).encode("latin-1")
+    response = client.get("/api/health?deep=1", headers={HEADER: wrong})
+    assert response.status_code == 401
+
+
+def test_plain_health_ignores_admin_header(client, monkeypatch):
+    """Plain health must never return deep fields, even with a valid admin secret."""
+    _patch_settings(monkeypatch, hotline_admin_secret=SECRET, ledger_pin_salt="pepper")
+    response = client.get("/api/health", headers={HEADER: SECRET})
+    assert response.json() == {"status": "ok"}

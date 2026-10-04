@@ -13,6 +13,7 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from starlette.concurrency import run_in_threadpool
 
 from hotline import config, db, security
+from hotline.pipeline import process
 from hotline.pipeline import transcript as tx
 
 logger = logging.getLogger(__name__)
@@ -39,11 +40,6 @@ update calls set source = 'elevenlabs', status = 'received', language = 'sw',
 where conversation_id = %(conversation_id)s and status = 'in_call'
 returning id
 """
-
-
-def process_call(conversation_id: str) -> None:
-    """Placeholder for #66, which replaces this call site with the real pipeline
-    (translate, extract, verify, save). Until then the pg_cron safety net finds the row."""
 
 
 def _row_params(conversation_id: str, data: dict[str, Any]) -> dict[str, Any]:
@@ -107,5 +103,5 @@ async def receive_call(request: Request, background_tasks: BackgroundTasks) -> d
         raise HTTPException(status_code=503, detail="store_failed") from None
 
     if status == "stored":
-        background_tasks.add_task(process_call, conversation_id)
+        background_tasks.add_task(process.process_call, conversation_id)
     return {"status": status}

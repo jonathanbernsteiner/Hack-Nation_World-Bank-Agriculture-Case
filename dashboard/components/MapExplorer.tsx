@@ -27,6 +27,13 @@ export default function MapExplorer({ data }: { data: DashboardData }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [path, setPath] = useState<AreaPath>(() => pathFromParam(searchParams.get("path"), data));
+  const context = useMemo(
+    () =>
+      data.villages
+        .filter((v) => v.lat !== null && v.lon !== null)
+        .map((v) => ({ path: [v.district, v.subCounty, v.parish, v.village], name: `${v.village}, ${v.district}`, lat: v.lat as number, lon: v.lon as number })),
+    [data],
+  );
   const [hasUnknownPath, setHasUnknownPath] = useState(() => {
     const param = searchParams.get("path");
     return Boolean(param) && pathFromParam(param, data).length === 0;
@@ -62,7 +69,7 @@ export default function MapExplorer({ data }: { data: DashboardData }) {
         <div className="bg-white border border-line rounded-xl overflow-hidden flex flex-col xl:h-full xl:min-h-0">
           <MapToolbar path={path} layer={layer} onLayer={setLayer} onSelect={select} />
           <div className="h-[60vh] min-h-[420px] xl:h-auto xl:min-h-0 xl:flex-1">
-            <MapView areas={children} selected={area} layer={layer} warnings={area.warnings} onSelect={select} />
+            <MapView areas={children} selected={area} layer={layer} warnings={area.warnings} onSelect={select} context={context} />
           </div>
         </div>
         <div ref={panelRef} className="xl:h-full xl:min-h-0 xl:overflow-y-auto">

@@ -9,12 +9,21 @@ import { formatIndex, formatNumber, labelLevel } from "@/lib/format";
 import { priceBand } from "./FarmersTable";
 import type { PriceBand } from "./FarmersTable";
 
+/** Every village, drawn as a faint dot so the map never looks empty when zoomed out. */
+export interface ContextPoint {
+  path: AreaPath;
+  name: string;
+  lat: number;
+  lon: number;
+}
+
 interface MapViewProps {
   areas: AreaSummary[];
   selected: AreaSummary;
   layer: MapLayer;
   warnings: Warning[];
   onSelect: (path: AreaPath) => void;
+  context?: ContextPoint[];
 }
 
 const UGANDA_CENTER: [number, number] = [1.37, 32.29];
@@ -157,7 +166,7 @@ function Legend({ layer }: { layer: MapLayer }) {
   );
 }
 
-export default function MapView({ areas, selected, layer, warnings, onSelect }: MapViewProps) {
+export default function MapView({ areas, selected, layer, warnings, onSelect, context = [] }: MapViewProps) {
   const isVillage = selected.level === "village";
   const isEmpty = areas.length === 0 && !isVillage;
   const shown = areas.length === 0 && isVillage ? [] : areas;
@@ -178,6 +187,20 @@ export default function MapView({ areas, selected, layer, warnings, onSelect }: 
         <ZoomTopRight />
         <QuietAttribution />
         <FitBounds areas={areas} selected={selected} />
+
+        {context
+          .filter((point) => !point.path.slice(0, selected.path.length).every((name, i) => name === selected.path[i]))
+          .map((point) => (
+            <CircleMarker
+              key={`ctx-${point.path.join("|")}`}
+              center={[point.lat, point.lon]}
+              radius={4}
+              pathOptions={{ color: "#FFFFFF", weight: 1, fillColor: "#64748B", fillOpacity: 0.75 }}
+              eventHandlers={{ click: () => onSelect(point.path) }}
+            >
+              <Tooltip direction="top" offset={[0, -4]}>{point.name}</Tooltip>
+            </CircleMarker>
+          ))}
 
         {shown.map((area) => {
           const style = styleFor(area, layer, containsWarning(area, warnings), maxFarmers);

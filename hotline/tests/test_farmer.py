@@ -89,8 +89,8 @@ def test_profile_renders_escaped_with_new_badge(client):
     body = client.get("/demo/farmer/413", headers=AUTH).text
     assert "<script>x</script>" not in body and "&lt;script&gt;" in body
     assert "Nakato &lt;i&gt;" in body and "&lt;b&gt;300 kilos&lt;/b&gt;" in body
-    assert body.count("class=new>NEW") == 1  # only the newest call's entry
-    assert "first call 2025-01-03" in body
+    assert body.count("class=new>New") == 1  # only the newest call's entry
+    assert "First called on 2025-01-03" in body
     assert "tile.openstreetmap.org" in body and "OpenStreetMap contributors" in body
     assert "pin_hash" not in body
 
@@ -115,7 +115,8 @@ def test_sentiment_errors_become_a_message(client, monkeypatch):
 def test_demo_links_caller_to_profile():
     call = {"id": 1, "farmer_id": 413, "received_at": None, "status": "processed", "identified_by": "pin",
             "first_name": "Nakato", "village": "Kyabakuza", "transcript_lines": []}
-    assert "<a href=/demo/farmer/413>Nakato / Kyabakuza</a>" in demo._call_block(call, [])
+    block = demo._call_block(call, [])
+    assert "<a class=who href=/demo/farmer/413>Nakato</a>" in block and "Kyabakuza" in block
 
 
 class FakeClient:

@@ -14,7 +14,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from hotline import db, history, security, sentiment
-from hotline.routes.demo import KAMPALA_TZ, _e, _kampala, _num, _page, _rows, _transcript, needs_review
+from hotline.routes import demo
+from hotline.routes.demo import KAMPALA_TZ, _e, _kampala, _num, _page, _rows, needs_review
 
 router = APIRouter()
 
@@ -134,12 +135,12 @@ def load_profile(conn, farmer_id: int, today: date | None = None) -> dict | None
 # --- rendering --------------------------------------------------------------------------------
 
 
-def _tile(label: str, value: str, note: str = "") -> str:
-    note_html = f"<div class=note>{_e(note)}</div>" if note else ""
-    return f"<div class=tile><div class=label>{_e(label)}</div><div class=value>{_e(value)}</div>{note_html}</div>"
+def _figure(value: str, label: str, note: str = "") -> str:
+    note_html = f"<span class=fig-note>{_e(note)}</span>" if note else ""
+    return f"<div class=fig><span class=fig-value>{_e(value)}</span><span class=fig-label>{_e(label)}</span>{note_html}</div>"
 
 
-def _tiles(view: dict, years: list[dict]) -> str:
+def _figures(view: dict, years: list[dict]) -> str:
     sales = _coffee_sales(view["entries"])
     kg = sum(_sale_kg(s) for s in sales)
     income = sum(float(s["price_total"]) for s in sales)
@@ -149,52 +150,48 @@ def _tiles(view: dict, years: list[dict]) -> str:
     vs = ""
     if her_avg and median.get("median_ugx_per_kg"):
         diff = her_avg - float(median["median_ugx_per_kg"])
-        vs = f"{'+' if diff >= 0 else '-'}{_num(abs(diff))} vs {median.get('level') or 'local'} median"
-    return "<div class=tiles>" + "".join([
-        _tile("Average harvest", f"{_num(sum(harvests) / len(harvests))} kg/yr" if harvests else "n/a",
-              f"{len(harvests)} coffee years"),
-        _tile("Coffee sold", f"{_num(kg)} kg", f"{len(sales)} sales"),
-        _tile("Income from coffee", f"{_num(income)} UGX", "all recorded sales"),
-        _tile("Her average price", f"{_num(her_avg)} UGX/kg" if her_avg else "n/a", vs),
-        _tile(f"Village median ({view['form']})",
-              f"{_num(median['median_ugx_per_kg'])} UGX/kg" if median.get("median_ugx_per_kg") else "n/a",
-              f"n={median.get('n_sales')}, {median.get('area') or ''}" if median.get("n_sales") else ""),
-        _tile("Calls", str(len(view["calls"])) + ("+" if len(view["calls"]) == CALLS_SHOWN else ""),
-              f"last {_kampala(view['calls'][0]['received_at'])}" if view["calls"] else ""),
-    ]) + "</div>"
+        vs = f"{_num(abs(diff))} {'above' if diff >= 0 else 'below'} the village median"
+    return "<section class=figures>" + "".join([
+        _figure(f"{_num(sum(harvests) / len(harvests))} kg" if harvests else "n/a", "harvest a year",
+                f"average of {len(harvests)} coffee years"),
+        _figure(f"{_num(kg)} kg", "coffee sold", f"{len(sales)} sales"),
+        _figure(f"{_num(income)} UGX", "earned from coffee", "all recorded sales"),
+        _figure(f"{_num(her_avg)} UGX/kg" if her_avg else "n/a", "her average price", vs),
+        _figure(f"{_num(median['median_ugx_per_kg'])} UGX/kg" if median.get("median_ugx_per_kg") else "n/a",
+                f"{view['form']} median nearby", f"{median.get('n_sales')} sales in {median.get('area')}" if median.get("n_sales") else ""),
+    ]) + "</section>"
 
 
 def _record(entry: dict, latest_call_id: Any) -> str:
-    new = " <span class=new>NEW</span>" if entry["call_id"] == latest_call_id else ""
-    flag = " <span class=flag>REVIEW</span>" if needs_review(entry, entry) else ""
-    kg = _sale_kg(entry)
-    what = ", ".join(_e(x) for x in (
-        entry.get("coffee_form") or entry.get("crop"),
-        f"{_num(kg)} kg" if kg else None,
-        f"{_num(entry['yield_amount'])} {entry.get('unit') or ''} harvested" if entry.get("yield_amount") else None,
-        f"{_num(entry['price_total'])} {entry.get('currency') or ''}" if entry.get("price_total") is not None else None,
-        f"{_num(float(entry['price_total']) / kg)}/kg" if kg and entry.get("price_total") is not None else None,
-        (entry.get("buyer_type") or "").replace("_", " ") or None,
-        (entry.get("paid_how") or "").replace("_", " ") or None,
-        (entry.get("likely_disease") or "").replace("_", " ") or entry.get("symptom"),
-    ) if x)
-    mark = {True: "&#10003;", False: "&#10007;"}.get(entry.get("quote_verified"), "")
-    quote = f"<div class=quote>{mark} &ldquo;{_e(entry['evidence_quote'])}&rdquo;</div>" if entry.get("evidence_quote") else ""
-    return (f"<tr{' class=hl' if new else ''}><td>{_e(entry['entry_date'].isoformat())}</td>"
-            f"<td><b>{_e(entry['kind'])}</b>{new}{flag}</td><td>{what}{quote}</td></tr>")
+    new = entry["call_id"] == latest_call_id
+    kind = demo._kind(entry)
+    head, details = demo._facts(entry)
+    flag = " <span class=flag>Needs review</span>" if needs_review(entry, entry) else ""
+    new_tag = " <span class=new>New</span>" if new else ""
+    quote = entry.get("evidence_quote")
+    mark = {True: "<span class=ok-mark>&#10003;</span>", False: "<span class=bad-mark>&#10007;</span>"}.get(entry.get("quote_verified"), "")
+    quote_html = f"<span class=rq>{mark} &ldquo;{_e(quote)}&rdquo;</span>" if quote else ""
+    rest = "".join(f"<span class=rd>{d}</span>" for d in details)
+    return (f"<tr class='k-{kind}{' hl' if new else ''}'><td class=rdate>{_e(entry['entry_date'].strftime('%d %b %Y'))}</td>"
+            f"<td><span class=dot></span>{demo.KIND_LABELS.get(kind, 'Record')}{new_tag}{flag}</td>"
+            f"<td><b>{head}</b>{rest}{quote_html}</td></tr>")
 
 
-def _calls(calls: list[dict]) -> str:
+def _calls(calls: list[dict], entries: list[dict]) -> str:
     if not calls:
         return "<p class=muted>No calls yet.</p>"
+    by_call: dict[Any, list[dict]] = {}
+    for entry in entries:
+        by_call.setdefault(entry["call_id"], []).append(entry)
     blocks = []
     for index, call in enumerate(calls):
         badge = " <span class=synthetic>SYNTHETIC</span>" if call.get("is_synthetic") else ""
-        mood = f" <span class=mood data-call={_e(call['id'])}></span>"
+        mood = f"<span class=mood data-call={_e(call['id'])}></span>"
+        status, tone = demo.STATUS_LABELS.get(call.get("status"), (call.get("status") or "", ""))
         blocks.append(
-            f"<details{' open' if index == 0 else ''}><summary>{_e(_kampala(call.get('received_at')))} &middot; "
-            f"{_e(call.get('status'))} &middot; by {_e(call.get('identified_by') or 'n/a')}{badge}{mood}</summary>"
-            f"{_transcript(call)}</details>"
+            f"<details class=pcall{' open' if index == 0 else ''}><summary><time>{_e(demo._when(call.get('received_at')))}</time>"
+            f"<span class='chip {tone}'>{_e(status)}</span>{mood}{badge}</summary>"
+            f"{demo._transcript(call, by_call.get(call['id'], []))}</details>"
         )
     return "".join(blocks)
 
@@ -204,60 +201,103 @@ def _json_script(data: Any) -> str:
     return f"<script type=application/json id=profile-data>{text}</script>"
 
 
-_PROFILE_CSS = (
-    "<style>.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin:12px 0}"
-    ".tile{border:1px solid #ddd;border-radius:8px;padding:8px 12px}.label,.note{color:#777;font-size:12px}"
-    ".value{font-size:20px;font-weight:600}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}"
-    "@media(max-width:800px){.grid{grid-template-columns:1fr}}#map{height:300px;border-radius:8px}"
-    ".box{border:1px solid #ddd;border-radius:8px;padding:8px 12px}.new{background:#bbf7d0;padding:1px 6px;"
-    "border-radius:4px;font-size:12px}tr.hl{background:#f0fdf4}details{border:1px solid #ddd;border-radius:8px;"
-    "padding:6px 12px;margin:8px 0}summary{cursor:pointer}.mood{font-size:12px;padding:1px 6px;border-radius:4px}"
-    ".positive{background:#bbf7d0}.neutral{background:#e5e7eb}.mixed{background:#fde68a}.negative{background:#fecaca}"
-    ".chart{position:relative;height:280px;min-width:0}.grid>div{min-width:0}</style>"
-)
+_PROFILE_CSS = """<style>
+.lede{color:var(--muted);margin:-8px 0 20px;font-size:16px}
+.back{display:inline-block;margin-top:20px;font-size:14px}
+.figures{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:var(--paper);border:1px solid var(--line);
+border-radius:16px;margin:0 0 20px}
+.fig{padding:16px 18px;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:2px}
+.fig:first-child{border-left:0}
+.fig-value{font-size:24px;font-weight:700;letter-spacing:-.01em;line-height:1.15}
+.fig-label{font-size:14px}.fig-note{font-size:12.5px;color:var(--muted)}
+@media(max-width:900px){.figures{grid-template-columns:repeat(2,minmax(0,1fr))}.fig{border-left:0;border-top:1px solid var(--line)}
+.fig:nth-child(-n+2){border-top:0}}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;margin-bottom:20px}
+@media(max-width:900px){.two{grid-template-columns:1fr}}
+.two>.panel{min-width:0}
+#map{height:320px;border-radius:10px;border:1px solid var(--line)}
+.mood-big{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+.mood-word{font-size:28px;font-weight:700;text-transform:capitalize;letter-spacing:-.01em}
+.mood-score{color:var(--muted);font-size:14px}
+.summary{font-family:'Source Serif 4',Georgia,serif;font-style:italic;font-size:18px;line-height:1.5;margin:0 0 16px;max-width:60ch}
+.mood{font-size:12px;padding:1px 8px;border-radius:999px;text-transform:capitalize}
+.mood:empty{display:none}
+.positive{background:var(--leaf-tint);color:var(--leaf)}.neutral{background:#E6E9E5;color:#3E4A43}
+.mixed{background:var(--husk-tint);color:#6B4D16}.negative{background:var(--cherry-tint);color:#7A1F18}
+.chart{position:relative;height:280px;min-width:0}
+.ledger{width:100%;border-collapse:collapse;background:var(--paper);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.ledger td{padding:10px 14px;border-top:1px solid var(--line);vertical-align:top}
+.ledger tr:first-child td{border-top:0}
+.rdate{white-space:nowrap;color:var(--muted);width:110px}
+.ledger td:nth-child(2){white-space:nowrap;width:150px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--leaf-2);margin-right:8px}
+.k-observation .dot{background:var(--cherry)}.k-harvest .dot{background:var(--husk)}.k-activity .dot,.k-other .dot{background:var(--muted)}
+.rd{display:block;color:#3A4A40}.rq{display:block;font-family:'Source Serif 4',Georgia,serif;font-style:italic;color:#3B4A41;margin-top:2px}
+tr.hl{background:#FBEFED}tr.hl td:first-child{box-shadow:inset 4px 0 0 var(--cherry)}
+.new{background:var(--cherry);color:#fff;border-radius:999px;padding:0 8px;font-size:12px;margin-left:6px}
+.flag{margin-left:6px}
+.pcall{background:var(--paper);border:1px solid var(--line);border-radius:12px;margin:0 0 10px;overflow:hidden}
+.pcall summary{cursor:pointer;padding:12px 18px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pcall time{font-weight:600;margin-right:4px}
+.pcall .convo{border-top:1px solid var(--line)}
+section.block{margin:28px 0}
+@media(max-width:700px){.ledger td:nth-child(2){white-space:normal;width:auto}.rdate{width:auto}}
+</style>"""
 
 _PROFILE_JS = """
 <script>
 (function () {
   var d = JSON.parse(document.getElementById('profile-data').textContent);
+  var css = getComputedStyle(document.documentElement);
+  function v(name) { return css.getPropertyValue(name).trim(); }
   if (window.L && d.lat != null) {
-    var map = L.map('map').setView([d.lat, d.lon], 13);
+    var map = L.map('map', {scrollWheelZoom: false}).setView([d.lat, d.lon], 13);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors'}).addTo(map);
-    L.marker([d.lat, d.lon]).addTo(map).bindPopup(d.place).openPopup();
+    L.circleMarker([d.lat, d.lon], {radius: 10, color: '#fff', weight: 3, fillColor: v('--cherry'), fillOpacity: 1})
+      .addTo(map).bindPopup(d.place).openPopup();
   } else { document.getElementById('map').textContent = 'No location on file.'; }
   if (window.Chart) {
     Chart.defaults.maintainAspectRatio = false;
+    Chart.defaults.font.family = "'Schibsted Grotesk', system-ui, sans-serif";
+    Chart.defaults.color = v('--muted');
+    Chart.defaults.plugins.legend.labels.boxWidth = 12;
+    var grid = {color: v('--line')};
     new Chart(document.getElementById('yearly'), {data: {labels: d.years.map(function (y) { return y.year; }),
       datasets: [
-        {type: 'bar', label: 'Harvest (kg)', data: d.years.map(function (y) { return y.harvest_kg; }), yAxisID: 'kg', backgroundColor: '#86efac'},
-        {type: 'bar', label: 'Sold (kg)', data: d.years.map(function (y) { return y.sold_kg; }), yAxisID: 'kg', backgroundColor: '#60a5fa'},
-        {type: 'line', label: 'Income (UGX)', data: d.years.map(function (y) { return y.income_ugx; }), yAxisID: 'ugx', borderColor: '#f59e0b', backgroundColor: '#f59e0b'}]},
-      options: {scales: {kg: {position: 'left', title: {display: true, text: 'kg'}},
+        {type: 'bar', label: 'Harvest (kg)', data: d.years.map(function (y) { return y.harvest_kg; }), yAxisID: 'kg', backgroundColor: v('--husk'), borderRadius: 4},
+        {type: 'bar', label: 'Sold (kg)', data: d.years.map(function (y) { return y.sold_kg; }), yAxisID: 'kg', backgroundColor: v('--leaf-2'), borderRadius: 4},
+        {type: 'line', label: 'Earned (UGX)', data: d.years.map(function (y) { return y.income_ugx; }), yAxisID: 'ugx', borderColor: v('--cherry'), backgroundColor: v('--cherry'), borderWidth: 2.5}]},
+      options: {scales: {x: {grid: {display: false}}, kg: {position: 'left', beginAtZero: true, grid: grid, title: {display: true, text: 'kg'}},
         ugx: {position: 'right', beginAtZero: true, grid: {drawOnChartArea: false}, title: {display: true, text: 'UGX'}}}}});
     new Chart(document.getElementById('monthly'), {data: {labels: d.monthly.labels, datasets: [
-        {type: 'bar', label: 'Sold (kg)', data: d.monthly.kg, yAxisID: 'kg', backgroundColor: '#60a5fa'},
-        {type: 'line', label: 'Income (UGX)', data: d.monthly.income, yAxisID: 'ugx', borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.2}]},
-      options: {scales: {kg: {position: 'left', beginAtZero: true}, ugx: {position: 'right', beginAtZero: true, grid: {drawOnChartArea: false}}}}});
+        {type: 'bar', label: 'Sold (kg)', data: d.monthly.kg, yAxisID: 'kg', backgroundColor: v('--leaf-2'), borderRadius: 3},
+        {type: 'line', label: 'Earned (UGX)', data: d.monthly.income, yAxisID: 'ugx', borderColor: v('--cherry'), backgroundColor: v('--cherry'), borderWidth: 2, tension: 0.25, pointRadius: 2}]},
+      options: {scales: {x: {grid: {display: false}}, kg: {position: 'left', beginAtZero: true, grid: grid},
+        ugx: {position: 'right', beginAtZero: true, grid: {drawOnChartArea: false}}}}});
     var sets = [{type: 'line', label: 'Her price (UGX/kg)', data: d.prices.map(function (p) { return p.y; }),
-      borderColor: '#2563eb', backgroundColor: '#2563eb', tension: 0.2}];
-    if (d.median) sets.push({type: 'line', label: 'Village median', data: d.prices.map(function () { return d.median; }),
-      borderColor: '#9ca3af', borderDash: [6, 4], pointRadius: 0});
-    new Chart(document.getElementById('prices'), {data: {labels: d.prices.map(function (p) { return p.x; }), datasets: sets}});
+      borderColor: v('--leaf-2'), backgroundColor: v('--leaf-2'), borderWidth: 2.5, tension: 0.25}];
+    if (d.median) sets.push({type: 'line', label: 'Village median now', data: d.prices.map(function () { return d.median; }),
+      borderColor: v('--husk'), borderDash: [6, 4], borderWidth: 2, pointRadius: 0});
+    new Chart(document.getElementById('prices'), {data: {labels: d.prices.map(function (p) { return p.x; }), datasets: sets},
+      options: {scales: {x: {grid: {display: false}}, y: {grid: grid}}}});
   }
   var box = document.getElementById('sentiment');
   fetch(d.sentimentUrl, {credentials: 'same-origin'}).then(function (r) { return r.json(); }).then(function (s) {
-    if (!s || !s.overall) { box.textContent = (s && s.message) || 'Sentiment unavailable.'; return; }
+    if (!s || !s.overall) { box.textContent = (s && s.message) || 'Sentiment is not available right now.'; return; }
     box.innerHTML = '';
-    var tag = document.createElement('span'); tag.className = 'mood ' + s.overall;
-    tag.textContent = s.overall + ' (' + s.score.toFixed(2) + ')';
-    var text = document.createElement('p'); text.textContent = s.summary;
-    box.appendChild(tag); box.appendChild(text);
+    var top = document.createElement('div'); top.className = 'mood-big';
+    var word = document.createElement('span'); word.className = 'mood-word'; word.textContent = s.overall;
+    var score = document.createElement('span'); score.className = 'mood-score';
+    score.textContent = 'score ' + s.score.toFixed(2) + ' from -1 to 1';
+    top.appendChild(word); top.appendChild(score);
+    var text = document.createElement('p'); text.className = 'summary'; text.textContent = s.summary;
+    box.appendChild(top); box.appendChild(text);
     (s.calls || []).forEach(function (c) {
       var el = document.querySelector('.mood[data-call="' + c.id + '"]');
       if (el) { el.className = 'mood ' + c.sentiment; el.textContent = c.sentiment; el.title = c.reason; }
     });
-  }).catch(function () { box.textContent = 'Sentiment unavailable.'; });
+  }).catch(function () { box.textContent = 'Sentiment is not available right now.'; });
 })();
 </script>
 """
@@ -267,36 +307,38 @@ def render_profile(view: dict) -> str:
     farmer, entries, calls = view["farmer"], view["entries"], view["calls"]
     years = yearly(entries)
     place = ", ".join(x for x in (farmer.get("village"), farmer.get("parish"), farmer.get("sub_county"),
-                                  farmer.get("district"), farmer.get("region")) if x)
+                                  farmer.get("district")) if x)
     lat = farmer.get("lat") if farmer.get("lat") is not None else farmer.get("village_lat")
     lon = farmer.get("lon") if farmer.get("lon") is not None else farmer.get("village_lon")
     median = (view.get("median") or {}).get("median_ugx_per_kg")
     data = {
-        "lat": lat, "lon": lon, "place": f"{farmer['name']}, {place}", "years": years,
+        "lat": lat, "lon": lon, "place": f"{farmer['name']}, {farmer.get('village') or ''}", "years": years,
         "monthly": monthly(entries, view["today"]), "prices": price_points(entries),
         "median": float(median) if median else None, "sentimentUrl": f"/demo/farmer/{farmer['id']}/sentiment",
     }
     badge = " <span class=synthetic>SYNTHETIC</span>" if farmer.get("is_synthetic") else ""
+    first = _kampala(farmer.get("first_call_at"))[:10]
     latest = calls[0]["id"] if calls else None
     records = "".join(_record(e, latest) for e in entries) or "<tr><td class=muted>No records yet.</td></tr>"
     body = (
-        f"<p><a href=/demo>&larr; All calls</a></p>"
-        f"<p>{_e(place)}{badge} &middot; {_e(farmer.get('coffee_type') or 'coffee')} &middot; mostly {_e(view['form'])}"
-        f" &middot; first call {_e(_kampala(farmer.get('first_call_at'))[:10] or 'n/a')}</p>"
-        f"{_tiles(view, years)}"
-        f"<div class=grid><div><h2>Farm location</h2><div id=map></div></div>"
-        f"<div><h2>Sentiment</h2><div class=box id=sentiment>Reading her recent calls&hellip;</div>"
-        f"<h2>Yield and income by coffee year</h2><div class=chart><canvas id=yearly></canvas></div></div></div>"
-        f"<div class=grid><div><h2>Monthly sales</h2><div class=chart><canvas id=monthly></canvas></div></div>"
-        f"<div><h2>Price received vs village median</h2><div class=chart><canvas id=prices></canvas></div></div></div>"
-        f"<h2>Records</h2><table>{records}</table>"
-        f"<h2>Recent calls</h2>{_calls(calls)}"
+        "<a class=back href=/demo>All calls</a>"
+        f"<h1>{_e(farmer['name'])}{badge}</h1>"
+        f"<p class=lede>Grows {_e(farmer.get('coffee_type') or 'coffee')} in {_e(place)}, mostly sold as {_e(view['form'])}."
+        f"{' First called on ' + _e(first) + '.' if first else ''}</p>"
+        f"{_figures(view, years)}"
+        "<div class=two><div class=panel><h2>Farm location</h2><div id=map></div></div>"
+        "<div class=panel><h2>How she sounds lately</h2><div id=sentiment><p class=muted>Reading her recent calls&hellip;</p></div>"
+        "<h2>Harvest, sales and earnings by coffee year</h2><div class=chart><canvas id=yearly></canvas></div></div></div>"
+        "<div class=two><div class=panel><h2>Sales by month</h2><div class=chart><canvas id=monthly></canvas></div></div>"
+        "<div class=panel><h2>Her price per kilo against the village median</h2><div class=chart><canvas id=prices></canvas></div></div></div>"
+        f"<section class=block><h2>Farm record</h2><table class=ledger>{records}</table></section>"
+        f"<section class=block><h2>Recent calls</h2>{_calls(calls, entries)}</section>"
         f"{_json_script(data)}"
     )
     head = (f"<link rel=stylesheet href={LEAFLET}/leaflet.min.css>{_PROFILE_CSS}"
             f"<script src={LEAFLET}/leaflet.min.js></script><script src={CHART_JS}></script>")
-    page = _page(farmer["name"], body + _PROFILE_JS, refresh=False)
-    return page.replace("</head>", head + "</head>", 1)
+    return _page(farmer["name"], body + _PROFILE_JS, refresh=False, head=head,
+                 tagline="Farmer profile built from her calls to the coffee line.")
 
 
 # --- routes -----------------------------------------------------------------------------------

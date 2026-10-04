@@ -299,7 +299,6 @@ def test_render_never_reintroduces_pin():
     assert rendered.count("[PIN]") == 3
 
 
-@pytest.mark.xfail(strict=True, reason="review cycle 1 finding 1: _GAP misses pause punctuation; drop marker once fixed")
 @pytest.mark.parametrize(
     "text",
     [
@@ -314,7 +313,6 @@ def test_pin_with_pause_punctuation_between_digits_is_redacted(text):
     assert redact_pins(_lines(text), {"4831"})[0]["sw"] == "PIN ni [PIN] asante"
 
 
-@pytest.mark.xfail(strict=True, reason="review cycle 1 finding 2: result looked up only in the call's own turn")
 def test_tool_result_logged_in_a_later_turn_is_paired_with_its_call():
     call = {"request_id": "r1", "tool_name": "identify_farmer", "params_as_json": json.dumps({"pin": "9001"})}
     result = {"request_id": "r1", "tool_name": "identify_farmer", "result_value": json.dumps({"median": 5300})}
@@ -328,7 +326,6 @@ def test_tool_result_logged_in_a_later_turn_is_paired_with_its_call():
     assert scrubbed["result"] == {"median": 5300}
 
 
-@pytest.mark.xfail(strict=True, reason="review cycle 1 finding 3: partial-run head/tail anchored to the wrong run edge")
 def test_pin_head_after_another_digit_word_is_redacted():
     (out,) = redact_pins(_lines("kilo moja, tisa sifuri sifuri"), {"9001"})
     assert "tisa sifuri sifuri" not in out["sw"]

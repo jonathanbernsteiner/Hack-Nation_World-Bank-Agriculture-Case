@@ -39,7 +39,7 @@ DROPPED_RESULT_KEYS = frozenset(
 )
 
 _TOKEN = re.compile(r"\d+|[^\W\d_]+", re.UNICODE)
-_GAP = re.compile(r"[\s,.\-]*(?:\bna\b[\s,.\-]*)?", re.IGNORECASE)
+_GAP = re.compile(r"[\W_]*(?:\bna\b[\W_]*)?", re.IGNORECASE)
 _PIN_KEY = re.compile(r"(?:^|_)pin(?:$|_)", re.IGNORECASE)
 _PIN_IN_TEXT = re.compile(r'("?pin"?\s*[:=]\s*"?)\d+', re.IGNORECASE)
 _DIGITS_ONLY = re.compile(r"\d+")
@@ -153,8 +153,8 @@ def _pin_spans(run: list[re.Match], pins: list[str]) -> list[tuple[int, int]]:
                 spans.append((start, end + 1))
             elif all_words and end + 1 - start >= MIN_PARTIAL_RUN:
                 # spoken digits only: the start or end of a PIN split across turns
-                is_head = start == 0 and any(p.startswith(acc) for p in pins)
-                is_tail = end == len(parts) - 1 and any(p.endswith(acc) for p in pins)
+                is_head = end == len(parts) - 1 and any(p.startswith(acc) for p in pins)
+                is_tail = start == 0 and any(p.endswith(acc) for p in pins)
                 if is_head or is_tail:
                     spans.append((start, end + 1))
     return spans
@@ -236,8 +236,10 @@ def scrub_tool_results(data: dict) -> list[dict]:
     """
     pins = collect_pins(data)
     scrubbed: list[dict] = []
+    results = {
+        r.get("request_id"): r for turn in _turns(data) for r in _tool_items(turn, "tool_results")
+    }
     for turn in _turns(data):
-        results = {r.get("request_id"): r for r in _tool_items(turn, "tool_results")}
         for call in _tool_items(turn, "tool_calls"):
             result = results.get(call.get("request_id"), {})
             scrubbed.append(

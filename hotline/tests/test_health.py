@@ -14,7 +14,6 @@ STUB_ROUTES = [
     ("POST", "/api/tools/find_farmer_by_location"),
     ("POST", "/api/tools/register_farmer"),
     ("POST", "/api/tools/get_weather_forecast"),
-    ("POST", "/api/calls"),
     ("POST", "/api/jobs/process-pending"),
     ("POST", "/api/calls/conv_123/process"),
 ]

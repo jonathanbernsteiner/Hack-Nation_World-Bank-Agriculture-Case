@@ -420,3 +420,99 @@ def test_call_date_flips_exactly_at_2100_utc():
     at_2100 = int(datetime(2026, 10, 3, 21, 0, 0, tzinfo=timezone.utc).timestamp())
     assert call_meta(_payload([], at_2100))["call_date_kampala"] == "2026-10-04"
     assert call_meta(_payload([], at_2100 - 1))["call_date_kampala"] == "2026-10-03"
+
+
+# --- Review cycle 3 regression tests (#57) ---
+
+EN_WORDS = ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
+
+
+def _identify_with_pin_param(pin_param, farmer_says, agent_says):
+    # #51: identify_farmer accepts digit words in `pin` and its result never has a `pin` key
+    call = {"request_id": "w", "tool_name": "identify_farmer", "params_as_json": json.dumps({"pin": pin_param})}
+    result = {"request_id": "w", "tool_name": "identify_farmer", "result_value": json.dumps({"status": "found"}), "is_error": False}
+    return _payload(
+        [
+            _turn("user", farmer_says, 2),
+            _turn("agent", agent_says, 4, tool_calls=[call], tool_results=[result]),
+        ]
+    )
+
+
+@pytest.mark.parametrize("pin_param", ["9 0 0 1", "9-0-0-1", "PIN 9001"])
+def test_pin_param_with_separators_is_collected_as_digits(pin_param):
+    data = _identify_with_pin_param(pin_param, "tisa sifuri sifuri moja", "Asante.")
+    assert collect_pins(data) == {"9001"}
+    assert to_lines(data)[0]["sw"] == "[PIN]"
+
+
+@pytest.mark.xfail(strict=True, reason="review cycle 3 finding 1: digit-word pin params are not collected")
+@pytest.mark.parametrize(
+    "pin_param", ["tisa sifuri sifuri moja", "tisa, sifuri, sifuri, moja", "nine zero zero one", "tisa zero zero one"]
+)
+def test_pin_param_given_as_digit_words_is_collected_and_redacted(pin_param):
+    data = _identify_with_pin_param(
+        pin_param, "PIN yangu ni tisa sifuri sifuri moja", "Asante, PIN tisa sifuri sifuri moja imepatikana."
+    )
+    assert collect_pins(data) == {"9001"}
+    assert [ln["sw"] for ln in to_lines(data)] == ["PIN yangu ni [PIN]", "Asante, PIN [PIN] imepatikana."]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "PIN ni 9 zero zero 1 asante",
+        "PIN ni tisa 0 0 one asante",
+        "PIN ni NINE ZERO ZERO ONE asante",
+        "PIN ni nine-zero-zero-one asante",
+        "PIN ni nine, ziro, ziro, one asante",
+        "PIN ni nine zero zero asante",
+        "PIN ni zero zero one asante",
+    ],
+)
+def test_mixed_and_partial_english_digit_forms_are_redacted(text):
+    assert redact_pins(_lines(text), {"9001"})[0]["sw"] == "PIN ni [PIN] asante"
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "one",
+        "Nimeuza kilo nine hundred kwa five thousand.",
+        "Gunia two, kilo one two three tu.",
+        "Bei ni zero, hakuna soko.",
+        "nine zero",
+    ],
+)
+def test_english_number_words_that_are_not_a_pin_stay(text):
+    assert redact_pins(_lines(text), {"9001", "4831"})[0]["sw"] == text
+
+
+def test_english_readout_inside_a_tool_result_string_is_redacted():
+    register = {"status": "registered", "pin": "4831", "say": "Your PIN is four eight three one. Remember four, eight, three, one."}
+    data = _payload([_tool_turn("register_farmer", {"first_name": "Mukasa"}, register)])
+    (scrubbed,) = scrub_tool_results(data)
+    assert scrubbed["result"]["say"] == "Your PIN is [PIN]. Remember [PIN]."
+    assert scrubbed["result"]["pin"] == "[PIN]"
+
+
+def test_no_output_contains_any_collected_pin_in_english_or_mixed_form():
+    data = _tool_payload()
+    data["transcript"].extend(
+        [
+            _turn("user", "Ngoja, ni four eight three one au nne eight tatu one?", 14),
+            _turn("agent", "Ya zamani ni nine zero zero one; mpya ni FOUR, EIGHT, THREE, ONE.", 15),
+        ]
+    )
+    lines = to_lines(data)
+    blob = " ".join([repr(lines), render(lines), json.dumps(scrub_tool_results(data), ensure_ascii=False)]).lower()
+    for pin in collect_pins(data):
+        en = [EN_WORDS[int(d)] for d in pin]
+        for form in (" ".join(en), ", ".join(en), *_spoken_forms(pin)):
+            assert form not in blob, form
+
+
+@pytest.mark.xfail(strict=True, reason="review cycle 3 finding 2: 'double'/'triple' digit forms are not expanded")
+@pytest.mark.parametrize("text", ["PIN ni nine double zero one asante", "PIN ni tisa double sifuri moja asante"])
+def test_double_digit_form_is_redacted(text):
+    assert redact_pins(_lines(text), {"9001"})[0]["sw"] == "PIN ni [PIN] asante"

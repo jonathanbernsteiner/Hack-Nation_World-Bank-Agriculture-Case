@@ -11,7 +11,6 @@ import urllib.error
 import urllib.request
 from collections import Counter
 from collections.abc import Callable
-from dataclasses import dataclass
 from typing import Any
 from urllib.parse import urlparse
 
@@ -75,8 +74,13 @@ def check_salt_gate(
 
 
 def is_production_database(database_url: str | None) -> bool:
-    host = (urlparse(database_url or "").hostname or "").lower()
-    return host.endswith(PRODUCTION_DB_SUFFIXES)
+    """Fail closed: a URL whose host cannot be read (libpq key=value conninfo, or the host in a
+    query parameter) counts as production, and so does any mention of a Supabase host."""
+    url = (database_url or "").lower()
+    host = urlparse(url).hostname or ""
+    if not host:
+        return True
+    return host.endswith(PRODUCTION_DB_SUFFIXES) or any(s[1:] in url for s in PRODUCTION_DB_SUFFIXES)
 
 
 def refuse_skip_for_production(database_url: str | None) -> None:

@@ -1,6 +1,9 @@
 """Offline tests for the synthetic loader (#44): a fake connection records the SQL."""
 
 import hashlib
+import io
+import json
+import urllib.error
 from contextlib import contextmanager
 
 import pytest
@@ -168,7 +171,12 @@ def test_pin_hash_matches_hotline_formula():
     ("postgresql://u:p@aws-0-eu-west-1.pooler.supabase.com:5432/postgres", True),
     ("postgresql://u:p@db.abcd.supabase.co:5432/postgres", True),
     ("postgresql://u:p@localhost:5432/postgres", False),
-    (None, False),
+    ("postgresql://u:p@127.0.0.1:54322/postgres", False),
+    # Fail closed: no readable host, or a Supabase host hidden in the query string.
+    (None, True),
+    ("host=aws-0-eu-west-1.pooler.supabase.com port=5432 dbname=postgres", True),
+    ("postgresql:///postgres?host=db.abcd.supabase.co", True),
+    ("postgresql://u:p@localhost/postgres?host=db.abcd.supabase.co", True),
 ])
 def test_is_production_database(url, expected):
     assert loader.is_production_database(url) is expected
@@ -187,3 +195,57 @@ def test_dry_run_prints_counts_and_needs_no_env(capsys, monkeypatch):
     assert main(["--dry-run"]) == 0
     out = capsys.readouterr().out
     assert "villages=6, farmers=21, calls=313, entries=313" in out and "UGX" in out
+
+
+# Regression tests from review cycle 1 (#44).
+
+
+class _Response:
+    def __init__(self, body):
+        self.body = body
+
+    def __enter__(self):
+        return io.BytesIO(json.dumps(self.body).encode())
+
+    def __exit__(self, *_exc):
+        return False
+
+
+def test_skip_salt_check_refused_for_conninfo_dsn(monkeypatch):
+    monkeypatch.setenv("LEDGER_PIN_SALT", SALT)
+    monkeypatch.setenv("DATABASE_URL", "host=aws-0-eu-west-1.pooler.supabase.com port=5432 user=u password=p")
+    monkeypatch.setattr("synthetic.__main__._connect", lambda _u: pytest.fail("connected"))
+    assert main(["--skip-salt-check"]) == 1
+
+
+def test_fetch_refuses_when_production_salt_unset(monkeypatch):
+    """Production with LEDGER_PIN_SALT unset answers salt_fp=null: the gate must not pass."""
+    seen = {}
+
+    def fake_urlopen(request, timeout):
+        seen["url"], seen["secret"] = request.full_url, request.get_header("X-hotline-admin-secret")
+        return _Response({"status": "ok", "db": "ok", "salt_fp": None})
+
+    monkeypatch.setattr(loader.urllib.request, "urlopen", fake_urlopen)
+    with pytest.raises(loader.SaltGateError, match="no salt_fp"):
+        loader.check_salt_gate(SALT, SECRET)
+    assert seen == {"url": loader.HEALTH_URL, "secret": SECRET}
+    assert seen["url"].startswith("https://hack-nation-world-bank-agriculture.vercel.app/") and "deep=1" in seen["url"]
+
+
+def test_fetch_wraps_http_401(monkeypatch):
+    def unauthorized(request, timeout):
+        raise urllib.error.HTTPError(request.full_url, 401, "unauthorized", None, None)
+
+    monkeypatch.setattr(loader.urllib.request, "urlopen", unauthorized)
+    with pytest.raises(loader.SaltGateError, match="unreachable") as info:
+        loader.fetch_production_fingerprint(SECRET)
+    assert SECRET not in str(info.value)
+
+
+def test_refused_reset_inserts_nothing():
+    conn = FakeConn(blockers=1, tables={"villages": 6, "farmers": 21, "calls": 313, "entries": 313})
+    with pytest.raises(loader.ResetRefused):
+        loader.run_load(conn, SALT, reset=True)
+    assert conn.writes() == []
+    assert conn.tables == {"villages": 6, "farmers": 21, "calls": 313, "entries": 313}

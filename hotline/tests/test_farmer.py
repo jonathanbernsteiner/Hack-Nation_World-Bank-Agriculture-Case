@@ -56,14 +56,14 @@ def test_yearly_sums_counted_entries_per_coffee_year():
 
 def test_monthly_covers_window_and_skips_flagged_sales():
     series = farmer.monthly(ENTRIES, TODAY, months=6)
-    assert series["labels"] == ["2026-05", "2026-06", "2026-07", "2026-08", "2026-09", "2026-10"]
+    assert series["labels"] == ["May 26", "Jun 26", "Jul 26", "Aug 26", "Sep 26", "Oct 26"]
     assert series["kg"] == [0, 0, 400, 0, 0, 300]
     assert series["income"][-1] == 1_800_000
 
 
 def test_price_points_oldest_first():
     assert farmer.price_points(ENTRIES) == [
-        {"x": "2025-03-01", "y": 7000}, {"x": "2026-07-18", "y": 5300}, {"x": "2026-10-03", "y": 6000}]
+        {"x": "Mar 25", "y": 7000}, {"x": "Jul 26", "y": 5300}, {"x": "Oct 26", "y": 6000}]
 
 
 def test_main_form_by_kg():
@@ -89,7 +89,7 @@ def test_profile_renders_escaped_with_new_badge(client):
     body = client.get("/demo/farmer/413", headers=AUTH).text
     assert "<script>x</script>" not in body and "&lt;script&gt;" in body
     assert "Nakato &lt;i&gt;" in body and "&lt;b&gt;300 kilos&lt;/b&gt;" in body
-    assert body.count("class=new>New") == 1  # only the newest call's entry
+    assert body.count("class='pill new'>New") == 1  # only the newest call's entry
     assert "First called on 2025-01-03" in body
     assert "tile.openstreetmap.org" in body and "OpenStreetMap contributors" in body
     assert "pin_hash" not in body

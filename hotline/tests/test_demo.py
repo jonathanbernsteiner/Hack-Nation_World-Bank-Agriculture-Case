@@ -51,7 +51,7 @@ def test_requires_auth(client):
 
 def test_renders_badge_footer_refresh(client):
     body = client.get("/demo", headers=AUTH).text
-    assert "SYNTHETIC" in body
+    assert "Synthetic</span>" in body
     assert "Open-Meteo.com (CC BY 4.0)" in body
     assert "http-equiv=refresh content=10" in body
     assert "12:00" in body  # 09:00 UTC is 12:00 in Kampala
@@ -72,7 +72,7 @@ def test_no_pin_material(client):
 
 def test_non_synthetic_has_no_badge(client, monkeypatch):
     monkeypatch.setattr(demo, "_load", lambda: _view(is_synthetic=False))
-    assert "SYNTHETIC</span>" not in client.get("/demo", headers=AUTH).text
+    assert "Synthetic</span>" not in client.get("/demo", headers=AUTH).text
 
 
 @pytest.mark.parametrize(

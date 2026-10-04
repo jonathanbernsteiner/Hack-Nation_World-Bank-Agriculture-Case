@@ -1,0 +1,6 @@
+{
+  "language": "sw",
+  "dtmf_input_settings": {"dtmf_input_timeout": 3.0, "hash_terminator": true, "redact_input": true},
+  "webhook_events": ["transcript"],
+  "send_audio": false
+}

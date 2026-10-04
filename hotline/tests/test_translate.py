@@ -145,11 +145,6 @@ def test_cache_hit_skips_the_call_and_prompt_change_misses(tmp_path, monkeypatch
     assert len(third.calls) == 1
 
 
-def test_no_cache_without_cache_dir(tmp_path):
-    tr.translate_lines(LINES, client=FakeClient(GOOD))
-    assert list(tmp_path.iterdir()) == []
-
-
 @pytest.mark.live
 def test_live_number_words():
     lines = [
@@ -329,3 +324,56 @@ def test_no_cache_io_without_cache_dir(monkeypatch):
     monkeypatch.setattr(tr.Path, "write_text", fail)
     monkeypatch.setattr(tr.Path, "mkdir", fail)
     assert tr.translate_lines(LINES, client=FakeClient(GOOD)) == EXPECTED
+
+
+EMPTY = _reply(
+    [
+        {"i": 0, "speaker": "Agent", "text": "Hello... I sold 300 kilos of kiboko."},
+        {"i": 1, "speaker": "Farmer", "text": ""},
+    ]
+)
+BLANK = _reply(
+    [
+        {"i": 0, "speaker": "Agent", "text": "Hello"},
+        {"i": 1, "speaker": "Farmer", "text": "   "},
+    ]
+)
+
+
+def test_empty_turn_then_good_retries_and_returns_good():
+    client = FakeClient(EMPTY, GOOD)
+    assert tr.translate_lines(LINES, client=client)[1] == "I sold 300 kilos of kiboko."
+    assert len(client.calls) == 2
+    assert "non-empty text" in client.calls[1]["messages"][0]["content"]
+
+
+@pytest.mark.parametrize("bad", [EMPTY, BLANK])
+def test_empty_turn_twice_raises_misaligned(bad):
+    client = FakeClient(bad, bad)
+    with pytest.raises(tr.TranslationMisaligned):
+        tr.translate_lines(LINES, client=client)
+    assert len(client.calls) == 2
+
+
+@pytest.mark.parametrize(
+    "bad_line",
+    [
+        {"role": "user", "sw": "x"},
+        {"role": None, "sw": "x"},
+        {"sw": "x"},
+        {"role": "farmer"},
+        {"role": "farmer", "sw": None},
+        {"role": "farmer", "sw": 5},
+    ],
+)
+def test_bad_input_line_raises_before_any_call(bad_line, monkeypatch):
+    def boom(*args, **kwargs):
+        raise AssertionError("client must not be built")
+
+    monkeypatch.setattr(tr.anthropic, "Anthropic", boom)
+    client = FakeClient(GOOD)
+    with pytest.raises(tr.TranslationInputError, match="line 1"):
+        tr.translate_lines([LINES[0], bad_line], client=client)
+    with pytest.raises(tr.TranslationInputError):
+        tr.translate_lines([LINES[0], bad_line])
+    assert client.calls == []

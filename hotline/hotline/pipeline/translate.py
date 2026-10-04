@@ -19,6 +19,7 @@ MAX_TOKENS = 20_000  # Opus 5.5 always thinks; leaves room for a 10-minute call
 TIMEOUT_SECS = 120.0
 SDK_RETRIES = 2
 SPEAKERS = ("Agent", "Farmer")
+ROLE_TO_SPEAKER = {"agent": "Agent", "farmer": "Farmer"}
 
 TURNS_SCHEMA: dict[str, Any] = {
     "type": "object",
@@ -66,15 +67,26 @@ class TranslationConfigError(TranslationError):
     """A required setting (the model name) is missing."""
 
 
+class TranslationInputError(TranslationError):
+    """An input line has an unknown role or no Kiswahili text; raised before any model call."""
+
+
 def _field(line: Any, name: str) -> Any:
-    return line[name] if isinstance(line, dict) else getattr(line, name)
+    return line.get(name) if isinstance(line, dict) else getattr(line, name, None)
 
 
 def _source_turns(lines: list[Any]) -> list[dict[str, Any]]:
-    return [
-        {"i": index, "speaker": str(_field(line, "role")).capitalize(), "text": _field(line, "sw")}
-        for index, line in enumerate(lines)
-    ]
+    turns = []
+    for index, line in enumerate(lines):
+        role = _field(line, "role")
+        speaker = ROLE_TO_SPEAKER.get(role) if isinstance(role, str) else None
+        if speaker is None:
+            raise TranslationInputError(f"line {index} has an unknown role (expected agent or farmer)")
+        sw = _field(line, "sw")
+        if not isinstance(sw, str):
+            raise TranslationInputError(f"line {index} has no sw text (expected a string)")
+        turns.append({"i": index, "speaker": speaker, "text": sw})
+    return turns
 
 
 def cache_key(model: str, effort: str, prompt: str, turns: list[dict[str, Any]]) -> str:
@@ -94,8 +106,8 @@ def _alignment_error(source: list[dict[str, Any]], data: Any) -> str | None:
             return f"turn at position {expected['i']} must have i={expected['i']}"
         if got.get("speaker") != expected["speaker"]:
             return f"turn i={expected['i']} must have speaker {expected['speaker']}"
-        if not isinstance(got.get("text"), str):
-            return f"turn i={expected['i']} must have a text string"
+        if not isinstance(got.get("text"), str) or not got["text"].strip():
+            return f"turn i={expected['i']} must have non-empty text"
     return None
 
 
@@ -145,7 +157,7 @@ def translate_lines(
 
     `model` defaults to $ANTHROPIC_TRANSLATE_MODEL. `cache_dir` turns on the on-disk cache
     (evals only; production passes None). Raises TranslationMisaligned, TranslationRefused,
-    TranslationTruncated or TranslationConfigError."""
+    TranslationTruncated, TranslationConfigError or TranslationInputError."""
     if not lines:
         return []
     model = model or os.environ.get(MODEL_ENV)

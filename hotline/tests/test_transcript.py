@@ -518,11 +518,9 @@ def test_double_digit_form_is_redacted(text):
 
 # --- Review cycle 4 regression tests (#57) ---
 
-LABEL_SPLITS_PIN = "review cycle 4 finding 1: the 'PIN:' label rule splits a spaced PIN before the run matcher"
 BARE_NUMBER_IS_PIN = "review cycle 4 finding 2: a bare spoken quantity or price is collected as a PIN"
 
 
-@pytest.mark.xfail(strict=True, reason=LABEL_SPLITS_PIN)
 @pytest.mark.parametrize(
     "text",
     [
@@ -539,7 +537,6 @@ def test_spaced_pin_after_a_pin_label_is_fully_redacted(text):
     assert not any(ch.isdigit() for ch in out["sw"]), out["sw"]
 
 
-@pytest.mark.xfail(strict=True, reason=LABEL_SPLITS_PIN)
 def test_labelled_spaced_pin_leaks_no_digit_from_lines_or_result_string():
     say = "Umesajiliwa. PIN: 4 8 3 1."
     truncated = '{"status":"registered","pin":"4831","say":"' + say  # non-JSON, so the string path runs
@@ -593,3 +590,33 @@ def test_bare_numeric_answer_that_is_no_pin_stays_in_every_line():
     )
     assert collect_pins(data) == set()
     assert [ln["sw"] for ln in to_lines(data)][1:3] == ["1450", "Sawa, kilo 1450. Uliuza kwa bei gani?"]
+
+
+SPACED_PIN_TEXTS = [
+    "Umesajiliwa. PIN: 4 8 3 1. Asante",
+    "Umesajiliwa. PIN: 4-8-3-1. Asante",
+    "Umesajiliwa. PIN: 48 31. Asante",
+    "Umesajiliwa. pin=4 8 3 1. Asante",
+    'Umesajiliwa. "pin": "4 8 3 1". Asante',
+]
+
+
+@pytest.mark.parametrize("text", SPACED_PIN_TEXTS)
+@pytest.mark.parametrize("pins", [set(), {"4831"}])
+def test_spaced_labelled_pin_is_redacted_in_farmer_text(text, pins):
+    out = redact_pins(_lines(text), pins)[0]["sw"]
+    assert "[PIN]" in out
+    assert not any(ch.isdigit() for ch in out), out
+    assert out.endswith("Asante")
+
+
+@pytest.mark.parametrize("text", SPACED_PIN_TEXTS)
+def test_spaced_labelled_pin_is_redacted_in_tool_result_string(text):
+    res = {"request_id": "r", "tool_name": "t", "result_value": "status ok " + text, "is_error": False}
+    call = {"request_id": "r", "tool_name": "t", "params_as_json": json.dumps({"first_name": "M"})}
+    data = _payload([_turn("agent", "Ngoja.", 1, tool_calls=[call], tool_results=[res])])
+    assert collect_pins(data) == {"4831"}
+    blob = json.dumps(scrub_tool_results(data), ensure_ascii=False)
+    assert "[PIN]" in blob
+    for tail in ("8 3 1", "831", "3 1", "4-8", "48 31"):
+        assert tail not in blob, tail

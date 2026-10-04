@@ -53,7 +53,7 @@ DROPPED_RESULT_KEYS = frozenset(
 _TOKEN = re.compile(r"\d+|[^\W\d_]+", re.UNICODE)
 _GAP = re.compile(r"[\W_]*(?:\bna\b[\W_]*)?", re.IGNORECASE)
 _PIN_KEY = re.compile(r"(?:^|_)pin(?:$|_)", re.IGNORECASE)
-_PIN_IN_TEXT = re.compile(r'("?pin"?\s*[:=]\s*"?)\d+', re.IGNORECASE)
+_PIN_IN_TEXT = re.compile(r'("?pin"?\s*[:=]\s*"?)\d+(?:[ .\-]\d+){0,7}', re.IGNORECASE)
 _DIGITS_ONLY = re.compile(r"\d+")
 _PHONE = re.compile(r"\+\d{6,}")
 
@@ -110,6 +110,10 @@ def _tool_items(turn: dict, field: str) -> list[dict]:
     return [x for x in (turn.get(field) or []) if isinstance(x, dict)]
 
 
+def _labelled_digits(match: re.Match) -> str:
+    return re.sub(r"\D", "", match.group(0)[len(match.group(1)) :])
+
+
 def collect_pins(data: dict) -> set[str]:
     """PINs seen in tool params, tool results and keypad-style farmer turns."""
     pins: set[str] = set()
@@ -120,7 +124,7 @@ def collect_pins(data: dict) -> set[str]:
             value = _parse_json(result.get("result_value"))
             pins.update(_walk_pin_values(value))
             if isinstance(value, str):
-                pins.update(m.group(0)[len(m.group(1)) :] for m in _PIN_IN_TEXT.finditer(value))
+                pins.update(_labelled_digits(m) for m in _PIN_IN_TEXT.finditer(value))
         message = _message(turn)
         is_keypad = turn.get("role") == "user" and _DIGITS_ONLY.fullmatch(message)
         if is_keypad and MIN_PIN_DIGITS <= len(message) <= MAX_PIN_DIGITS:

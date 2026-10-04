@@ -59,7 +59,7 @@ def stub_store(monkeypatch):
         return "stored"
 
     monkeypatch.setattr(webhooks, "_store_in_transaction", fake_store)
-    monkeypatch.setattr(webhooks, "process_call", lambda cid: calls["process"].append(cid))
+    monkeypatch.setattr(webhooks.process, "process_call", lambda cid: calls["process"].append(cid))
     return calls
 
 
@@ -69,7 +69,7 @@ def rollback_store(monkeypatch, db):
     monkeypatch.setattr(
         webhooks, "_store_in_transaction", lambda cid, data: webhooks.store_call(db, cid, data)
     )
-    monkeypatch.setattr(webhooks, "process_call", lambda cid: None)
+    monkeypatch.setattr(webhooks.process, "process_call", lambda cid: None)
     return db
 
 
@@ -158,7 +158,7 @@ def test_store_failure_is_503_and_logs_no_payload(client, monkeypatch, caplog):
 def test_process_hook_not_scheduled_for_duplicates(client, monkeypatch):
     ran = []
     monkeypatch.setattr(webhooks, "_store_in_transaction", lambda cid, data: "duplicate")
-    monkeypatch.setattr(webhooks, "process_call", lambda cid: ran.append(cid))
+    monkeypatch.setattr(webhooks.process, "process_call", lambda cid: ran.append(cid))
     assert _post(client, _payload()).json() == {"status": "duplicate"}
     assert ran == []
 
@@ -479,7 +479,7 @@ def test_store_failure_schedules_no_processing(client, monkeypatch):
         raise RuntimeError("pooler down")
 
     monkeypatch.setattr(webhooks, "_store_in_transaction", boom)
-    monkeypatch.setattr(webhooks, "process_call", lambda cid: ran.append(cid))
+    monkeypatch.setattr(webhooks.process, "process_call", lambda cid: ran.append(cid))
     assert _post(client, _payload()).status_code == 503
     assert ran == []
 
@@ -518,7 +518,7 @@ def test_db_in_call_row_from_failed_pins_keeps_attempts(rollback_store):
 @pytest.mark.supabase
 def test_db_route_takeover_schedules_processing_once(client, rollback_store, monkeypatch):
     ran = []
-    monkeypatch.setattr(webhooks, "process_call", lambda cid: ran.append(cid))
+    monkeypatch.setattr(webhooks.process, "process_call", lambda cid: ran.append(cid))
     farmer_id = _insert_in_call_row(rollback_store, "hash-issue11-route")
     event = _payload()
     event["data"]["conversation_id"] = CONV

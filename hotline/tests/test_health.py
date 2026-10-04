@@ -11,8 +11,6 @@ HEADER = "X-Hotline-Admin-Secret"
 
 STUB_ROUTES = [
     ("POST", "/api/tools/get_weather_forecast"),
-    ("POST", "/api/jobs/process-pending"),
-    ("POST", "/api/calls/conv_123/process"),
 ]
 
 

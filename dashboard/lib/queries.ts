@@ -149,6 +149,7 @@ async function loadDashboardDataUncached(): Promise<DashboardData> {
 
   const farmers: Farmer[] = farmerRows.map((r) => ({
     id: Number(r.id),
+    name: String(r.name ?? "").trim(),
     firstName: String(r.name ?? "").trim().split(/\s+/)[0] ?? "",
     villageId: Number(r.village_id),
     registeredAt: toIso(r.created_at),

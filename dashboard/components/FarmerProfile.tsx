@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import { ChevronRight } from "lucide-react";
 import { Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { FarmerDetail } from "@/lib/farmerDetail";
@@ -32,7 +33,17 @@ export interface FarmerExtras {
   lon: number | null;
   harvests: { date: string; kg: number }[];
   isUnavailable?: boolean;
-  calls: { id: number; receivedAt: string; status: string; durationSecs: number | null; lines: { role: "farmer" | "agent"; text: string }[] }[];
+  calls: FarmerCall[];
+  hasMore: boolean;
+}
+
+export interface FarmerCall {
+  id: number;
+  receivedAt: string;
+  status: string;
+  durationSecs: number | null;
+  lines: { role: "farmer" | "agent"; sw: string; en: string }[];
+  fallback: { sw: string; en: string } | null; // transcript text without per-line structure
 }
 
 function coffeeYear(date: string): string {
@@ -94,7 +105,7 @@ function Stat({ label, value, sub }: { label: string; value: string; sub: string
   );
 }
 
-const UNAVAILABLE_EXTRAS: FarmerExtras = { lat: null, lon: null, harvests: [], calls: [], isUnavailable: true };
+const UNAVAILABLE_EXTRAS: FarmerExtras = { lat: null, lon: null, harvests: [], calls: [], hasMore: false, isUnavailable: true };
 
 export function useFarmerExtras(farmerId: number): FarmerExtras | null {
   const [extras, setExtras] = useState<{ id: number; data: FarmerExtras } | null>(null);
@@ -195,18 +206,75 @@ export function MonthlySales({ detail, today }: { detail: FarmerDetail; today: s
   );
 }
 
-export function RecentCalls({ extras }: { extras: FarmerExtras | null }) {
+function Language({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="min-w-0">
+      <div className="text-xs text-muted mb-1 md:hidden">{title}</div>
+      {children}
+    </div>
+  );
+}
+
+function Transcript({ call }: { call: FarmerCall }) {
+  if (call.lines.length === 0 && !call.fallback) return <p className="px-4 pb-3 text-sm text-muted">No transcript</p>;
+  return (
+    <div className="px-4 pb-3 text-sm">
+      <div className="hidden md:grid grid-cols-[3.5rem_1fr_1fr] gap-4 py-1.5 border-t border-gray-100 text-xs font-medium text-muted">
+        <span />
+        <span>Kiswahili</span>
+        <span>English</span>
+      </div>
+      {call.lines.map((line, i) => (
+        <div key={i} className="grid md:grid-cols-[3.5rem_1fr_1fr] gap-x-4 gap-y-1 py-1.5 border-t border-gray-100">
+          <div className="text-muted">{line.role === "farmer" ? "Farmer" : "Agent"}</div>
+          <Language title="Kiswahili"><span className={line.role === "farmer" ? "text-ink" : "text-gray-600"}>{line.sw || "—"}</span></Language>
+          <Language title="English"><span className={line.role === "farmer" ? "text-ink" : "text-gray-600"}>{line.en || "—"}</span></Language>
+        </div>
+      ))}
+      {call.fallback && (
+        <div className="grid md:grid-cols-[3.5rem_1fr_1fr] gap-x-4 gap-y-1 py-1.5 border-t border-gray-100">
+          <span />
+          <Language title="Kiswahili"><p className="whitespace-pre-wrap text-gray-600">{call.fallback.sw || "—"}</p></Language>
+          <Language title="English"><p className="whitespace-pre-wrap text-gray-600">{call.fallback.en || "—"}</p></Language>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Every call of the farmer, newest first, 10 at a time; each expands to its Kiswahili and English transcript. */
+export function CallsSection({ farmerId, extras }: { farmerId: number; extras: FarmerExtras | null }) {
+  const [more, setMore] = useState<{ id: number; calls: FarmerCall[]; hasMore: boolean; isFailed: boolean } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const extra = more?.id === farmerId ? more : null;
+  const calls = [...(extras?.calls ?? []), ...(extra?.calls ?? [])];
+  const hasMore = extra ? extra.hasMore : (extras?.hasMore ?? false);
+
+  async function showMore() {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/farmer/${farmerId}?callsOffset=${calls.length}`);
+      if (!res.ok) throw new Error("calls page failed");
+      const page: { calls: FarmerCall[]; hasMore: boolean } = await res.json();
+      setMore({ id: farmerId, calls: [...(extra?.calls ?? []), ...page.calls], hasMore: page.hasMore, isFailed: false });
+    } catch {
+      setMore({ id: farmerId, calls: extra?.calls ?? [], hasMore: true, isFailed: true });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
     <section>
-      <h3 className={SECTION_HEADING}>Recent calls</h3>
+      <h3 className={SECTION_HEADING}>Calls</h3>
       {!extras ? (
         <p className="text-sm text-faint">Loading calls…</p>
-      ) : extras.calls.length === 0 ? (
-        <p className="text-sm text-muted">{extras.isUnavailable ? "Call history unavailable." : "No call transcripts yet."}</p>
+      ) : calls.length === 0 ? (
+        <p className="text-sm text-muted">{extras.isUnavailable ? "Call history unavailable." : "No calls yet."}</p>
       ) : (
         <div className="border border-line rounded-xl overflow-hidden divide-y divide-gray-100">
-          {extras.calls.map((call, index) => (
-            <details key={call.id} open={index === 0} className="group">
+          {calls.map((call) => (
+            <details key={call.id} className="group">
               <summary className="cursor-pointer list-none px-4 py-3 text-sm flex items-center gap-3 hover:bg-gray-50 transition-colors">
                 <ChevronRight size={16} className="text-faint transition-transform group-open:rotate-90" />
                 <span className="font-medium text-ink">{formatDate(call.receivedAt)}</span>
@@ -215,16 +283,22 @@ export function RecentCalls({ extras }: { extras: FarmerExtras | null }) {
                   {call.status.replaceAll("_", " ")}
                 </span>
               </summary>
-              <dl className="px-4 pb-3 text-sm">
-                {call.lines.map((line, i) => (
-                  <div key={i} className="flex gap-4 py-1.5 border-t border-gray-100">
-                    <dt className="w-14 shrink-0 text-muted">{line.role === "farmer" ? "Farmer" : "Agent"}</dt>
-                    <dd className={line.role === "farmer" ? "text-ink" : "text-gray-600"}>{line.text}</dd>
-                  </div>
-                ))}
-              </dl>
+              <Transcript call={call} />
             </details>
           ))}
+        </div>
+      )}
+      {hasMore && (
+        <div className="mt-3">
+          <button
+            type="button"
+            disabled={isLoading}
+            onClick={showMore}
+            className="text-sm font-medium text-accent hover:underline disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
+          >
+            {isLoading ? "Loading…" : "Show more"}
+          </button>
+          {extra?.isFailed && <span className="ml-3 text-sm text-red-600">Could not load more calls.</span>}
         </div>
       )}
     </section>

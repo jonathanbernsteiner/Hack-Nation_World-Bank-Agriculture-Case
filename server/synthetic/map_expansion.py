@@ -4,6 +4,8 @@ CLI (run from server/, psycopg needed: `uv run --with "psycopg[binary]" python -
   --dry-run          print counts and the planted-case checks, no DB access
   --apply            remove the previous expansion rows, then insert, in ONE transaction (idempotent)
   --remove           delete exactly the expansion rows (entries, calls, farmers, villages)
+  --transcripts      write Kiswahili + English transcripts onto expansion calls that have none (UPDATE only,
+                     one transaction, idempotent); combine with --dry-run to print 2 samples without a database
   --farmers N        number of farmers (default 2000, 60-2500); villages and districts scale with N
 
 Expansion rows are identified by calls.conversation_id 'synmap-%' (every expansion farmer has at least
@@ -35,6 +37,7 @@ from farm_ledger.enums import CoffeeForm
 
 from . import supabase as loader
 from .anchors import anchor_price
+from .map_expansion_transcripts import build_transcript
 
 SEED = 20261005
 DEFAULT_FARMERS = 2000
@@ -605,16 +608,84 @@ def plan_counts(plan: Plan) -> dict[str, int]:
 def _parse(argv):
     parser = argparse.ArgumentParser(prog="python -m synthetic.map_expansion", description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    mode = parser.add_mutually_exclusive_group(required=True)
-    for flag in ("--dry-run", "--apply", "--remove"):
-        mode.add_argument(flag, action="store_true")
+    for flag in ("--dry-run", "--apply", "--remove", "--transcripts"):
+        parser.add_argument(flag, action="store_true")
     parser.add_argument("--farmers", type=int, default=DEFAULT_FARMERS, metavar="N",
                         help=f"farmers to generate ({MIN_FARMERS}-{MAX_FARMERS}, default {DEFAULT_FARMERS})")
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    modes = [args.apply, args.remove, args.transcripts or args.dry_run]
+    if sum(modes) != 1 or (args.dry_run and (args.apply or args.remove)):
+        parser.error("choose one of --dry-run, --apply, --remove, --transcripts (--dry-run may be added to --transcripts)")
+    return args
+
+
+# ---- transcripts ---------------------------------------------------------------------------
+
+SELECT_TRANSCRIPT_CALLS = (
+    "select c.id, c.conversation_id, v.village, v.id from calls c join farmers f on f.id = c.farmer_id"
+    " join villages v on v.id = f.village_id where c.conversation_id like %s"
+    " and (c.transcript_lines is null or jsonb_array_length(c.transcript_lines) <= 1) order by c.id")
+SELECT_TRANSCRIPT_ENTRIES = (
+    "select call_id, kind, amount_kg, price_total, coffee_form, buyer_type, likely_disease, evidence_quote"
+    " from entries where call_id = any(%s)")
+SELECT_VILLAGE_MEDIANS = (
+    "select f.village_id, percentile_cont(0.5) within group (order by e.price_total / nullif(e.amount_kg, 0))"
+    " from entries e join farmers f on f.id = e.farmer_id join calls c on c.id = e.call_id"
+    " where c.conversation_id like %s and e.kind = 'sale' group by f.village_id")
+UPDATE_TRANSCRIPTS = (
+    "update calls set transcript_lines = d.lines::jsonb, transcript_sw = d.sw, transcript_en = d.en"
+    " from (values {rows}) as d(id, lines, sw, en) where calls.id = d.id::bigint"
+    " and calls.conversation_id like %s")
+TRANSCRIPT_BATCH_ROWS = 300
+SAMPLE_COUNT = 2
+
+
+def write_transcripts(conn) -> int:
+    """UPDATE expansion calls that have no real transcript. Re-running finds none left, so it is idempotent."""
+    calls = conn.execute(SELECT_TRANSCRIPT_CALLS, (CONVERSATION_LIKE,)).fetchall()
+    ids = [c[0] for c in calls]
+    entries: dict = {}
+    for row in conn.execute(SELECT_TRANSCRIPT_ENTRIES, (ids,)).fetchall():
+        entries.setdefault(row[0], []).append(dict(zip(
+            ("kind", "amount_kg", "price_total", "coffee_form", "buyer_type", "likely_disease", "evidence_quote"), row[1:])))
+    medians = {r[0]: float(r[1]) for r in conn.execute(SELECT_VILLAGE_MEDIANS, (CONVERSATION_LIKE,)).fetchall() if r[1]}
+    rows = []
+    for call_id, conversation_id, village, village_id in calls:
+        t = build_transcript(conversation_id, tuple(entries.get(call_id, ())), village, medians.get(village_id))
+        rows.append((call_id, json.dumps(t["lines"]), t["sw"], t["en"]))
+    for start in range(0, len(rows), TRANSCRIPT_BATCH_ROWS):
+        chunk = rows[start:start + TRANSCRIPT_BATCH_ROWS]
+        conn.execute(UPDATE_TRANSCRIPTS.format(rows=", ".join(["(%s, %s, %s, %s)"] * len(chunk))),
+                     [p for row in chunk for p in row] + [CONVERSATION_LIKE])
+    return len(rows)
+
+
+def transcripts_main(args) -> int:
+    if args.dry_run:
+        plan = build_plan(args.farmers)
+        for call in [c for c in plan.calls if c.entries][:SAMPLE_COUNT]:
+            village = plan.villages[plan.farmers[call.farmer].village].village
+            print(json.dumps(build_transcript(call.conversation_id, call.entries, village, 5000.0), ensure_ascii=False, indent=2, default=str))
+        return 0
+    _load_env()
+    url = os.environ.get("DATABASE_URL")
+    if not url:
+        print("refused: DATABASE_URL is not set", file=sys.stderr)
+        return 1
+    conn = _connect(url)
+    try:
+        with conn.transaction():
+            updated = write_transcripts(conn)
+    finally:
+        conn.close()
+    print(f"transcripts written: {updated}")
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
     args = _parse(argv)
+    if args.transcripts:
+        return transcripts_main(args)
     plan = None if args.remove else build_plan(args.farmers)
     if plan is not None:
         from .map_expansion_checks import describe, plan_failures

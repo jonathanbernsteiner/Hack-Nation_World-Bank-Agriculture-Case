@@ -27,6 +27,7 @@ interface AreaPanelProps {
   childAreas: AreaSummary[];
   farmers: FarmerRow[] | null;
   onSelect: (path: AreaPath) => void;
+  onOpenFarmer?: (id: number) => void;
   notice?: string | null;
 }
 
@@ -249,7 +250,7 @@ function ChildrenCard({
   );
 }
 
-export default function AreaPanel({ area, childAreas, farmers, onSelect, notice = null }: AreaPanelProps) {
+export default function AreaPanel({ area, childAreas, farmers, onSelect, onOpenFarmer, notice = null }: AreaPanelProps) {
   const sortedChildren = [...childAreas].sort((a, b) => b.farmers - a.farmers);
   return (
     <div className="flex flex-col gap-4">
@@ -271,7 +272,7 @@ export default function AreaPanel({ area, childAreas, farmers, onSelect, notice 
       </div>
       {farmers !== null && (
         <div className={CARD}>
-          <FarmersTable farmers={farmers} />
+          <FarmersTable farmers={farmers} onOpenFarmer={onOpenFarmer} />
         </div>
       )}
     </div>

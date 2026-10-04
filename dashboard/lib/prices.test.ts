@@ -58,7 +58,7 @@ describe("all pages agree on one fixture", () => {
   // One sale per farmer, all inside 90 days, so the 90-day, 12-month and per-farmer metrics see the same sales.
   // August reference 8000, September 10000: indexes 0.8 (Aug) and 0.75..0.9 (Sep).
   const farmers: Farmer[] = Array.from({ length: 12 }, (_, i) => ({
-    id: i + 1, firstName: `F${i + 1}`, villageId: 1, registeredAt: "2026-07-01T08:00:00Z", registeredOn: "2026-07-01",
+    id: i + 1, name: `F${i + 1}`, firstName: `F${i + 1}`, villageId: 1, registeredAt: "2026-07-01T08:00:00Z", registeredOn: "2026-07-01",
     callCount: 1, lastCallAt: "2026-09-01T08:00:00Z", lastCallOn: "2026-09-01", isSynthetic: false,
   }));
   const sales: Sale[] = [

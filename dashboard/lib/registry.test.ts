@@ -7,7 +7,7 @@ const village: Village = {
   lat: 0, lon: 31, coffeeType: "robusta", isVerified: true, isSynthetic: false,
 };
 const farmer = (id: number, registeredAt: string): Farmer => ({
-  id, firstName: `F${id}`, villageId: 1, registeredAt, registeredOn: registeredAt.slice(0, 10), callCount: 1,
+  id, name: `F${id}`, firstName: `F${id}`, villageId: 1, registeredAt, registeredOn: registeredAt.slice(0, 10), callCount: 1,
   lastCallAt: registeredAt, lastCallOn: registeredAt.slice(0, 10), isSynthetic: false,
 });
 const sale = (farmerId: number, ugxPerKg: number, date = "2026-09-10"): Sale => ({

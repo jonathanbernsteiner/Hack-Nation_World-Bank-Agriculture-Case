@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
-import { ChevronRight } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 import AreaPanel from "@/components/AreaPanel";
+import { FarmerRecord } from "@/components/FarmerPeek";
 import SidePanel from "@/components/SidePanel";
 import { childrenOf, computeWarnings, farmersIn, summarize } from "@/lib/aggregate";
 import type { AreaPath, DashboardData, Warning } from "@/lib/types";
@@ -38,11 +39,23 @@ export default function AreaPeek({ data, path, warnings, onSelect, onClose }: Ar
   const allWarnings = useMemo(() => warnings ?? computeWarnings(data), [warnings, data]);
   const area = useMemo(() => summarize(data, path, allWarnings), [data, path, allWarnings]);
   const childAreas = useMemo(() => childrenOf(data, path, allWarnings), [data, path, allWarnings]);
+  const [openFarmerId, setOpenFarmerId] = useState<number | null>(null);
   const farmers = useMemo(() => (path.length === VILLAGE_DEPTH ? farmersIn(data, path) : null), [data, path]);
   return (
     <SidePanel title={area.name} open onClose={onClose} link={{ href: `/map?path=${encodeURIComponent(path.join("|"))}`, label: "Open on map" }}>
-      <Breadcrumb path={path} onSelect={onSelect} />
-      <AreaPanel area={area} childAreas={childAreas} farmers={farmers} onSelect={onSelect} />
+      {openFarmerId !== null ? (
+        <>
+          <button type="button" onClick={() => setOpenFarmerId(null)} className="inline-flex items-center gap-1 mb-4 text-sm text-accent hover:underline">
+            <ArrowLeft size={14} /> Back to {area.name}
+          </button>
+          <FarmerRecord data={data} farmerId={openFarmerId} />
+        </>
+      ) : (
+        <>
+          <Breadcrumb path={path} onSelect={onSelect} />
+          <AreaPanel area={area} childAreas={childAreas} farmers={farmers} onSelect={onSelect} onOpenFarmer={setOpenFarmerId} />
+        </>
+      )}
     </SidePanel>
   );
 }

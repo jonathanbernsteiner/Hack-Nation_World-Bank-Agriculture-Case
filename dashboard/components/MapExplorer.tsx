@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { childrenOf, computeWarnings, farmersIn, inArea, summarize } from "@/lib/aggregate";
 import type { AreaPath, DashboardData, MapLayer } from "@/lib/types";
 import AreaPanel from "./AreaPanel";
+import FarmerPeek from "./FarmerPeek";
 import MapToolbar from "./MapToolbar";
 
 const MapView = dynamic(() => import("./MapView"), {
@@ -57,6 +58,7 @@ export default function MapExplorer({ data }: { data: DashboardData }) {
     const param = searchParams.get("path");
     return Boolean(param) && pathFromParam(param, data).length === 0;
   });
+  const [openFarmerId, setOpenFarmerId] = useState<number | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
   const select = useCallback(
@@ -97,6 +99,7 @@ export default function MapExplorer({ data }: { data: DashboardData }) {
             childAreas={children}
             farmers={farmers}
             onSelect={select}
+            onOpenFarmer={setOpenFarmerId}
             notice={hasUnknownPath ? "Area not found — showing Uganda" : null}
           />
         </div>
@@ -104,6 +107,7 @@ export default function MapExplorer({ data }: { data: DashboardData }) {
       <p className="text-xs text-faint">
         Sources: UCDA / MAAIF, © OpenStreetMap contributors
       </p>
+      {openFarmerId !== null && <FarmerPeek data={data} farmerId={openFarmerId} onClose={() => setOpenFarmerId(null)} />}
     </div>
   );
 }

@@ -19,6 +19,7 @@ export interface FarmerSale {
 export interface FarmerDetail {
   profile: {
     id: number;
+    name: string;
     firstName: string;
     village: string;
     parish: string;
@@ -88,6 +89,7 @@ export function farmerDetail(data: DashboardData, farmerId: number): FarmerDetai
   return {
     profile: {
       id: farmer.id,
+      name: farmer.name,
       firstName: farmer.firstName,
       village: village.village,
       parish: village.parish,

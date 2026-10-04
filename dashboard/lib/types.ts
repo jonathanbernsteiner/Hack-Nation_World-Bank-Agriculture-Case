@@ -36,7 +36,8 @@ export interface Village {
 
 export interface Farmer {
   id: number;
-  firstName: string; // first name only; PINs and phone numbers never leave the database
+  name: string; // full name as stored (first name or full name, whatever the farmer gave)
+  firstName: string; // first word of name; PINs and phone numbers never leave the database
   villageId: number;
   registeredAt: string; // ISO timestamp (display)
   registeredOn: string; // YYYY-MM-DD (Kampala) of registeredAt; use it for day windows

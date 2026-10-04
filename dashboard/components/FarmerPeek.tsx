@@ -6,10 +6,10 @@ import { Maximize2, Minimize2, X } from "lucide-react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { farmerDetail } from "@/lib/farmerDetail";
 import type { FarmerDetail } from "@/lib/farmerDetail";
-import { formatDate, formatIndex, formatMonth, formatNumber, labelBuyer, labelProblem } from "@/lib/format";
+import { formatDate, formatIndex, formatMonth, formatNumber, labelBuyer, labelProblem, maskedPhone } from "@/lib/format";
 import { indexPillClass, shortForm } from "@/components/FarmersTable";
 import type { CoffeeForm, DashboardData } from "@/lib/types";
-import { LocationAndYield, MonthlySales, ProfileKpis, RecentCalls, useFarmerExtras } from "@/components/FarmerProfile";
+import { LocationAndYield, MonthlySales, ProfileKpis, CallsSection, useFarmerExtras } from "@/components/FarmerProfile";
 
 const SECTION_HEADING = "text-base font-semibold text-gray-900 mb-4";
 const TH = "font-medium text-muted px-3 py-2 whitespace-nowrap";
@@ -33,11 +33,63 @@ function tickLabel(ms: number): string {
   return formatMonth(new Date(ms).toISOString().slice(0, 7));
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, isLarge = false }: { label: string; value: string; isLarge?: boolean }) {
   return (
-    <div>
+    <div className="min-w-0">
       <div className="text-xs text-muted whitespace-nowrap">{label}</div>
-      <div className="text-sm font-medium text-gray-900 whitespace-nowrap">{value}</div>
+      <div className={`font-medium text-gray-900 truncate ${isLarge ? "text-lg font-semibold" : "text-sm whitespace-nowrap"}`}>{value}</div>
+    </div>
+  );
+}
+
+// The hotline never stores phone numbers, so only synthetic records get a (masked, placeholder) number.
+function phoneFor(p: FarmerDetail["profile"]): string {
+  return p.isSynthetic ? maskedPhone(p.id) : "—";
+}
+
+/** Record number, name, phone and the registration facts. */
+export function FarmerHeader({ detail }: { detail: FarmerDetail }) {
+  const p = detail.profile;
+  const path = [p.village, p.parish, p.subCounty, p.district, p.region].join(" · ");
+  return (
+    <div className="min-w-0 flex-1">
+      <p className="text-xs text-muted">Farmer #{p.id}</p>
+      <div className="flex flex-wrap gap-x-8 gap-y-2 mt-1">
+        <Stat label="Name" value={p.name || "—"} isLarge />
+        <Stat label="Phone" value={phoneFor(p)} isLarge />
+      </div>
+      <p className="text-sm text-muted mt-2 truncate" title={path}>{path}</p>
+      <div className="flex flex-wrap gap-x-6 gap-y-2 mt-3">
+        <Stat label="Registered" value={formatDate(p.registeredAt)} />
+        <Stat label="Calls" value={String(p.callCount)} />
+        <Stat label="Last call" value={formatDate(p.lastCallAt)} />
+      </div>
+    </div>
+  );
+}
+
+/** The record's sections, ending with every call and its transcript. */
+export function FarmerBody({ data, detail }: { data: DashboardData; detail: FarmerDetail }) {
+  const extras = useFarmerExtras(detail.profile.id);
+  return (
+    <div className="space-y-6">
+      <ProfileKpis detail={detail} extras={extras} />
+      <LocationAndYield detail={detail} extras={extras} />
+      <SalesCard detail={detail} side={<MonthlySales detail={detail} today={data.today} />} />
+      <ProblemsCard detail={detail} />
+      <CallsSection farmerId={detail.profile.id} extras={extras} />
+    </div>
+  );
+}
+
+/** The whole record without its own panel, for use inside another side panel. */
+export function FarmerRecord({ data, farmerId }: { data: DashboardData; farmerId: number }) {
+  const detail = useMemo(() => farmerDetail(data, farmerId), [data, farmerId]);
+  if (!detail) return <p className="text-lg font-semibold text-gray-900">Farmer not found</p>;
+  return (
+    <div className="space-y-6">
+      <FarmerHeader detail={detail} />
+      <FarmerBody data={data} detail={detail} />
     </div>
   );
 }
@@ -156,7 +208,6 @@ function ProblemsCard({ detail }: { detail: FarmerDetail }) {
 export default function FarmerPeek({ data, farmerId, onClose }: { data: DashboardData; farmerId: number; onClose: () => void }) {
   const [isFull, setIsFull] = useState(false);
   const detail = useMemo(() => farmerDetail(data, farmerId), [data, farmerId]);
-  const extras = useFarmerExtras(farmerId);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -170,27 +221,13 @@ export default function FarmerPeek({ data, farmerId, onClose }: { data: Dashboar
   }, [onClose]);
 
   const position = isFull ? "left-0 md:left-14 right-0" : "left-0 right-0 md:left-auto md:w-[min(max(880px,62vw),calc(100vw-56px))]";
-  const p = detail?.profile;
-  const path = p ? [p.village, p.parish, p.subCounty, p.district, p.region].join(" · ") : "";
   return (
     <aside
       aria-label="Farmer details"
       className={`fixed top-14 bottom-14 md:bottom-0 ${position} bg-white border-l border-line shadow-xl z-40 flex flex-col transition-[width,left] duration-150`}
     >
       <div className="flex items-start justify-between gap-3 px-6 py-5 border-b border-line">
-        {p ? (
-          <div className="min-w-0 flex-1">
-            <h2 className="text-lg font-semibold text-gray-900 truncate">{p.firstName}</h2>
-            <p className="text-sm text-muted mt-0.5 truncate" title={path}>{path}</p>
-            <div className="flex gap-x-6 mt-3">
-              <Stat label="Registered" value={formatDate(p.registeredAt)} />
-              <Stat label="Calls" value={String(p.callCount)} />
-              <Stat label="Last call" value={formatDate(p.lastCallAt)} />
-            </div>
-          </div>
-        ) : (
-          <h2 className="text-lg font-semibold text-gray-900">Farmer not found</h2>
-        )}
+        {detail ? <FarmerHeader detail={detail} /> : <h2 className="text-lg font-semibold text-gray-900">Farmer not found</h2>}
         <div className="flex gap-1 shrink-0">
           <button type="button" className={ICON_BTN} aria-label={isFull ? "Shrink panel" : "Expand panel"} onClick={() => setIsFull(!isFull)}>
             {isFull ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
@@ -201,12 +238,8 @@ export default function FarmerPeek({ data, farmerId, onClose }: { data: Dashboar
         </div>
       </div>
       {detail && (
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white">
-          <ProfileKpis detail={detail} extras={extras} />
-          <LocationAndYield detail={detail} extras={extras} />
-          <SalesCard detail={detail} side={<MonthlySales detail={detail} today={data.today} />} />
-          <ProblemsCard detail={detail} />
-          <RecentCalls extras={extras} />
+        <div className="flex-1 overflow-y-auto p-6 bg-white">
+          <FarmerBody data={data} detail={detail} />
         </div>
       )}
     </aside>

@@ -98,3 +98,14 @@ export function formatMonth(month: string): string {
 export function formatK(v: number): string {
   return v % 1000 === 0 ? `${v / 1000}k` : `${(v / 1000).toFixed(1)}k`;
 }
+
+const PHONE_PREFIX = "+256 7•• •••";
+const PHONE_TAIL_DIGITS = 1000;
+
+/** Placeholder phone for synthetic records only: the hotline never stores phone numbers (privacy by design).
+ *  Deterministic from the farmer id, e.g. "+256 7•• ••• 482"; the last 3 digits come from an FNV-1a hash of the id. */
+export function maskedPhone(id: number): string {
+  let hash = 0x811c9dc5;
+  for (const ch of String(id)) hash = Math.imul(hash ^ ch.charCodeAt(0), 0x01000193) >>> 0;
+  return `${PHONE_PREFIX} ${String(hash % PHONE_TAIL_DIGITS).padStart(3, "0")}`;
+}

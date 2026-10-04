@@ -2,17 +2,50 @@ import { getSql } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-const CALLS_SHOWN = 5;
+const CALLS_PAGE = 10;
 
 type TranscriptLine = { role?: string; en?: string | null; sw?: string | null };
 
-// Extra detail for the farmer peek: farm position, harvests and recent call transcripts.
-// Never selects pin_hash, PINs, phone numbers or the full name.
-export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+// One page of the farmer's calls, newest first. Safe columns only; one extra row tells whether more follow.
+async function callsPage(sql: ReturnType<typeof getSql>, id: number, offset: number) {
+  const rows = await sql`
+    select id, received_at, status, duration_secs, transcript_lines, transcript_en, transcript_sw
+      from calls where farmer_id = ${id}
+     order by received_at desc, id desc limit ${CALLS_PAGE + 1} offset ${offset}`;
+  return {
+    hasMore: rows.length > CALLS_PAGE,
+    calls: rows.slice(0, CALLS_PAGE).map((c) => {
+      const lines = ((c.transcript_lines ?? []) as TranscriptLine[]).map((l) => ({
+        role: l.role === "farmer" ? "farmer" : "agent",
+        sw: l.sw || "",
+        en: l.en || "",
+      }));
+      const hasText = Boolean(c.transcript_sw || c.transcript_en);
+      return {
+        id: Number(c.id),
+        receivedAt: c.received_at,
+        status: c.status,
+        durationSecs: c.duration_secs,
+        lines,
+        fallback: lines.length === 0 && hasText ? { sw: String(c.transcript_sw ?? ""), en: String(c.transcript_en ?? "") } : null,
+      };
+    }),
+  };
+}
+
+// Extra detail for the farmer peek: farm position, harvests and the calls with their transcripts.
+// `?callsOffset=N` returns only that page of calls. Never selects pin_hash, PINs, phone numbers or the name.
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const id = Number((await params).id);
   if (!Number.isInteger(id) || id <= 0) return Response.json({ error: "bad_id" }, { status: 400 });
 
   const sql = getSql();
+  const offsetParam = new URL(request.url).searchParams.get("callsOffset");
+  if (offsetParam !== null) {
+    const offset = Number(offsetParam);
+    if (!Number.isInteger(offset) || offset < 0) return Response.json({ error: "bad_offset" }, { status: 400 });
+    return Response.json(await callsPage(sql, id, offset));
+  }
   const [farmer] = await sql`
     select coalesce(f.lat, v.lat) as lat, coalesce(f.lon, v.lon) as lon
       from farmers f left join villages v on v.id = f.village_id
@@ -27,24 +60,12 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
      where e.farmer_id = ${id} and e.kind = 'harvest'
        and coalesce(case when e.unit = 'kg' then e.yield_amount end, e.amount_kg) > 0`;
 
-  const calls = await sql`
-    select id, received_at, status, duration_secs, transcript_lines
-      from calls where farmer_id = ${id} and transcript_lines is not null
-     order by received_at desc limit ${CALLS_SHOWN}`;
+  const page = await callsPage(sql, id, 0);
 
   return Response.json({
     lat: farmer.lat,
     lon: farmer.lon,
     harvests,
-    calls: calls.map((c) => ({
-      id: Number(c.id),
-      receivedAt: c.received_at,
-      status: c.status,
-      durationSecs: c.duration_secs,
-      lines: ((c.transcript_lines ?? []) as TranscriptLine[]).map((l) => ({
-        role: l.role === "farmer" ? "farmer" : "agent",
-        text: l.en || l.sw || "",
-      })),
-    })),
+    ...page,
   });
 }

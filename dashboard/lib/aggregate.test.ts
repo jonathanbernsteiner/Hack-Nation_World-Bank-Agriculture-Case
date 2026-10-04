@@ -31,7 +31,7 @@ const report = (farmerId: number, date: string, villageId = 1): ProblemReport =>
 });
 
 const farmer = (id: number, registeredOn: string): Farmer => ({
-  id, firstName: `F${id}`, villageId: 1, registeredAt: `${registeredOn}T08:00:00Z`, registeredOn,
+  id, name: `F${id}`, firstName: `F${id}`, villageId: 1, registeredAt: `${registeredOn}T08:00:00Z`, registeredOn,
   callCount: 1, lastCallAt: `${registeredOn}T08:00:00Z`, lastCallOn: registeredOn, isSynthetic: false,
 });
 

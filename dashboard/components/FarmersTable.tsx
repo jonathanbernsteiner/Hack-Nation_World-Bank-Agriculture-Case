@@ -42,9 +42,10 @@ function buyerCell(buyer: BuyerType | null) {
 
 interface FarmersTableProps {
   farmers: FarmerRow[];
+  onOpenFarmer?: (id: number) => void;
 }
 
-export default function FarmersTable({ farmers }: FarmersTableProps) {
+export default function FarmersTable({ farmers, onOpenFarmer }: FarmersTableProps) {
   return (
     <div>
       <h2 className="text-base font-semibold text-ink mb-4">Farmers</h2>
@@ -69,7 +70,17 @@ export default function FarmersTable({ farmers }: FarmersTableProps) {
                   const sale = f.lastSale;
                   const index = sale && f.villageMedian ? sale.ugxPerKg / f.villageMedian : null;
                   return (
-                    <tr key={f.id} className="border-b border-gray-100 last:border-b-0">
+                    <tr
+                      key={f.id}
+                      className={`border-b border-gray-100 last:border-b-0${onOpenFarmer ? " cursor-pointer hover:bg-gray-50 focus:outline-none focus-visible:bg-gray-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500" : ""}`}
+                      {...(onOpenFarmer && {
+                        tabIndex: 0,
+                        onClick: () => onOpenFarmer(f.id),
+                        onKeyDown: (e: React.KeyboardEvent) => {
+                          if (e.key === "Enter") onOpenFarmer(f.id);
+                        },
+                      })}
+                    >
                       <td className="px-4 py-3 font-medium text-gray-900">
                         {f.firstName}
                       </td>

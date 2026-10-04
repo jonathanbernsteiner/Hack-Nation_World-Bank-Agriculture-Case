@@ -10,9 +10,6 @@ SECRET = "admin-secret-value"
 HEADER = "X-Hotline-Admin-Secret"
 
 STUB_ROUTES = [
-    ("POST", "/api/tools/identify_farmer"),
-    ("POST", "/api/tools/find_farmer_by_location"),
-    ("POST", "/api/tools/register_farmer"),
     ("POST", "/api/tools/get_weather_forecast"),
     ("POST", "/api/calls"),
     ("POST", "/api/jobs/process-pending"),

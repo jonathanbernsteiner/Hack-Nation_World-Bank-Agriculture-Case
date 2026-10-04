@@ -329,3 +329,95 @@ def test_tool_result_logged_in_a_later_turn_is_paired_with_its_call():
 def test_pin_head_after_another_digit_word_is_redacted():
     (out,) = redact_pins(_lines("kilo moja, tisa sifuri sifuri"), {"9001"})
     assert "tisa sifuri sifuri" not in out["sw"]
+
+
+# --- Review cycle 2 regression tests (#57) ---
+
+SW_WORDS = ("sifuri", "moja", "mbili", "tatu", "nne", "tano", "sita", "saba", "nane", "tisa")
+
+
+def _spoken_forms(pin):
+    words = [SW_WORDS[int(d)] for d in pin]
+    return [pin, " ".join(pin), " ".join(words), ", ".join(words)]
+
+
+@pytest.mark.xfail(strict=True, reason="review cycle 2 finding 1: English digit words are not redacted")
+@pytest.mark.parametrize(
+    "text",
+    [
+        "PIN ni tisa zero zero moja asante",
+        "PIN ni tisa, zero, zero, moja asante",
+        "PIN ni nine zero zero one asante",
+    ],
+)
+def test_code_switched_digit_words_are_redacted(text):
+    assert redact_pins(_lines(text), {"9001"})[0]["sw"] == "PIN ni [PIN] asante"
+
+
+def test_readback_before_the_register_result_turn_is_redacted():
+    register = {"status": "registered", "pin": "4831", "pin_digits_sw": "nne, nane, tatu, moja"}
+    call = {"request_id": "r", "tool_name": "register_farmer", "params_as_json": "{}"}
+    result = {"request_id": "r", "tool_name": "register_farmer", "result_value": json.dumps(register), "is_error": False}
+    data = _payload(
+        [
+            _turn("agent", "PIN yako mpya ni nne, nane, tatu, moja.", 10, tool_calls=[call], tool_results=[]),
+            _turn("agent", None, 11, tool_calls=[], tool_results=[result]),
+            _turn("user", "nne nane tatu moja, sawa", 13),
+        ]
+    )
+    assert [ln["sw"] for ln in to_lines(data)] == ["PIN yako mpya ni [PIN].", "[PIN], sawa"]
+    (scrubbed,) = scrub_tool_results(data)
+    assert scrubbed["result"]["pin"] == "[PIN]" and scrubbed["result"]["status"] == "registered"
+
+
+def test_integer_pin_param_is_collected_as_digits():
+    call = {"request_id": "a", "tool_name": "identify_farmer", "params_as_json": json.dumps({"pin": 9001})}
+    data = _payload([_turn("user", "tisa sifuri sifuri moja", 1), _turn("agent", "Ngoja.", 2, tool_calls=[call])])
+    assert collect_pins(data) == {"9001"}
+    assert to_lines(data)[0]["sw"] == "[PIN]"
+
+
+def test_truncated_json_result_still_yields_and_redacts_the_pin():
+    truncated = '{"status":"registered","pin":"4831","farmer":{"first_na'
+    call = {"request_id": "r", "tool_name": "register_farmer", "params_as_json": "{}"}
+    result = {"request_id": "r", "tool_name": "register_farmer", "result_value": truncated, "is_error": False}
+    data = _payload([_turn("agent", "PIN yako ni nne nane tatu moja", 3, tool_calls=[call], tool_results=[result])])
+    assert collect_pins(data) == {"4831"}
+    assert to_lines(data)[0]["sw"] == "PIN yako ni [PIN]"
+    assert "4831" not in repr(scrub_tool_results(data))
+
+
+def test_no_output_contains_any_collected_pin_in_any_form():
+    data = _tool_payload()
+    data["transcript"].extend(
+        [
+            _turn("user", "Nirudie: 4 8 3 1, au nne… nane… tatu… moja?", 14),
+            _turn("agent", "Ndiyo: 9-0-0-1 ni ya zamani; mpya ni 4831.", 15),
+            _turn("user", "Sawa. Tisa na sifuri na sifuri na moja.", 16),
+        ]
+    )
+    pins = collect_pins(data)
+    assert pins == {"9001", "4831"}
+    lines = to_lines(data)
+    blob = " ".join(
+        [repr(lines), render(lines), json.dumps(scrub_tool_results(data), ensure_ascii=False)]
+    ).lower()
+    for pin in pins:
+        for form in _spoken_forms(pin):
+            assert form not in blob, form
+
+
+def test_transcript_functions_do_not_mutate_the_payload():
+    data = _tool_payload()
+    before = json.loads(json.dumps(data))
+    to_lines(data)
+    scrub_tool_results(data)
+    collect_pins(data)
+    call_meta(data)
+    assert data == before
+
+
+def test_call_date_flips_exactly_at_2100_utc():
+    at_2100 = int(datetime(2026, 10, 3, 21, 0, 0, tzinfo=timezone.utc).timestamp())
+    assert call_meta(_payload([], at_2100))["call_date_kampala"] == "2026-10-04"
+    assert call_meta(_payload([], at_2100 - 1))["call_date_kampala"] == "2026-10-03"

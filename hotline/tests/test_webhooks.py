@@ -398,3 +398,150 @@ def test_db_missing_start_time_falls_back_to_now(rollback_store):
     assert rollback_store.execute(
         "select received_at = now() from calls where conversation_id = %s", (CONV,)
     ).fetchone() == (True,)
+
+
+# ---- review regression tests (PR #84, cycle 2) ----
+
+PHONE = "+256772123456"
+AGENT_NUMBER = "+15555550100"
+CALL_SID = "CA0123456789abcdef0123456789abcdef"
+ID_PIN = "9001"
+MEDIAN = 5300
+
+
+def _phone_call(data: dict) -> dict:
+    """A real phone call: caller id in metadata and dynamic variables, call_sid in the tool
+    params, and an identify_farmer result that echoes the caller id."""
+    data = copy.deepcopy(data)
+    data["metadata"]["phone_call"] = {
+        "direction": "inbound", "type": "twilio", "external_number": PHONE,
+        "agent_number": AGENT_NUMBER, "call_sid": CALL_SID,
+    }
+    data["conversation_initiation_client_data"]["dynamic_variables"].update(
+        {"system__caller_id": PHONE, "system__called_number": AGENT_NUMBER, "system__call_sid": CALL_SID}
+    )
+    turn = data["transcript"][2]
+    turn["tool_calls"] = [
+        {"request_id": "r9", "tool_name": "identify_farmer",
+         "params_as_json": json.dumps({"pin": ID_PIN, "conversation_id": "c", "call_sid": CALL_SID})}
+    ]
+    turn["tool_results"] = [
+        {"request_id": "r9", "tool_name": "identify_farmer", "is_error": False,
+         "result_value": json.dumps({
+             "status": "found", "identified_by": "pin", "caller_id": PHONE,
+             "farmer": {"first_name": "Nakato", "district": "Masaka"},
+             "village_price": {"form": "kiboko", "median_ugx_per_kg": MEDIAN, "n_sales": 7},
+         })}
+    ]
+    return data
+
+
+def test_phone_number_and_call_sid_are_never_stored():
+    params = webhooks._row_params("conv_x", _phone_call(_payload()["data"]))
+    stored = json.dumps(params, ensure_ascii=False)
+    for secret in (PHONE, PHONE.lstrip("+"), AGENT_NUMBER, CALL_SID, ID_PIN):
+        assert secret not in stored
+
+
+def test_tool_results_keep_price_medians_as_numbers():
+    """verify (#59) walks tool_results for numeric median_ugx_per_kg: `result` must stay parsed JSON."""
+    scrubbed = json.loads(webhooks._row_params("conv_x", _phone_call(_payload()["data"]))["tool_results"])
+    assert [item["tool_name"] for item in scrubbed] == ["identify_farmer"]
+    assert scrubbed[0]["result"]["village_price"]["median_ugx_per_kg"] == MEDIAN
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda d: d.update(transcript=None),
+        lambda d: d.update(metadata=None),
+        lambda d: d.update(transcript=[None, "text", 3]),
+        lambda d: d["transcript"][0].update(role=None, message=None),
+        lambda d: d["transcript"][0].update(
+            tool_calls=None, tool_results=[{"request_id": "orphan", "result_value": "not json"}]
+        ),
+    ],
+    ids=["null_transcript", "null_metadata", "non_dict_turns", "null_role_message", "orphan_result"],
+)
+def test_odd_signed_shapes_build_a_row_instead_of_a_503_loop(mutate):
+    """Any exception here becomes a 503 and ElevenLabs retries until it disables the webhook."""
+    data = copy.deepcopy(_payload()["data"])
+    mutate(data)
+    params = webhooks._row_params("conv_x", data)
+    assert isinstance(json.loads(params["lines"]), list)
+    assert isinstance(json.loads(params["tool_results"]), list)
+
+
+def test_store_failure_schedules_no_processing(client, monkeypatch):
+    ran = []
+
+    def boom(conversation_id, data):
+        raise RuntimeError("pooler down")
+
+    monkeypatch.setattr(webhooks, "_store_in_transaction", boom)
+    monkeypatch.setattr(webhooks, "process_call", lambda cid: ran.append(cid))
+    assert _post(client, _payload()).status_code == 503
+    assert ran == []
+
+
+@pytest.mark.supabase
+@pytest.mark.parametrize("status", ["received", "processing", "failed", "needs_review"])
+def test_db_retry_never_rewrites_a_row_past_in_call(rollback_store, status):
+    """A retry during or after processing must not reset the row or its transcript."""
+    rollback_store.execute(
+        "insert into calls (conversation_id, status, source, transcript_sw) values (%s, %s, 'elevenlabs', 'kept')",
+        (CONV, status),
+    )
+    assert webhooks.store_call(rollback_store, CONV, _data()) == "duplicate"
+    assert rollback_store.execute(
+        "select status, transcript_sw, transcript_lines from calls where conversation_id = %s", (CONV,)
+    ).fetchone() == (status, "kept", None)
+
+
+@pytest.mark.supabase
+def test_db_in_call_row_from_failed_pins_keeps_attempts(rollback_store):
+    """#51 creates an in_call row with no farmer when a PIN fails; the takeover keeps the count."""
+    rollback_store.execute(
+        "insert into calls (conversation_id, status, source, pin_attempts) values (%s, 'in_call', 'elevenlabs', 2)",
+        (CONV,),
+    )
+    data = _data()
+    assert webhooks.store_call(rollback_store, CONV, data) == "stored"
+    assert rollback_store.execute(
+        "select status, farmer_id, pin_attempts, received_at = to_timestamp(%s),"
+        " jsonb_array_length(transcript_lines) from calls where conversation_id = %s",
+        (data["metadata"]["start_time_unix_secs"], CONV),
+    ).fetchone() == ("received", None, 2, True, 9)
+    assert _count(rollback_store) == 1
+
+
+@pytest.mark.supabase
+def test_db_route_takeover_schedules_processing_once(client, rollback_store, monkeypatch):
+    ran = []
+    monkeypatch.setattr(webhooks, "process_call", lambda cid: ran.append(cid))
+    farmer_id = _insert_in_call_row(rollback_store, "hash-issue11-route")
+    event = _payload()
+    event["data"]["conversation_id"] = CONV
+    assert _post(client, event).json() == {"status": "stored"}
+    assert _post(client, event).json() == {"status": "duplicate"}
+    assert ran == [CONV]
+    assert rollback_store.execute(
+        "select farmer_id, status from calls where conversation_id = %s", (CONV,)
+    ).fetchone() == (farmer_id, "received")
+
+
+@pytest.mark.supabase
+def test_db_route_stores_no_pin_in_any_column(client, rollback_store):
+    """Checklist item 'stored lines are redacted', end to end: route, real SQL, jsonb columns."""
+    event = _payload()
+    event["data"] = _with_new_pin(_data())
+    assert _post(client, event).json() == {"status": "stored"}
+    lines, rendered, tools = rollback_store.execute(
+        "select transcript_lines::text, transcript_sw, tool_results::text from calls"
+        " where conversation_id = %s",
+        (CONV,),
+    ).fetchone()
+    for column in (lines, rendered, tools):
+        assert PIN not in column
+        assert PIN_WORDS_SW not in column
+    assert "[PIN]" in rendered and "[PIN]" in tools

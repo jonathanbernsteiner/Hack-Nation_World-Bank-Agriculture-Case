@@ -235,7 +235,7 @@ def test_history_sql_selects_only_callers_entries_and_reviewed_rows():
     assert "e.farmer_id = %(farmer_id)s" in sql and params["farmer_id"] == 42
     assert "quote_verified is not false" in sql and ">= 0.6" in sql
     assert "buyer_name" not in sql and "pin_hash" not in sql
-    assert params["since"] == date(2024, 9, 1)
+    assert params["since"] == date(2023, 10, 1)
 
 
 def test_nearby_sql_excludes_caller_and_limits_to_30_days():
@@ -423,8 +423,6 @@ def test_windowed_history_keeps_full_oldest_year_in_october():
     assert {y["year"]: y["sold_kg"] for y in out["coffee_years"]} == FULL_SOLD_KG
 
 
-@pytest.mark.xfail(strict=True, reason="review cycle 2, finding 1: the 24-month window truncates "
-                                        "the oldest coffee year outside October")
 @pytest.mark.parametrize("as_of", [date(2026, 11, 15), date(2027, 3, 15), date(2027, 9, 30)])
 def test_oldest_coffee_year_is_never_a_partial_total(as_of):
     out = summarize(WindowedConn(GAP_ROWS), 1, HOME, as_of, totals_only=True)

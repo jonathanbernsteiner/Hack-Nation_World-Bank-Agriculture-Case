@@ -20,7 +20,6 @@ from psycopg.rows import dict_row
 COFFEE_YEAR_START_MONTH = 10  # coffee year runs October to September
 COFFEE_YEARS_SHOWN = 2
 PRICE_ROUNDING_UGX = 50
-HISTORY_MONTHS = 24
 NEARBY_DAYS = 30
 MIN_NEARBY_FARMS = 2
 DEFAULT_LIST_LENGTH = 3
@@ -172,12 +171,6 @@ def nearby_reports(rows: list[Row], home: Row, as_of: date,
     return sorted(reports, key=lambda r: (r["level"] != "parish", -r["farms"], r["likely"]))
 
 
-def _first_of_month_ago(day: date, months: int) -> date:
-    total = day.year * 12 + day.month - 1 - months
-    year, month = divmod(total, 12)
-    return date(year, month + 1, 1)
-
-
 def _fetch(conn, sql: str, params: Row) -> list[Row]:
     with conn.cursor(row_factory=dict_row) as cur:
         cur.execute(sql, params)
@@ -185,9 +178,10 @@ def _fetch(conn, sql: str, params: Row) -> list[Row]:
 
 
 def load_history(conn, farmer_id: int, as_of: date) -> list[Row]:
-    """The caller's own entries (and only theirs) from the last 24 months."""
-    return _fetch(conn, _HISTORY_SQL, {
-        "farmer_id": farmer_id, "since": _first_of_month_ago(as_of, HISTORY_MONTHS), "as_of": as_of})
+    """The caller's own entries (and only theirs), back to the start (1 Oct) of the coffee year
+    COFFEE_YEARS_SHOWN years before the current one, so the oldest year shown is always complete."""
+    since = date(_coffee_year_start(as_of) - COFFEE_YEARS_SHOWN, COFFEE_YEAR_START_MONTH, 1)
+    return _fetch(conn, _HISTORY_SQL, {"farmer_id": farmer_id, "since": since, "as_of": as_of})
 
 
 def load_nearby(conn, farmer_id: int, home: Row, as_of: date) -> list[Row]:

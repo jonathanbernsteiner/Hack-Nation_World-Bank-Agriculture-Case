@@ -31,3 +31,16 @@ phrase,symptom,expected_id,not_sure_ok,is_synthetic,note
 "When I dug around a wilting coffee tree there were white insects on the roots.",pests,coffee_root_mealybug,true,true,insects on roots
 "The coffee leaves have silvery grey patches with tiny black dots, and it has been very dry.",leaf_spots,coffee_thrips,true,true,silvering in drought
 "The young coffee seedlings are small and yellow, and there are little knots on the roots.",stunted_growth,coffee_nematodes,true,true,root galls
+"Small branches on my robusta are drying and turning black, and I see a tiny hole under the branch.",pests,black_coffee_twig_borer,false,true,hole on the underside of a drying twig is the tell-tale
+One branch of my coffee dried up and there is a small round hole on the lower side of the twig.,wilting,black_coffee_twig_borer,false,true,hole plus drying twig
+"The leaves on some branches of my robusta are wilting and the branches are dying, but I have not looked closely.",wilting,not_sure,true,true,twig borer vs coffee wilt: needs the tell-apart question (hole under the twig? blue-black wood?)
+"Some branches on my robusta have started wilting and drying one after another, and the berries on them are drying too.",wilting,black_coffee_twig_borer,true,true,twig borer vs coffee wilt vs overbearing dieback; the hole question decides
+"The whole coffee field is pale yellow and the leaves are small, and I have not put manure for many years.",yellowing_leaves,low_soil_fertility,true,true,evenly pale field plus no manure; nitrogen deficiency is a look-alike
+"My coffee gives less and less every year and the soil is tired, I never add manure or fertiliser.",other,low_soil_fertility,false,true,declining yield with no feeding
+"My coffee trees are very old and tall with many thin branches, and they give only a few berries.",other,old_unpruned_trees,false,true,old overgrown trees
+"The stems are crowded and too tall to pick, and I have never pruned or cut back the old ones.",stunted_growth,old_unpruned_trees,false,true,never pruned or stumped
+Grass has grown over my coffee and the young trees are small and not growing.,stunted_growth,weed_competition,false,true,weeds smothering young coffee
+I left the shamba without weeding for the whole season and now the coffee gives very little.,other,weed_competition,true,true,weeds plus low yield; soil fertility is a look-alike
+The buyer paid me less because my coffee had green beans mixed in and some smelled mouldy.,other,poor_harvest_practice,false,true,quality and price loss from picking and drying
+"I dried my coffee on the bare ground and the rain wet it again, and now it smells musty.",other,poor_harvest_practice,false,true,bare-ground drying and rewetting
+"I stripped all the cherries off the branch at once, green and red together.",other,poor_harvest_practice,false,true,strip picking

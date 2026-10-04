@@ -2,14 +2,14 @@
 
 A cited reference of what can go wrong on an arabica coffee farm, so the hotline agent can go from what a farmer says on the call ("the leaves have dots on them") to a **likely** problem and safe advice. If the description doesn't clearly fit one row, the answer is **"not sure, flagged for the extension officer"**.
 
-Built for issue #17. The hotline agent's knowledge file (#46) is built from these rows.
+Built for issue #17; issue #45 added the Uganda rows (black coffee twig borer and four farm-practice causes). The hotline agent's knowledge file (#46) is built from these rows.
 
 ## Files
 
 | File | What it is | Size |
 |---|---|---|
-| `coffee-diseases.json` | 30 rows: 10 diseases, 11 pests, 8 non-disease look-alikes, 1 `not_sure` fallback | ~130 KB, 58 cited sources |
-| `disease-eval.csv` | 32 farmer-style phrases with the expected answer, **all SYNTHETIC** (written by us) | ~5 KB |
+| `coffee-diseases.json` | 35 rows: 10 diseases, 12 pests, 12 non-disease look-alikes, 1 `not_sure` fallback | ~149 KB, 61 cited sources |
+| `disease-eval.csv` | 45 farmer-style phrases with the expected answer, **all SYNTHETIC** (written by us) | ~8 KB |
 
 ## How it is meant to be used
 
@@ -44,22 +44,24 @@ Built for issue #17. The hotline agent's knowledge file (#46) is built from thes
 ## What's covered
 
 - **Diseases:** coffee leaf rust, coffee berry disease, coffee wilt disease, bacterial blight (Elgon die-back), brown eye spot (Cercospora), Phoma leaf blight, Fusarium bark disease, Armillaria root rot, American leaf spot (Latin America only), sooty mould.
-- **Pests:** leaf miner, Antestia bug, coffee berry borer, white stem borer, thrips, mealybug, root mealybug, green scale, nematodes, lace bug, leaf skeletoniser.
-- **Non-disease look-alikes:** nitrogen, magnesium and potassium deficiency, waterlogging, drought stress, sun scorch, overbearing dieback (with the biennial on/off-year pattern), hail damage. The brief hints at these ("40 mm overnight", "why the third row is struggling"). Without them the model would call every yellow leaf a disease.
+- **Pests:** leaf miner, Antestia bug, coffee berry borer, white stem borer, thrips, mealybug, root mealybug, green scale, nematodes, lace bug, leaf skeletoniser, **black coffee twig borer** (Uganda's top robusta pest; added in #45).
+- **Non-disease look-alikes:** nitrogen, magnesium and potassium deficiency, waterlogging, drought stress, sun scorch, overbearing dieback (with the biennial on/off-year pattern), hail damage, plus four farm-practice causes added in #45 that are not diseases: **low soil fertility, old unpruned trees, weed competition, poor harvest and drying practice**. The brief hints at these ("40 mm overnight", "why the third row is struggling"). Without them the model would call every yellow leaf a disease.
 
 ## Sources and licences
 
-Every problem row (29 of 30) cites at least one source (the `not_sure` fallback states no fact and has none), and 26 of the 29 problem rows cite three or more. Rows cite these publishers:
+Every problem row (34 of 35) cites at least one source (the `not_sure` fallback states no fact and has none), and 27 of the 34 problem rows cite three or more. Rows cite these publishers:
 
 | Publisher | Rows citing it | Licence |
 |---|---|---|
-| Uganda Coffee Development Authority (UCDA): Arabica and Robusta Coffee Handbooks, 2019 | 22 | Public PDF; no licence stated |
+| Uganda Coffee Development Authority (UCDA): Arabica and Robusta Coffee Handbooks, 2019 (the four #45 practice rows and the twig borer row cite the Robusta handbook, the practice rows also the Arabica one) | 27 | Public PDF; no licence stated |
 | CABI: *Pests and Diseases of Coffee in Eastern Africa: A Technical and Advisory Manual* (Rutherford & Phiri, eds., 2006) | 12 | Public PDF on gov.uk (DFID-funded); no licence stated |
 | Infonet-Biovision coffee page (archived 2012 copy; cites Kenya's Coffee Research Foundation) | 11 | Not checked |
 | Tanzania Coffee Research Institute (TaCRI): annual reports and programme pages | 10 | Public; no licence stated |
 | University of Hawaii CTAHR: *Growing Coffee in Hawaii* (2008) and nutrient guides | 8 | Public; no licence stated |
 | KALRO Coffee Research Institute scientists' papers (MDPI *Agronomy* 2021 and 2023, other journals) | 4 | MDPI papers are CC BY 4.0 |
 | FAO: *Arabica coffee manual for Lao PDR* (2005) | 4 | FAO terms |
+| NaCORI (NARO), Kyalo et al. 2024, *Journal of Agricultural Science*: Robusta pest and disease survey in Uganda (abstract page only) | 1 | Open repository record; no licence stated |
+| UCDA / Coffee Department (MAAIF): "Manage the Black Coffee Twig Borer with these easy steps" web page | 1 | Public; no licence stated; undated |
 | World Coffee Research varieties catalogue | 3 | Website |
 | Cenicafé (Colombia): *Enfermedades del cafeto en Colombia* (2003) | 3 | Public; no licence stated |
 | BRACOL dataset and paper | 3 | CC BY 4.0 |
@@ -68,6 +70,13 @@ Every problem row (29 of 30) cites at least one source (the `not_sure` fallback 
 We cite these sources and restate the facts in our own words. No text, tables or images are copied from them.
 
 ## What it does NOT cover (read before using it)
+
+- **The #45 Uganda rows** (twig borer and the four practice causes) rest mainly on the UCDA Robusta Coffee Handbook (2019), which we opened and read, plus the UCDA twig borer page and the NaCORI abstract.
+  - The MAAIF advisory page named in the issue (`agriculture.go.ug/?p=13681`) returned an empty page both times we fetched it, so it is **not cited**.
+  - The UCDA twig borer page and the handbook say to cut, chop and burn infested twigs. Neither says how far below the hole to cut, so the advice says "below the hole" and the officer note asks the officer to demonstrate. The farmer advice gives no re-check interval for the same reason; the handbook's two weeks is for refilling beetle traps.
+  - The four practice rows have only the two UCDA handbooks behind them. They are not checked by an agronomist.
+  - Both UCDA handbooks mention chemical options (for twig borer and for weeds). We deliberately leave all product names and rates out of this file.
+  - No Kiswahili names were added: no opened source gives one for these five rows. #46 adds farmer phrases for a speaker check.
 
 - **Not checked by an agronomist.** Nobody from KALRO or an extension service has reviewed it.
   - Two planned sources were unreachable while we researched: KALRO's own repository and the CABI PlantwisePlus factsheets.

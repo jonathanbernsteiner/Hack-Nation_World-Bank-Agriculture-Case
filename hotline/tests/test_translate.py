@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -377,3 +378,112 @@ def test_bad_input_line_raises_before_any_call(bad_line, monkeypatch):
     with pytest.raises(tr.TranslationInputError):
         tr.translate_lines([LINES[0], bad_line])
     assert client.calls == []
+
+
+# Review cycle 2 regression tests (#58): split lines, input privacy, the R2 line shape, deployment.
+
+
+def test_extra_turn_is_rejected_and_the_rejected_answer_is_not_echoed():
+    split = _reply(
+        [
+            {"i": 0, "speaker": "Agent", "text": "Hello, what did you grow?"},
+            {"i": 1, "speaker": "Farmer", "text": "I sold 300 kilos"},
+            {"i": 2, "speaker": "Farmer", "text": "of kiboko."},
+        ]
+    )
+    client = FakeClient(split, split)
+    with pytest.raises(tr.TranslationMisaligned, match="expected 2 turns, got 3"):
+        tr.translate_lines(LINES, client=client)
+    retry = client.calls[1]["messages"][0]["content"]
+    assert "expected 2 turns, got 3" in retry
+    assert "I sold 300 kilos" not in retry
+
+
+@pytest.mark.parametrize(
+    "turns",
+    [
+        [{"i": 0, "speaker": "Agent", "text": "Hello"}, "I sold."],
+        [{"i": 0, "speaker": "Agent", "text": "Hello"}, {"i": 1, "speaker": "Farmer", "text": None}],
+        [{"i": 0, "speaker": "Agent", "text": "Hello"}, {"i": 1, "text": "I sold."}],
+        [{"i": 0, "speaker": "Agent", "text": "Hello"}, {"speaker": "Farmer", "text": "I sold."}],
+    ],
+    ids=["turn-not-object", "null-text", "missing-speaker", "missing-i"],
+)
+def test_malformed_turns_are_retried_then_misaligned(turns):
+    client = FakeClient(_reply(turns), _reply(turns))
+    with pytest.raises(tr.TranslationMisaligned):
+        tr.translate_lines(LINES, client=client)
+    assert len(client.calls) == 2
+
+
+def test_bare_list_response_is_misaligned():
+    bare = _reply(json.dumps([{"i": 0, "speaker": "Agent", "text": "a"}, {"i": 1, "speaker": "Farmer", "text": "b"}]))
+    with pytest.raises(tr.TranslationMisaligned, match="turns"):
+        tr.translate_lines(LINES, client=FakeClient(bare, bare))
+
+
+@pytest.mark.parametrize(
+    "bad_line",
+    [
+        {"role": "+256700000001", "sw": "x"},
+        {"role": "farmer", "sw": {"phone": "+256700000001"}},
+        {"role": "farmer", "sw": ["+256700000001"]},
+    ],
+)
+def test_input_error_names_the_line_but_never_its_values(bad_line):
+    # The message becomes calls.last_error, so it must not carry caller data.
+    client = FakeClient(GOOD)
+    with pytest.raises(tr.TranslationInputError) as info:
+        tr.translate_lines([LINES[0], bad_line], client=client)
+    assert "line 1" in str(info.value)
+    assert "+256" not in str(info.value)
+    assert client.calls == []
+
+
+def test_r2_line_shape_keeps_pin_placeholders_verbatim_on_every_attempt():
+    # The #57 Line shape: {i, role, sw, t}; [PIN] must reach the model unchanged and t must not.
+    lines = [
+        {"i": 0, "role": "agent", "sw": "Tafadhali sema PIN yako.", "t": 0.0},
+        {"i": 1, "role": "farmer", "sw": "Ni [PIN].", "t": 4.25},
+    ]
+    client = FakeClient(BAD, GOOD)
+    tr.translate_lines(lines, client=client)
+    for call in client.calls:
+        sent = json.loads(call["messages"][0]["content"].split("\n\nYour previous answer")[0])
+        assert sent[1] == {"i": 1, "speaker": "Farmer", "text": "Ni [PIN]."}
+        assert all(set(turn) == {"i", "speaker", "text"} for turn in sent)
+
+
+def test_str_enum_roles_are_accepted():
+    from enum import StrEnum
+
+    class Role(StrEnum):
+        AGENT = "agent"
+        FARMER = "farmer"
+
+    lines = [{"role": Role.AGENT, "sw": LINES[0]["sw"]}, {"role": Role.FARMER, "sw": LINES[1]["sw"]}]
+    client = FakeClient(GOOD)
+    assert tr.translate_lines(lines, client=client) == EXPECTED
+    assert [t["speaker"] for t in json.loads(client.calls[0]["messages"][0]["content"])] == ["Agent", "Farmer"]
+
+
+def test_explicit_model_overrides_env_and_needs_no_env(monkeypatch):
+    client = FakeClient(GOOD, GOOD)
+    assert tr.translate_lines(LINES, client=client, model="claude-eval-model") == EXPECTED
+    monkeypatch.delenv(tr.MODEL_ENV)
+    assert tr.translate_lines(LINES, client=client, model="claude-eval-model") == EXPECTED
+    assert [call["model"] for call in client.calls] == ["claude-eval-model", "claude-eval-model"]
+
+
+def test_prompt_file_ships_with_the_vercel_function():
+    # Production reads the prompt from disk; an excludeFiles glob that matched it would only fail at runtime.
+    import fnmatch
+
+    project_root = Path(tr.__file__).resolve().parents[2]
+    relative = tr.PROMPT_PATH.resolve().relative_to(project_root).as_posix()
+    assert tr.PROMPT_PATH.is_file()
+    config = json.loads((project_root / "vercel.json").read_text(encoding="utf-8"))
+    for function in config.get("functions", {}).values():
+        excluded = function.get("excludeFiles", "")
+        for pattern in excluded.strip("{}").split(","):
+            assert not (pattern and fnmatch.fnmatchcase(relative, pattern)), (relative, pattern)

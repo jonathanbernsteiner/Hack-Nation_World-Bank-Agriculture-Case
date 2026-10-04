@@ -210,3 +210,72 @@ def test_supabase_create_and_match_in_rolled_back_transaction(db):
     ).fetchone()
     assert row == (False, False, district.lat)
     assert match_village(db, "Masaka", "Zzplaces Test").best.village_id == first
+
+
+# --- Review regressions (#48) ---
+
+
+@pytest.mark.parametrize(
+    "spoken, tied",
+    [("Kaungu", {"Kalungu", "Kanungu"}), ("Tooro", {"Tororo", "Ntoroko"})],
+)
+def test_real_districts_within_margin_return_none_and_list_both(spoken, tied):
+    top_two = district_candidates(spoken, limit=2)
+    assert {c.district for c in top_two} == tied
+    assert all(c.score >= places.MATCH_THRESHOLD for c in top_two)
+    assert match_district(spoken) is None
+
+
+@pytest.mark.parametrize(
+    "spoken, expected",
+    [("Masaka", "Masaka"), ("Mazaka", "Masaka"), ("Massaka", "Masaka"), ("Masaaka", "Masaka"),
+     ("Masindi", "Masindi"), ("Mazindi", "Masindi"), ("Masiindi", "Masindi")],
+)
+def test_masaka_and_masindi_never_collapse(spoken, expected):
+    assert match_district(spoken).district == expected
+    assert places.score("Masaka", "Masindi") < places.MATCH_THRESHOLD
+
+
+def test_below_threshold_district_returns_none_but_offers_candidates():
+    # Swahili ASR hears "Mbale" as the word "mbali" (far): no confident match, Mbale offered first.
+    assert match_district("Mbali") is None
+    assert district_candidates("Mbali")[0].district == "Mbale"
+
+
+def test_village_candidates_stay_inside_the_requested_district(conn):
+    add(conn, "Mbale", "Namanyonyi", "Bumasikye", "Kisenyi")
+    add(conn, "Mbale", "Namanyonyi", "Bumasikye", "Kyabakuza")
+    for spoken in ("Kisenyi", "Kyabakuza", "Chabakuza"):
+        result = match_village(conn, "Masaka", spoken)
+        assert result.candidates
+        assert all(c.district == "Masaka" for c in result.candidates)
+
+
+def test_village_query_never_touches_farmers():
+    seen = []
+
+    class Spy:
+        def execute(self, sql, params=()):
+            seen.append(sql.lower())
+            return type("R", (), {"fetchall": lambda self: []})()
+
+    match_village(Spy(), "Masaka", "Kyabakuza", parish="Kitovu", sub_county="Kyanamukaaka")
+    assert seen and all("from villages" in sql and "farmer" not in sql for sql in seen)
+
+
+def test_district_case_does_not_split_the_cache(conn):
+    assert match_village(conn, "MASAKA", "Lwanda").status == "none"
+    new_id = create_unverified_village(conn, MASAKA, "Lwanda", None, None)
+    assert match_village(conn, "masaka", "Lwanda").best.village_id == new_id
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="review #48 finding 1: a stored 'unknown' parish/sub-county must not hide a registered village",
+)
+@pytest.mark.parametrize("narrow", [{"parish": "Nyendo"}, {"sub_county": "Kyanamukaaka"}])
+def test_unknown_parish_does_not_hide_a_registered_village(conn, narrow):
+    new_id = create_unverified_village(conn, MASAKA, "Lwanda", None, None)
+    result = match_village(conn, "Masaka", "Lwanda", **narrow)
+    assert result.status == "unique"
+    assert result.best.village_id == new_id

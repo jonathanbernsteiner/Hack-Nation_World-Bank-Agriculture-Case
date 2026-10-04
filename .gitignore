@@ -13,6 +13,10 @@ recordings/
 __pycache__/
 *.pyc
 .venv/
+hotline/.venv/
+hotline/.cache/
+hotline/.venv/
+hotline/.cache/
 
 # Node
 node_modules/

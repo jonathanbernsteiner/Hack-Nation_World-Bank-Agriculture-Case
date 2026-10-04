@@ -1,0 +1,9 @@
+{
+  "framework": "fastapi",
+  "functions": {
+    "hotline/main.py": {
+      "maxDuration": 300,
+      "excludeFiles": "{evals/**,tests/**,agent/**,scripts/**,.cache/**}"
+    }
+  }
+}

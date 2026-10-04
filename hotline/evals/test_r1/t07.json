@@ -1,0 +1,162 @@
+{
+  "id": "t07",
+  "is_synthetic": true,
+  "call_date": "2026-10-22",
+  "timezone": "Africa/Kampala",
+  "conversation": {
+    "conversation_id": "conv_t07_r1",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Habari. Mimi ni kompyuta, msaidizi wa simu wa kahawa. Simu hii inarekodiwa ili kutunza kumbukumbu ya shamba lako. Je, unakubali tuendelee?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 0
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 17
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Tafadhali sema namba yako ya siri ya tarakimu nne.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 23
+      },
+      {
+        "role": "user",
+        "message": "[PIN].",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 33
+      },
+      {
+        "role": "agent",
+        "message": "Karibu. Bei ya kati ya kiboko hapa Bushenyi ni shilingi elfu nne na mia saba kwa kilo. Je, umeuza kahawa hivi karibuni?",
+        "tool_calls": [
+          {
+            "request_id": "r1",
+            "tool_name": "identify_farmer",
+            "params_as_json": "{\"pin\": \"[PIN]\"}",
+            "tool_has_been_called": true,
+            "type": "webhook"
+          }
+        ],
+        "tool_results": [
+          {
+            "request_id": "r1",
+            "tool_name": "identify_farmer",
+            "is_error": false,
+            "tool_has_been_called": true,
+            "result_value": "{\"status\": \"found\", \"village_price\": {\"form\": \"kiboko\", \"median_ugx_per_kg\": 4700, \"reports\": 14, \"area\": \"village\"}}"
+          }
+        ],
+        "time_in_call_secs": 41
+      },
+      {
+        "role": "user",
+        "message": "Hapana, kahawa yote bado iko nyumbani. Ninasubiri bei ipande.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 56
+      },
+      {
+        "role": "agent",
+        "message": "Sawa. Je, una tatizo na kahawa yako?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 65
+      },
+      {
+        "role": "user",
+        "message": "Hapana, hakuna tatizo mwaka huu.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 74
+      },
+      {
+        "role": "agent",
+        "message": "Vizuri. Kuna swali lingine?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 82
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, mvua itanyesha wiki hii? Nataka kukausha kahawa kwenye [unclear] tarpaulin.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 90
+      },
+      {
+        "role": "agent",
+        "message": "Ngoja nitazame utabiri.",
+        "tool_calls": [
+          {
+            "request_id": "r2",
+            "tool_name": "get_weather_forecast",
+            "params_as_json": "{\"district\": \"Bushenyi\"}",
+            "tool_has_been_called": true,
+            "type": "webhook"
+          }
+        ],
+        "tool_results": [
+          {
+            "request_id": "r2",
+            "tool_name": "get_weather_forecast",
+            "is_error": false,
+            "tool_has_been_called": true,
+            "result_value": "{\"status\": \"ok\", \"days\": [{\"day\": \"Ijumaa\", \"rain_mm\": 0}, {\"day\": \"Jumamosi\", \"rain_mm\": 2}, {\"day\": \"Jumapili\", \"rain_mm\": 18}]}"
+          }
+        ],
+        "time_in_call_secs": 102
+      },
+      {
+        "role": "agent",
+        "message": "Ijumaa na Jumamosi kutakuwa kukavu, karibu bila mvua, lakini Jumapili kuna mvua nyingi, karibu milimita kumi na nane. Kausha kahawa mapema na uifunike Jumapili.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 109
+      },
+      {
+        "role": "user",
+        "message": "Asante sana, nimeelewa.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 126
+      },
+      {
+        "role": "agent",
+        "message": "Asante kwa kupiga simu. Kwaheri.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 133
+      }
+    ],
+    "metadata": {
+      "start_time_unix_secs": 1792650600
+    }
+  },
+  "gold": {
+    "consent": "yes",
+    "entries": []
+  },
+  "free_text_alts": {},
+  "quote_possible": true,
+  "tags": [
+    "weather_only",
+    "weather",
+    "not_sold",
+    "no_sale_trap",
+    "asr_noise",
+    "code_switching"
+  ],
+  "review": {
+    "verdict": "approved",
+    "rounds": 2
+  }
+}

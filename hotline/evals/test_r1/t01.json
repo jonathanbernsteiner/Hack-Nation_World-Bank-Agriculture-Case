@@ -1,0 +1,204 @@
+{
+  "id": "t01",
+  "is_synthetic": true,
+  "call_date": "2026-10-08",
+  "timezone": "Africa/Kampala",
+  "conversation": {
+    "conversation_id": "conv_t01_r1",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Habari. Mimi ni kompyuta, msaidizi wa simu wa kahawa. Simu hii inarekodiwa ili kutunza kumbukumbu ya shamba lako. Je, unakubali tuendelee?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 0
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, nakubali.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 17
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Tafadhali sema namba yako ya siri ya tarakimu nne.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 24
+      },
+      {
+        "role": "user",
+        "message": "Ni [PIN].",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 34
+      },
+      {
+        "role": "agent",
+        "message": "Karibu tena. Bei ya kati ya kiboko hapa Masaka kwa miezi kumi na miwili ni shilingi elfu tano na mia moja kwa kilo. Je, umeuza kahawa hivi karibuni?",
+        "tool_calls": [
+          {
+            "request_id": "r1",
+            "tool_name": "identify_farmer",
+            "params_as_json": "{\"pin\": \"[PIN]\"}",
+            "tool_has_been_called": true,
+            "type": "webhook"
+          }
+        ],
+        "tool_results": [
+          {
+            "request_id": "r1",
+            "tool_name": "identify_farmer",
+            "is_error": false,
+            "tool_has_been_called": true,
+            "result_value": "{\"status\": \"found\", \"village_price\": {\"form\": \"kiboko\", \"median_ugx_per_kg\": 5100, \"reports\": 14, \"area\": \"village\"}}"
+          }
+        ],
+        "time_in_call_secs": 42
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, nimeuza Jumapili.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 60
+      },
+      {
+        "role": "agent",
+        "message": "Sawa. Uliuza kilo ngapi, na kahawa ya aina gani?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 68
+      },
+      {
+        "role": "user",
+        "message": "Kilo mia tatu, ni kiboko. Si FAQ, kiboko.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 78
+      },
+      {
+        "role": "agent",
+        "message": "Bei ilikuwa ngapi, na alinunua nani?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 87
+      },
+      {
+        "role": "user",
+        "message": "Shilingi elfu nne na mia nane kwa kilo. Alinunua mfanyabiashara wa hapa, alilipa cash.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 96
+      },
+      {
+        "role": "agent",
+        "message": "Nimesikia: Jumapili, kilo mia tatu za kiboko, shilingi elfu nne na mia nane kwa kilo, mfanyabiashara, pesa taslimu. Je, ni sahihi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 109
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, sahihi.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 125
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Je, una tatizo lolote na kahawa yako mwaka huu?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 132
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, majani yana unga wa rangi ya machungwa upande wa chini.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 142
+      },
+      {
+        "role": "agent",
+        "message": "Je, unga huo unabaki kwenye kidole ukiugusa, na majani yanaanguka?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 153
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, unabaki kwenye kidole, na majani mengine yameanza kuanguka.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 164
+      },
+      {
+        "role": "agent",
+        "message": "Huenda ni ugonjwa wa kutu ya majani ya kahawa. Ondoa majani yaliyoathirika, punguza kivuli, na muone afisa ugani kwa ushauri wa dawa. Kuzuia, weka mbolea na kata matawi yaliyosongamana. Je, kuna swali lingine?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 175
+      },
+      {
+        "role": "user",
+        "message": "Hapana, asante.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 198
+      },
+      {
+        "role": "agent",
+        "message": "Asante kwa kupiga simu. Kwaheri.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 205
+      }
+    ],
+    "metadata": {
+      "start_time_unix_secs": 1791441000
+    }
+  },
+  "gold": {
+    "consent": "yes",
+    "entries": [
+      {
+        "kind": "sale",
+        "crop": "coffee",
+        "coffee_form": "kiboko",
+        "amount_kg": 300,
+        "price_total": 1440000,
+        "currency": "UGX",
+        "date_sold": "2026-10-04",
+        "buyer_type": "middleman",
+        "buyer_name": null,
+        "paid_how": "cash",
+        "amount": 300,
+        "unit": "kg"
+      },
+      {
+        "kind": "observation",
+        "crop": "coffee",
+        "plot": null,
+        "symptom": "powder_or_rust",
+        "disease_detected": true,
+        "likely_disease": "coffee_leaf_rust"
+      }
+    ]
+  },
+  "free_text_alts": {},
+  "quote_possible": true,
+  "tags": [
+    "clean_sale",
+    "per_kg_only",
+    "weekday_date",
+    "buyer_type",
+    "problem_leaf_rust",
+    "code_switching"
+  ],
+  "review": {
+    "verdict": "approved",
+    "rounds": 2
+  }
+}

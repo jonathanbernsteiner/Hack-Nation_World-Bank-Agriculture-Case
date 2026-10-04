@@ -1,0 +1,161 @@
+{
+  "id": "t06",
+  "is_synthetic": true,
+  "call_date": "2026-10-20",
+  "timezone": "Africa/Kampala",
+  "conversation": {
+    "conversation_id": "conv_t06_r1",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Habari. Mimi ni kompyuta, msaidizi wa simu wa kahawa. Simu hii inarekodiwa ili kutunza kumbukumbu ya shamba lako. Je, unakubali tuendelee?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 0
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, nakubali.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 17
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Tafadhali sema namba yako ya siri ya tarakimu nne.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 24
+      },
+      {
+        "role": "user",
+        "message": "[PIN].",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 34
+      },
+      {
+        "role": "agent",
+        "message": "Karibu. Bei ya kati ya kiboko hapa Kasese ni shilingi elfu tano na mia tatu kwa kilo. Je, wewe huuza kwa bei kama hiyo?",
+        "tool_calls": [
+          {
+            "request_id": "r1",
+            "tool_name": "identify_farmer",
+            "params_as_json": "{\"pin\": \"[PIN]\"}",
+            "tool_has_been_called": true,
+            "type": "webhook"
+          }
+        ],
+        "tool_results": [
+          {
+            "request_id": "r1",
+            "tool_name": "identify_farmer",
+            "is_error": false,
+            "tool_has_been_called": true,
+            "result_value": "{\"status\": \"found\", \"village_price\": {\"form\": \"kiboko\", \"median_ugx_per_kg\": 5300, \"reports\": 14, \"area\": \"village\"}}"
+          }
+        ],
+        "time_in_call_secs": 42
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, karibu na hapo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 57
+      },
+      {
+        "role": "agent",
+        "message": "Je, umeuza kahawa hivi karibuni?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 64
+      },
+      {
+        "role": "user",
+        "message": "Hapana, kahawa bado iko stoo. Nitaiuza mwisho wa mwezi.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 72
+      },
+      {
+        "role": "agent",
+        "message": "Sawa. Je, una tatizo na kahawa yako mwaka huu?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 80
+      },
+      {
+        "role": "user",
+        "message": "Miti haionekani vizuri, sijui ni nini.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 89
+      },
+      {
+        "role": "agent",
+        "message": "Majani, matunda au matawi, kipi kinaonekana vibaya zaidi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 98
+      },
+      {
+        "role": "user",
+        "message": "Sijui kwa kweli, sijaangalia kwa makini. Miti tu imebadilika.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 108
+      },
+      {
+        "role": "agent",
+        "message": "Sina uhakika ni tatizo gani. Nakushauri umwite afisa ugani aone shamba lako. Kuna swali lingine?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 117
+      },
+      {
+        "role": "user",
+        "message": "Hapana, asante.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 131
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Kwaheri.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 138
+      }
+    ],
+    "metadata": {
+      "start_time_unix_secs": 1792477800
+    }
+  },
+  "gold": {
+    "consent": "yes",
+    "entries": [
+      {
+        "kind": "observation",
+        "crop": "coffee",
+        "plot": null,
+        "symptom": "other",
+        "disease_detected": true,
+        "likely_disease": "not_sure"
+      }
+    ]
+  },
+  "free_text_alts": {},
+  "quote_possible": true,
+  "tags": [
+    "no_sale_trap",
+    "echo_median",
+    "intended_sale",
+    "not_sold",
+    "vague_symptom_not_sure"
+  ],
+  "review": {
+    "verdict": "approved",
+    "rounds": 2
+  }
+}

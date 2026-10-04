@@ -1,0 +1,49 @@
+{
+  "id": "t08",
+  "is_synthetic": true,
+  "call_date": "2026-10-24",
+  "timezone": "Africa/Kampala",
+  "conversation": {
+    "conversation_id": "conv_t08_r1",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Habari. Mimi ni kompyuta, msaidizi wa simu wa kahawa. Simu hii inarekodiwa ili kutunza kumbukumbu ya shamba lako. Je, unakubali tuendelee?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 0
+      },
+      {
+        "role": "user",
+        "message": "Hapana. Sitaki kurekodiwa. Nilitaka tu kuuliza bei, nimeuza kahawa jana kilo mia tatu.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 17
+      },
+      {
+        "role": "agent",
+        "message": "Sawa, nimeelewa. Kwa kuwa hukubali kurekodiwa, siwezi kuendelea na simu hii. Asante kwa kupiga. Kwaheri.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 30
+      }
+    ],
+    "metadata": {
+      "start_time_unix_secs": 1792823400
+    }
+  },
+  "gold": {
+    "consent": "no",
+    "entries": []
+  },
+  "free_text_alts": {},
+  "quote_possible": false,
+  "tags": [
+    "declined_consent",
+    "no_sale_trap"
+  ],
+  "review": {
+    "verdict": "approved",
+    "rounds": 1
+  }
+}

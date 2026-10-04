@@ -1,0 +1,191 @@
+{
+  "id": "t10",
+  "is_synthetic": true,
+  "call_date": "2026-10-29",
+  "timezone": "Africa/Kampala",
+  "conversation": {
+    "conversation_id": "conv_t10_r1",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Habari. Mimi ni kompyuta, msaidizi wa simu wa kahawa. Simu hii inarekodiwa ili kutunza kumbukumbu ya shamba lako. Je, unakubali tuendelee?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 0
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 17
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Tafadhali sema namba yako ya siri ya tarakimu nne.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 23
+      },
+      {
+        "role": "user",
+        "message": "Nimesahau namba yangu.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 33
+      },
+      {
+        "role": "agent",
+        "message": "Hakuna shida. Tafadhali niambie jina lako la kwanza, wilaya na kijiji.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 40
+      },
+      {
+        "role": "user",
+        "message": "Jina langu ni Peter, wilaya ya Masaka, kijiji cha Bukakata.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 51
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Karibu. Bei ya kati ya drugar hapa Bukakata ni shilingi elfu tatu na mia tisa kwa kilo. Je, umeuza kahawa hivi karibuni?",
+        "tool_calls": [
+          {
+            "request_id": "r1",
+            "tool_name": "find_farmer_by_location",
+            "params_as_json": "{\"first_name\": \"[NAME]\", \"district\": \"Masaka\", \"village\": \"Bukakata\"}",
+            "tool_has_been_called": true,
+            "type": "webhook"
+          }
+        ],
+        "tool_results": [
+          {
+            "request_id": "r1",
+            "tool_name": "find_farmer_by_location",
+            "is_error": false,
+            "tool_has_been_called": true,
+            "result_value": "{\"status\": \"found\", \"village_price\": {\"form\": \"drugar\", \"median_ugx_per_kg\": 3900, \"reports\": 9, \"area\": \"village\"}}"
+          }
+        ],
+        "time_in_call_secs": 62
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, jana. Nimeuza drugar kilo mia mbili na hamsini kwa mfanyabiashara.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 78
+      },
+      {
+        "role": "agent",
+        "message": "Bei ilikuwa ngapi, na alilipa vipi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 90
+      },
+      {
+        "role": "user",
+        "message": "Elfu nne kwa kilo, jumla ni milioni moja. Alilipa kwa mobile money.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 98
+      },
+      {
+        "role": "agent",
+        "message": "Nimesikia: jana, drugar kilo mia mbili hamsini, elfu nne kwa kilo, jumla milioni moja, mfanyabiashara, mobile money. Sahihi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 109
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 125
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Je, una tatizo na kahawa yako?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 131
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, punje zina mashimo madogo, na kuna wadudu wadogo weusi ndani ya punje.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 140
+      },
+      {
+        "role": "agent",
+        "message": "Huenda ni kipekecha cha punje za kahawa. Vuna punje zote zilizoiva, okota zilizoanguka chini, na uzichome au uzike. Muone afisa ugani. Kuna swali lingine?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 152
+      },
+      {
+        "role": "user",
+        "message": "Hapana, asante.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 170
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Kwaheri.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 177
+      }
+    ],
+    "metadata": {
+      "start_time_unix_secs": 1793255400
+    }
+  },
+  "gold": {
+    "consent": "yes",
+    "entries": [
+      {
+        "kind": "sale",
+        "crop": "coffee",
+        "coffee_form": "drugar",
+        "amount_kg": 250,
+        "price_total": 1000000,
+        "currency": "UGX",
+        "date_sold": "2026-10-28",
+        "buyer_type": "middleman",
+        "buyer_name": null,
+        "paid_how": "mobile_money",
+        "amount": 250,
+        "unit": "kg"
+      },
+      {
+        "kind": "observation",
+        "crop": "coffee",
+        "plot": null,
+        "symptom": "pests",
+        "disease_detected": true,
+        "likely_disease": "coffee_berry_borer"
+      }
+    ]
+  },
+  "free_text_alts": {},
+  "quote_possible": true,
+  "tags": [
+    "both_price_forms",
+    "forgot_pin",
+    "yesterday",
+    "mobile_money",
+    "buyer_type",
+    "problem_berry_borer",
+    "clean_sale"
+  ],
+  "review": {
+    "verdict": "approved",
+    "rounds": 2
+  }
+}

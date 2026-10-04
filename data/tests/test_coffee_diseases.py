@@ -374,5 +374,123 @@ class FarmerSafetyCycle2Test(unittest.TestCase):
         self.assertEqual({row["id"] for row in self.rows if row["in_bracol"]}, BRACOL_ROWS)
 
 
+# --- Review cycle 3 -----------------------------------------------------------
+# Kiswahili names go straight into the #46 knowledge file ("farmer says (EN | SW)")
+# and from there into what the agent says. #17 decided they come only from a
+# source, never from our own translation. The cited TaCRI reports are the
+# Kiswahili editions ("Taarifa ya Mwaka ..., Kiswahili").
+KISWAHILI_SOURCE_TITLE = re.compile(r"kiswahili|swahili|taarifa ya mwaka", re.IGNORECASE)
+README_SWAHILI_SECTION = re.compile(r"- \*\*Swahili names:\*\*\n(.*?)\n- \*\*", re.DOTALL)
+README_SWAHILI_ITEM = re.compile(r"^\s+- [^:\n]+: \*([^*\n]+)\*\s*$", re.MULTILINE)
+
+
+def readme_number(test, pattern, text):
+    """The integer groups of the one README sentence that states a count."""
+    match = re.search(pattern, text)
+    test.assertIsNotNone(match, f"README no longer states this count: {pattern}")
+    return tuple(int(group) for group in match.groups())
+
+
+def readme_swahili_names(text):
+    section = README_SWAHILI_SECTION.search(text)
+    if section is None:
+        raise AssertionError("README has no '- **Swahili names:**' section")
+    return [name.strip() for name in README_SWAHILI_ITEM.findall(section.group(1))]
+
+
+class SwahiliProvenanceTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.rows = load_rows()
+        cls.named = {row["id"]: row for row in cls.rows if row["swahili_name"] is not None}
+
+    def test_every_swahili_name_cites_a_kiswahili_source(self):
+        self.assertTrue(self.named, "no row has a Kiswahili name")
+        for row_id, row in self.named.items():
+            with self.subTest(row=row_id):
+                name = row["swahili_name"]
+                self.assertIsInstance(name, str)
+                self.assertEqual(name, name.strip())
+                self.assertTrue(name, "empty Kiswahili name: use null instead")
+                titles = [source["title"] for source in row["sources"]]
+                self.assertTrue(
+                    any(KISWAHILI_SOURCE_TITLE.search(title) for title in titles),
+                    f"'{name}' has no Kiswahili-language source among {titles}",
+                )
+
+    def test_readme_lists_exactly_the_swahili_names_in_the_data(self):
+        text = README_PATH.read_text(encoding="utf-8")
+        listed = readme_swahili_names(text)
+        self.assertEqual(len(listed), len(set(listed)), "a Kiswahili name is listed twice")
+        self.assertEqual(sorted(listed), sorted(row["swahili_name"] for row in self.named.values()))
+        (stated,) = readme_number(self, r"Only (\d+) rows have one", text)
+        self.assertEqual(stated, len(self.named))
+
+
+class ReadmeCountsMatchDataTest(unittest.TestCase):
+    """#46 and the pitch quote these README numbers; #45 must update them with its rows."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.rows = load_rows()
+        cls.problem_rows = [row for row in cls.rows if row["kind"] != "fallback"]
+        cls.text = README_PATH.read_text(encoding="utf-8")
+
+    def count_kind(self, kind):
+        return sum(row["kind"] == kind for row in self.rows)
+
+    def test_files_table_matches_the_rows_and_sources(self):
+        stated = readme_number(
+            self,
+            r"(\d+) rows: (\d+) diseases, (\d+) pests, (\d+) non-disease look-alikes, (\d+) `not_sure` fallback",
+            self.text,
+        )
+        actual = (
+            len(self.rows), self.count_kind("disease"), self.count_kind("pest"),
+            self.count_kind("disorder"), self.count_kind("fallback"),
+        )
+        self.assertEqual(stated, actual)
+        (sources,) = readme_number(self, r"(\d+) cited sources", self.text)
+        self.assertEqual(sources, len({s["url"] for row in self.rows for s in row["sources"]}))
+
+    def test_eval_phrase_count_matches_the_csv(self):
+        _, eval_rows = load_eval_rows()
+        (stated,) = readme_number(self, r"(\d+) farmer-style phrases", self.text)
+        self.assertEqual(stated, len(eval_rows))
+
+    def test_sourcing_sentence_matches_the_rows(self):
+        cited, total = readme_number(self, r"Every problem row \((\d+) of (\d+)\)", self.text)
+        self.assertEqual((cited, total), (len(self.problem_rows), len(self.rows)))
+        self.assertTrue(all(row["sources"] for row in self.problem_rows))
+        three_plus, of_problem_rows = readme_number(
+            self, r"(\d+) of the (\d+) problem rows cite three or more", self.text,
+        )
+        self.assertEqual(of_problem_rows, len(self.problem_rows))
+        self.assertEqual(three_plus, sum(len(row["sources"]) >= 3 for row in self.problem_rows))
+
+    def test_overlap_and_bracol_counts_match_the_rows(self):
+        (leaf_spots,) = readme_number(self, r"(\d+) rows include `leaf_spots`", self.text)
+        self.assertEqual(leaf_spots, sum("leaf_spots" in row["symptom_categories"] for row in self.rows))
+        (bracol,) = readme_number(self, r"cover only (\d+) of our rows", self.text)
+        self.assertEqual(bracol, sum(row["in_bracol"] for row in self.rows))
+
+
+class ReadmeParsingSelfTest(unittest.TestCase):
+    """The README parsers must find a drifted count or name, or the tests above prove nothing."""
+
+    def test_swahili_parser_reads_the_bullet_list(self):
+        text = (
+            "- **Swahili names:**\n  - Only 2 rows have one:\n"
+            "    - leaf rust: *kutu ya majani*\n    - berry borer: *ruhuka*\n"
+            "  - None has been checked by a speaker.\n- **The eval phrases are synthetic.**\n"
+        )
+        self.assertEqual(readme_swahili_names(text), ["kutu ya majani", "ruhuka"])
+        self.assertEqual(readme_number(self, r"Only (\d+) rows have one", text), (2,))
+
+    def test_missing_count_sentence_fails_loudly(self):
+        with self.assertRaises(AssertionError):
+            readme_number(self, r"(\d+) farmer-style phrases", "32 phrases, reworded")
+
+
 if __name__ == "__main__":
     unittest.main()

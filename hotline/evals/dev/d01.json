@@ -1,0 +1,211 @@
+{
+  "id": "d01",
+  "is_synthetic": true,
+  "call_date": "2026-10-02",
+  "timezone": "Africa/Kampala",
+  "conversation": {
+    "agent_id": "agent_eval",
+    "conversation_id": "conv_eval_d01",
+    "status": "done",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Habari! Hii ni simu ya kompyuta, si mtu. Mazungumzo haya yanarekodiwa ili kutunza rekodi ya shamba lako. Je, unakubali?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 0,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, nakubali.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 9,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Tafadhali bonyeza au sema namba yako ya siri ya tarakimu nne.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 18,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "[PIN]",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 27,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Karibu Nakato. Bei ya kati ya kiboko Kyabakuza kwa miezi kumi na miwili iliyopita ni shilingi elfu tano na mia tano kwa kilo, kutoka ripoti kumi na nne.",
+        "tool_calls": [
+          {
+            "request_id": "toolu_d01_4",
+            "tool_name": "identify_farmer",
+            "params_as_json": "{\"pin\": \"[PIN]\"}",
+            "tool_has_been_called": true,
+            "type": "webhook"
+          }
+        ],
+        "tool_results": [
+          {
+            "request_id": "toolu_d01_4",
+            "tool_name": "identify_farmer",
+            "result_value": "{\"status\": \"found\", \"identified_by\": \"pin\", \"farmer\": {\"first_name\": \"Nakato\", \"village\": \"Kyabakuza\", \"district\": \"Masaka\", \"region\": \"Central\", \"coffee_type\": \"robusta\", \"main_form\": \"kiboko\"}, \"village_price\": {\"form\": \"kiboko\", \"median_ugx_per_kg\": 5500, \"n_sales\": 14, \"level\": \"village\", \"area\": \"Kyabakuza\", \"median_words_sw\": \"elfu tano na mia tano\"}}",
+            "is_error": false,
+            "tool_has_been_called": true
+          }
+        ],
+        "time_in_call_secs": 36,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Aa, sawa. Mimi niliuza kiboko jana, kilo mia tatu kwa shilingi elfu tano na mia tatu kwa kilo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 45,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Umemuuzia nani, na ulilipwa vipi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 54,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Nilimuuzia mfanyabiashara wa hapa, alinilipa cash.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 63,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Nimeandika: kilo mia tatu za kiboko, shilingi elfu tano na mia tatu kwa kilo, jana, kwa mfanyabiashara, cash. Sahihi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 72,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, sahihi.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 81,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Je, kuna tatizo lolote kwenye kahawa yako mwaka huu?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 90,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, kuna unga wa rangi ya machungwa chini ya majani, na majani yanaanguka.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 99,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Madoa ya njano pia yapo upande wa juu wa majani?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 108,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, madoa ya njano juu.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 117,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Hii inaonekana kuwa kutu ya majani ya kahawa. Kata matawi yaliyoathirika, punguza kivuli, na umwambie afisa ugani aangalie shamba lako.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 126,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Sawa, asante.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 135,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Asante sana kwa kupiga simu. Kwaheri!",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 144,
+        "source_medium": null
+      }
+    ],
+    "metadata": {
+      "start_time_unix_secs": 1790925300,
+      "call_duration_secs": 153
+    }
+  },
+  "gold": {
+    "consent": "yes",
+    "entries": [
+      {
+        "kind": "sale",
+        "crop": "coffee",
+        "coffee_form": "kiboko",
+        "amount_kg": 300,
+        "price_total": 1590000,
+        "currency": "UGX",
+        "date_sold": "2026-10-01",
+        "buyer_type": "middleman",
+        "buyer_name": null,
+        "paid_how": "cash",
+        "amount": 300,
+        "unit": "kg"
+      },
+      {
+        "kind": "observation",
+        "crop": "coffee",
+        "plot": null,
+        "symptom": "powder_or_rust",
+        "disease_detected": true,
+        "likely_disease": "coffee_leaf_rust"
+      }
+    ]
+  },
+  "free_text_alts": {},
+  "quote_possible": true,
+  "tags": [
+    "clean_sale",
+    "per_kg_only",
+    "yesterday",
+    "buyer_type",
+    "problem_leaf_rust"
+  ],
+  "labeler_notes": "",
+  "review": {
+    "verdict": "approved",
+    "rounds": 2,
+    "reviewer": "claude-opus-5-5"
+  }
+}

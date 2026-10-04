@@ -1,0 +1,218 @@
+{
+  "id": "d05",
+  "is_synthetic": true,
+  "call_date": "2026-09-26",
+  "timezone": "Africa/Kampala",
+  "conversation": {
+    "agent_id": "agent_eval",
+    "conversation_id": "conv_eval_d05",
+    "status": "done",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Habari! Hii ni simu ya kompyuta, si mtu. Mazungumzo haya yanarekodiwa ili kutunza rekodi ya shamba lako. Je, unakubali?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 0,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Yes, nakubali.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 9,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Tafadhali bonyeza au sema namba yako ya siri ya tarakimu nne.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 18,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "[PIN]",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 27,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Karibu Ssebu. Bei ya kati ya kiboko Mubende kwa miezi kumi na miwili iliyopita ni shilingi elfu tano na mia mbili kwa kilo, kutoka ripoti ishirini.",
+        "tool_calls": [
+          {
+            "request_id": "toolu_d05_4",
+            "tool_name": "identify_farmer",
+            "params_as_json": "{\"pin\": \"[PIN]\"}",
+            "tool_has_been_called": true,
+            "type": "webhook"
+          }
+        ],
+        "tool_results": [
+          {
+            "request_id": "toolu_d05_4",
+            "tool_name": "identify_farmer",
+            "result_value": "{\"status\": \"found\", \"identified_by\": \"pin\", \"farmer\": {\"first_name\": \"Ssebu\", \"village\": \"Kitenga\", \"district\": \"Mubende\", \"region\": \"Central\", \"coffee_type\": \"robusta\", \"main_form\": \"kiboko\"}, \"village_price\": {\"form\": \"kiboko\", \"median_ugx_per_kg\": 5200, \"n_sales\": 20, \"level\": \"village\", \"area\": \"Kitenga\", \"median_words_sw\": \"elfu tano na mia mbili\"}}",
+            "is_error": false,
+            "tool_has_been_called": true
+          }
+        ],
+        "time_in_call_secs": 36,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Mimi niliuza kiboko mwezi wa Agosti, kilo mia moja na hamsini. Shilingi elfu tano kwa kilo, jumla laki saba na nusu.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 45,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Umemuuzia nani, na ulilipwa vipi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 54,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Buyer wa hapa kijijini, mfanyabiashara. Alilipa kwa mobile money, kisha nikatumia boda kwenda sokoni.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 63,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Nimeandika: kilo mia moja na hamsini za kiboko, elfu tano kwa kilo, jumla laki saba na nusu, Agosti, mfanyabiashara, mobile money. Sahihi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 72,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 81,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Je, kuna tatizo kwenye kahawa?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 90,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Hapana. Lakini nimevuna kilo mia mbili za red cherry wiki hii, na Jumatano nilikata magugu shambani.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 99,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Vizuri. Una mpango gani wa wiki ijayo?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 108,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Wiki ijayo nitapulizia dawa. Nitumie dawa gani?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 117,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Siwezi kutaja jina la dawa. Muulize afisa ugani wa wilaya yako akupendekezee dawa inayofaa.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 126,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Sawa, nitamuuliza.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 135,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Asante sana kwa kupiga simu. Kwaheri!",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 144,
+        "source_medium": null
+      }
+    ],
+    "metadata": {
+      "start_time_unix_secs": 1790406900,
+      "call_duration_secs": 153
+    }
+  },
+  "gold": {
+    "consent": "yes",
+    "entries": [
+      {
+        "kind": "sale",
+        "crop": "coffee",
+        "coffee_form": "kiboko",
+        "amount_kg": 150,
+        "price_total": 750000,
+        "currency": "UGX",
+        "date_sold": "2026-08-15",
+        "buyer_type": "middleman",
+        "buyer_name": null,
+        "paid_how": "mobile_money",
+        "amount": 150,
+        "unit": "kg"
+      },
+      {
+        "kind": "harvest",
+        "crop": "coffee",
+        "yield_amount": 200,
+        "unit": "kg"
+      },
+      {
+        "kind": "activity",
+        "activity": "weeding",
+        "input": null,
+        "quantity": null,
+        "plot": null
+      }
+    ]
+  },
+  "free_text_alts": {},
+  "quote_possible": true,
+  "tags": [
+    "both_price_forms",
+    "named_month",
+    "nusu",
+    "harvest",
+    "activity_done_vs_planned",
+    "code_switching",
+    "spray_name_request"
+  ],
+  "labeler_notes": "",
+  "review": {
+    "verdict": "approved",
+    "rounds": 2,
+    "reviewer": "claude-opus-5-5"
+  }
+}

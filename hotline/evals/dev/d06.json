@@ -1,0 +1,227 @@
+{
+  "id": "d06",
+  "is_synthetic": true,
+  "call_date": "2026-09-29",
+  "timezone": "Africa/Kampala",
+  "conversation": {
+    "agent_id": "agent_eval",
+    "conversation_id": "conv_eval_d06",
+    "status": "done",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Habari! Hii ni simu ya kompyuta, si mtu. Mazungumzo haya yanarekodiwa ili kutunza rekodi ya shamba lako. Je, unakubali?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 0,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 9,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Tafadhali bonyeza au sema namba yako ya siri ya tarakimu nne.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 18,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "[PIN]",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 27,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Karibu Atuhaire. Bei ya kati ya FAQ Ntungamo kwa miezi kumi na miwili iliyopita ni shilingi elfu kumi na mbili kwa kilo, kutoka ripoti saba.",
+        "tool_calls": [
+          {
+            "request_id": "toolu_d06_4",
+            "tool_name": "identify_farmer",
+            "params_as_json": "{\"pin\": \"[PIN]\"}",
+            "tool_has_been_called": true,
+            "type": "webhook"
+          }
+        ],
+        "tool_results": [
+          {
+            "request_id": "toolu_d06_4",
+            "tool_name": "identify_farmer",
+            "result_value": "{\"status\": \"found\", \"identified_by\": \"pin\", \"farmer\": {\"first_name\": \"Atuhaire\", \"village\": \"Rwashamaire\", \"district\": \"Ntungamo\", \"region\": \"Western\", \"coffee_type\": \"robusta\", \"main_form\": \"faq\"}, \"village_price\": {\"form\": \"faq\", \"median_ugx_per_kg\": 12000, \"n_sales\": 7, \"level\": \"district\", \"area\": \"Ntungamo\", \"median_words_sw\": \"elfu kumi na mbili\"}}",
+            "is_error": false,
+            "tool_has_been_called": true
+          }
+        ],
+        "time_in_call_secs": 36,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Aa. Niliuza kilo [unclear] za FAQ jana, shilingi elfu kumi na moja na mia tano kwa kilo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 45,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Samahani, sikusikia vizuri. Ulisema kilo ngapi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 54,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Mia tatu. Alilipa cash.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 63,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Nimeandika: kilo mia tatu za FAQ, elfu kumi na moja na mia tano kwa kilo, jana, cash. Sahihi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 72,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, mia tatu.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 81,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Je, kuna tatizo kwenye kahawa yako?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 90,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Miti yangu inakauka tu, sijui kwa nini.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 99,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Majani yanageuka manjano kwanza, au yanakauka mara moja?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 108,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Sijui, sikuangalia vizuri.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 117,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Kuna mistari ya kahawia ndani ya shina ukikata gome?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 126,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Sijui.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 135,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Sina uhakika ni tatizo gani. Tafadhali muulize afisa ugani aje aangalie miti yako.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 144,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Sawa, asante.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 153,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Asante sana kwa kupiga simu. Kwaheri!",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 162,
+        "source_medium": null
+      }
+    ],
+    "metadata": {
+      "start_time_unix_secs": 1790666100,
+      "call_duration_secs": 171
+    }
+  },
+  "gold": {
+    "consent": "yes",
+    "entries": [
+      {
+        "kind": "sale",
+        "crop": "coffee",
+        "coffee_form": "faq",
+        "amount_kg": 300,
+        "price_total": 3450000,
+        "currency": "UGX",
+        "date_sold": "2026-09-28",
+        "buyer_type": null,
+        "buyer_name": null,
+        "paid_how": "cash",
+        "amount": 300,
+        "unit": "kg"
+      },
+      {
+        "kind": "observation",
+        "crop": "coffee",
+        "plot": null,
+        "symptom": "wilting",
+        "disease_detected": true,
+        "likely_disease": "not_sure"
+      }
+    ]
+  },
+  "free_text_alts": {},
+  "quote_possible": true,
+  "tags": [
+    "asr_noise",
+    "vague_symptom_not_sure",
+    "per_kg_only",
+    "yesterday",
+    "clean_sale"
+  ],
+  "labeler_notes": "",
+  "review": {
+    "verdict": "approved",
+    "rounds": 2,
+    "reviewer": "claude-opus-5-5"
+  }
+}

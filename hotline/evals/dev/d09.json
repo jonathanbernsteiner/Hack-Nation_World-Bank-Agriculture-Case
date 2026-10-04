@@ -1,0 +1,250 @@
+{
+  "id": "d09",
+  "is_synthetic": true,
+  "call_date": "2026-09-27",
+  "timezone": "Africa/Kampala",
+  "conversation": {
+    "agent_id": "agent_eval",
+    "conversation_id": "conv_eval_d09",
+    "status": "done",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Habari! Hii ni simu ya kompyuta, si mtu. Mazungumzo haya yanarekodiwa ili kutunza rekodi ya shamba lako. Je, unakubali?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 0,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 9,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Je, una namba ya siri?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 18,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Hapana, mimi ni mgeni.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 27,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Karibu. Tafadhali sema jina lako la kwanza, wilaya, kata na kijiji.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 36,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Naitwa Okello, wilaya ya Zombo, kata ya Paidha, kijiji cha Pamora.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 45,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Asante Okello. Nimekusajili. Namba yako ya siri ni [PIN]. Nasema tena: [PIN]. Bei ya kati ya parchment Zombo ni shilingi elfu sita na nusu kwa kilo, kutoka ripoti tano.",
+        "tool_calls": [
+          {
+            "request_id": "toolu_d09_6",
+            "tool_name": "register_farmer",
+            "params_as_json": "{\"first_name\": \"Okello\", \"district\": \"Zombo\", \"sub_county\": \"Paidha\", \"village\": \"Pamora\"}",
+            "tool_has_been_called": true,
+            "type": "webhook"
+          }
+        ],
+        "tool_results": [
+          {
+            "request_id": "toolu_d09_6",
+            "tool_name": "register_farmer",
+            "result_value": "{\"status\": \"registered\", \"pin\": \"[PIN]\", \"village_known\": false, \"farmer\": {\"first_name\": \"Okello\", \"district\": \"Zombo\", \"region\": \"Northern\", \"coffee_type\": \"arabica\"}, \"village_price\": {\"form\": \"parchment\", \"median_ugx_per_kg\": 6500, \"n_sales\": 5, \"level\": \"district\", \"area\": \"Zombo\", \"median_words_sw\": \"elfu sita na nusu\"}}",
+            "is_error": false,
+            "tool_has_been_called": true
+          }
+        ],
+        "time_in_call_secs": 54,
+        "source_medium": null
+      },
+      {
+        "role": "agent",
+        "message": "Ulikuza kahawa aina gani, na umeuza hivi karibuni?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 63,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Arabica. Niliuza kahawa yote wakati wa mavuno, kilo mia mbili na hamsini za parchment, shilingi elfu sita kwa kilo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 72,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Nimeandika: kilo mia mbili na hamsini za parchment, elfu sita kwa kilo, wakati wa mavuno. Sahihi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 81,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo. Mavuno ya mwaka huu yalikuwa kilo mia tatu kwa jumla.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 90,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Je, kuna tatizo kwenye kahawa?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 99,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, matawi yanakauka na kuna mashimo madogo sana kwenye matawi.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 108,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Mashimo yana unga mdogo wa mbao?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 117,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, unga mdogo mdogo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 126,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Huenda ni funza wa matawi ya kahawa. Kata na uchome matawi yaliyoathirika. Muulize afisa ugani kuhusu hatua zaidi.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 135,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Sawa. Pia majani ya miti ya zamani ni ya njano, na hatujawahi kuweka mbolea.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 144,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Huenda udongo umepungukiwa na rutuba. Weka mbolea ya mboji kwenye miti, na pima udongo ukiweza.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 153,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Asante.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 162,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Asante sana kwa kupiga simu. Kwaheri!",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 171,
+        "source_medium": null
+      }
+    ],
+    "metadata": {
+      "start_time_unix_secs": 1790493300,
+      "call_duration_secs": 180
+    }
+  },
+  "gold": {
+    "consent": "yes",
+    "entries": [
+      {
+        "kind": "sale",
+        "crop": "coffee",
+        "coffee_form": "parchment",
+        "amount_kg": 250,
+        "price_total": 1500000,
+        "currency": "UGX",
+        "date_sold": null,
+        "buyer_type": null,
+        "buyer_name": null,
+        "paid_how": null,
+        "amount": 250,
+        "unit": "kg"
+      },
+      {
+        "kind": "harvest",
+        "crop": "coffee",
+        "yield_amount": 300,
+        "unit": "kg"
+      },
+      {
+        "kind": "observation",
+        "crop": "coffee",
+        "plot": null,
+        "symptom": "pests",
+        "disease_detected": true,
+        "likely_disease": "black_coffee_twig_borer"
+      },
+      {
+        "kind": "observation",
+        "crop": "coffee",
+        "plot": null,
+        "symptom": "yellowing_leaves",
+        "disease_detected": false,
+        "likely_disease": "low_soil_fertility"
+      }
+    ]
+  },
+  "free_text_alts": {},
+  "quote_possible": true,
+  "tags": [
+    "registration",
+    "vague_date",
+    "harvest",
+    "problem_twig_borer",
+    "non_disease_cause",
+    "per_kg_only"
+  ],
+  "labeler_notes": "",
+  "review": {
+    "verdict": "approved",
+    "rounds": 2,
+    "reviewer": "claude-opus-5-5"
+  }
+}

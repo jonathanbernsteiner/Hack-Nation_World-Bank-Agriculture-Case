@@ -1,0 +1,277 @@
+{
+  "id": "d04",
+  "is_synthetic": true,
+  "call_date": "2026-10-03",
+  "timezone": "Africa/Kampala",
+  "conversation": {
+    "agent_id": "agent_eval",
+    "conversation_id": "conv_eval_d04",
+    "status": "done",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Habari! Hii ni simu ya kompyuta, si mtu. Mazungumzo haya yanarekodiwa ili kutunza rekodi ya shamba lako. Je, unakubali?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 0,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 9,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Tafadhali bonyeza au sema namba yako ya siri ya tarakimu nne.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 18,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "[PIN]",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 27,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Karibu Biira. Bei ya kati ya FAQ Kasese kwa miezi kumi na miwili iliyopita ni shilingi elfu tisa na mia tatu kwa kilo, kutoka ripoti kumi na mbili.",
+        "tool_calls": [
+          {
+            "request_id": "toolu_d04_4",
+            "tool_name": "identify_farmer",
+            "params_as_json": "{\"pin\": \"[PIN]\"}",
+            "tool_has_been_called": true,
+            "type": "webhook"
+          }
+        ],
+        "tool_results": [
+          {
+            "request_id": "toolu_d04_4",
+            "tool_name": "identify_farmer",
+            "result_value": "{\"status\": \"found\", \"identified_by\": \"pin\", \"farmer\": {\"first_name\": \"Biira\", \"village\": \"Kyarumba\", \"district\": \"Kasese\", \"region\": \"Western\", \"coffee_type\": \"robusta\", \"main_form\": \"faq\"}, \"village_price\": {\"form\": \"faq\", \"median_ugx_per_kg\": 9300, \"n_sales\": 12, \"level\": \"district\", \"area\": \"Kasese\", \"median_words_sw\": \"elfu tisa na mia tatu\"}}",
+            "is_error": false,
+            "tool_has_been_called": true
+          }
+        ],
+        "time_in_call_secs": 36,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Nina mauzo mawili. Jana niliuza magunia matano ya FAQ, kila gunia kilo hamsini, kwa shilingi elfu tisa na mia tano kwa kilo, kwa chama cha ushirika.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 45,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Ulilipwa vipi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 54,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Walinilipa kwa mobile money.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 63,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Na mauzo ya pili?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 72,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Mwezi uliopita niliuza magunia mawili ya kahawa kavu. Nilipata shilingi laki saba, cash.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 81,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Kila gunia lilikuwa na kilo ngapi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 90,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Sikupima, sijui kilo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 99,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Nimeandika mauzo mawili: jana magunia matano ya FAQ, kilo hamsini kila moja, elfu tisa na mia tano kwa kilo, kwa ushirika, mobile money. Na mwezi uliopita magunia mawili ya kiboko, jumla laki saba, cash. Sahihi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 108,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, sahihi.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 117,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Je, kuna tatizo kwenye kahawa?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 126,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Hapana.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 135,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Una swali lingine?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 144,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, mvua itanyesha wiki hii?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 153,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Naangalia utabiri.",
+        "tool_calls": [
+          {
+            "request_id": "toolu_d04_18",
+            "tool_name": "get_weather_forecast",
+            "params_as_json": "{\"district\": \"Kasese\"}",
+            "tool_has_been_called": true,
+            "type": "webhook"
+          }
+        ],
+        "tool_results": [
+          {
+            "request_id": "toolu_d04_18",
+            "tool_name": "get_weather_forecast",
+            "result_value": "{\"status\": \"ok\", \"place\": \"Kyarumba, Kasese\", \"source\": \"Open-Meteo (CC BY 4.0)\", \"days\": [{\"date\": \"2026-10-05\", \"rain_mm\": 12.3, \"rain_chance_pct\": 80, \"tmin_c\": 17, \"tmax_c\": 27}], \"summary\": {\"rain_days\": 4, \"total_rain_mm\": 38, \"heavy_rain_days\": 1}}",
+            "is_error": false,
+            "tool_has_been_called": true
+          }
+        ],
+        "time_in_call_secs": 162,
+        "source_medium": null
+      },
+      {
+        "role": "agent",
+        "message": "Mvua itanyesha siku nne wiki hii, na Jumatatu itakuwa nyingi zaidi.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 171,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Asante sana.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 180,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Asante sana kwa kupiga simu. Kwaheri!",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 189,
+        "source_medium": null
+      }
+    ],
+    "metadata": {
+      "start_time_unix_secs": 1791011700,
+      "call_duration_secs": 198
+    }
+  },
+  "gold": {
+    "consent": "yes",
+    "entries": [
+      {
+        "kind": "sale",
+        "crop": "coffee",
+        "coffee_form": "faq",
+        "amount_kg": 250,
+        "price_total": 2375000,
+        "currency": "UGX",
+        "date_sold": "2026-10-02",
+        "buyer_type": "cooperative",
+        "buyer_name": null,
+        "paid_how": "mobile_money",
+        "amount": 5,
+        "unit": "bag",
+        "kg_per_unit": 50
+      },
+      {
+        "kind": "sale",
+        "crop": "coffee",
+        "coffee_form": "kiboko",
+        "amount_kg": null,
+        "price_total": 700000,
+        "currency": "UGX",
+        "date_sold": "2026-09-15",
+        "buyer_type": null,
+        "buyer_name": null,
+        "paid_how": "cash",
+        "amount": 2,
+        "unit": "bag"
+      }
+    ]
+  },
+  "free_text_alts": {},
+  "quote_possible": true,
+  "tags": [
+    "two_sales",
+    "bags_with_kg",
+    "bags_no_kg",
+    "last_month",
+    "yesterday",
+    "weather",
+    "per_kg_only",
+    "total_only"
+  ],
+  "labeler_notes": "",
+  "review": {
+    "verdict": "approved",
+    "rounds": 2,
+    "reviewer": "claude-opus-5-5"
+  }
+}

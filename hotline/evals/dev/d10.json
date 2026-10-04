@@ -1,0 +1,224 @@
+{
+  "id": "d10",
+  "is_synthetic": true,
+  "call_date": "2026-09-25",
+  "timezone": "Africa/Kampala",
+  "conversation": {
+    "agent_id": "agent_eval",
+    "conversation_id": "conv_eval_d10",
+    "status": "done",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Habari! Hii ni simu ya kompyuta, si mtu. Mazungumzo haya yanarekodiwa ili kutunza rekodi ya shamba lako. Je, unakubali?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 0,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, nakubali.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 9,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Tafadhali bonyeza au sema namba yako ya siri ya tarakimu nne.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 18,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "[PIN]",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 27,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Karibu Tumwine. Bei ya kati ya kiboko Kyeizooba kwa miezi kumi na miwili iliyopita ni shilingi elfu tano na mia nne kwa kilo, kutoka ripoti kumi na tatu.",
+        "tool_calls": [
+          {
+            "request_id": "toolu_d10_4",
+            "tool_name": "identify_farmer",
+            "params_as_json": "{\"pin\": \"[PIN]\"}",
+            "tool_has_been_called": true,
+            "type": "webhook"
+          }
+        ],
+        "tool_results": [
+          {
+            "request_id": "toolu_d10_4",
+            "tool_name": "identify_farmer",
+            "result_value": "{\"status\": \"found\", \"identified_by\": \"pin\", \"farmer\": {\"first_name\": \"Tumwine\", \"village\": \"Kyeizooba\", \"district\": \"Bushenyi\", \"region\": \"Western\", \"coffee_type\": \"robusta\", \"main_form\": \"kiboko\"}, \"village_price\": {\"form\": \"kiboko\", \"median_ugx_per_kg\": 5400, \"n_sales\": 13, \"level\": \"sub_county\", \"area\": \"Kyeizooba\", \"median_words_sw\": \"elfu tano na mia nne\"}}",
+            "is_error": false,
+            "tool_has_been_called": true
+          }
+        ],
+        "time_in_call_secs": 36,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Jumanne niliuza kilo sitini za kiboko, nilipata mitwalo thelathini.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 45,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Umemuuzia nani, na ulilipwa vipi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 54,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Nilimuuzia Mzee Byaruhanga, alinilipa na mobile money.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 63,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Nimeandika: kilo sitini za kiboko, jumla shilingi laki tatu, Jumanne, kwa Byaruhanga, mobile money. Sahihi?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 72,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Yes, sahihi.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 81,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Je, kuna tatizo kwenye kahawa?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 90,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo. Kwenye shamba la juu, miti miwili imenyauka ghafla, majani yamegeuka kahawia na yamebaki kwenye mti.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 99,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Ukikata gome, kuna mistari ya kahawia ndani ya shina?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 108,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, kuna mistari ya kahawia.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 117,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Inaonekana ni ugonjwa wa kunyauka wa kahawa. Usipande mti mwingine kwenye shimo hilo, na mwite afisa ugani haraka.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 126,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Sawa, nitamwita leo.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 135,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Asante sana kwa kupiga simu. Kwaheri!",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 144,
+        "source_medium": null
+      }
+    ],
+    "metadata": {
+      "start_time_unix_secs": 1790320500,
+      "call_duration_secs": 153
+    }
+  },
+  "gold": {
+    "consent": "yes",
+    "entries": [
+      {
+        "kind": "sale",
+        "crop": "coffee",
+        "coffee_form": "kiboko",
+        "amount_kg": 60,
+        "price_total": 300000,
+        "currency": "UGX",
+        "date_sold": "2026-09-22",
+        "buyer_type": null,
+        "buyer_name": "Byaruhanga",
+        "paid_how": "mobile_money",
+        "amount": 60,
+        "unit": "kg"
+      },
+      {
+        "kind": "observation",
+        "crop": "coffee",
+        "plot": "upper garden",
+        "symptom": "wilting",
+        "disease_detected": true,
+        "likely_disease": "coffee_wilt_disease"
+      }
+    ]
+  },
+  "free_text_alts": {
+    "buyer_name": [
+      "Mzee Byaruhanga",
+      "Mr Byaruhanga"
+    ],
+    "plot": [
+      "upper plot",
+      "upper field",
+      "top garden",
+      "the upper garden",
+      "upper farm"
+    ]
+  },
+  "quote_possible": true,
+  "tags": [
+    "weekday_date",
+    "mitwalo",
+    "buyer_name",
+    "problem_wilt",
+    "code_switching",
+    "total_only"
+  ],
+  "labeler_notes": "",
+  "review": {
+    "verdict": "approved",
+    "rounds": 2,
+    "reviewer": "claude-opus-5-5"
+  }
+}

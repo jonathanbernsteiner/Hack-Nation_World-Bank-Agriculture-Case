@@ -1,0 +1,188 @@
+{
+  "id": "d08",
+  "is_synthetic": true,
+  "call_date": "2026-10-02",
+  "timezone": "Africa/Kampala",
+  "conversation": {
+    "agent_id": "agent_eval",
+    "conversation_id": "conv_eval_d08",
+    "status": "done",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Habari! Hii ni simu ya kompyuta, si mtu. Mazungumzo haya yanarekodiwa ili kutunza rekodi ya shamba lako. Je, unakubali?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 0,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Ndiyo, nakubali.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 9,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Asante. Tafadhali bonyeza au sema namba yako ya siri ya tarakimu nne.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 18,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Nimesahau namba yangu ya siri.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 27,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Hakuna shida. Tafadhali sema jina lako la kwanza, wilaya na kijiji.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 36,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Naitwa Namutebi, wilaya ya Mukono, kijiji cha Nakisunga.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 45,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Asante Namutebi. Bei ya kati ya kiboko Mukono kwa miezi kumi na miwili iliyopita ni shilingi elfu tano na mia mbili kwa kilo, kutoka ripoti kumi.",
+        "tool_calls": [
+          {
+            "request_id": "toolu_d08_6",
+            "tool_name": "find_farmer_by_location",
+            "params_as_json": "{\"first_name\": \"Namutebi\", \"district\": \"Mukono\", \"village\": \"Nakisunga\"}",
+            "tool_has_been_called": true,
+            "type": "webhook"
+          }
+        ],
+        "tool_results": [
+          {
+            "request_id": "toolu_d08_6",
+            "tool_name": "find_farmer_by_location",
+            "result_value": "{\"status\": \"found\", \"identified_by\": \"location\", \"farmer\": {\"first_name\": \"Namutebi\", \"village\": \"Nakisunga\", \"district\": \"Mukono\", \"region\": \"Central\", \"coffee_type\": \"robusta\", \"main_form\": \"kiboko\"}, \"village_price\": {\"form\": \"kiboko\", \"median_ugx_per_kg\": 5200, \"n_sales\": 10, \"level\": \"district\", \"area\": \"Mukono\", \"median_words_sw\": \"elfu tano na mia mbili\"}}",
+            "is_error": false,
+            "tool_has_been_called": true
+          }
+        ],
+        "time_in_call_secs": 54,
+        "source_medium": null
+      },
+      {
+        "role": "agent",
+        "message": "Je, umeuza kahawa hivi karibuni?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 63,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Sijauza bado.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 72,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Sawa. Je, kuna tatizo kwenye kahawa?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 81,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Hapana, ninataka tu kujua kuhusu mvua.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 90,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Naangalia utabiri.",
+        "tool_calls": [
+          {
+            "request_id": "toolu_d08_11",
+            "tool_name": "get_weather_forecast",
+            "params_as_json": "{\"district\": \"Mukono\"}",
+            "tool_has_been_called": true,
+            "type": "webhook"
+          }
+        ],
+        "tool_results": [
+          {
+            "request_id": "toolu_d08_11",
+            "tool_name": "get_weather_forecast",
+            "result_value": "{\"status\": \"ok\", \"place\": \"Nakisunga, Mukono\", \"source\": \"Open-Meteo (CC BY 4.0)\", \"days\": [{\"date\": \"2026-10-05\", \"rain_mm\": 9.0, \"rain_chance_pct\": 70, \"tmin_c\": 18, \"tmax_c\": 28}], \"summary\": {\"rain_days\": 3, \"total_rain_mm\": 25, \"heavy_rain_days\": 0}}",
+            "is_error": false,
+            "tool_has_been_called": true
+          }
+        ],
+        "time_in_call_secs": 99,
+        "source_medium": null
+      },
+      {
+        "role": "agent",
+        "message": "Katika siku saba zijazo mvua itanyesha siku tatu, jumla milimita ishirini na tano.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 108,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Asante. Nitasubiri mvua kisha nitapalilia.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 117,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Asante sana kwa kupiga simu. Kwaheri!",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 126,
+        "source_medium": null
+      }
+    ],
+    "metadata": {
+      "start_time_unix_secs": 1790925300,
+      "call_duration_secs": 135
+    }
+  },
+  "gold": {
+    "consent": "yes",
+    "entries": []
+  },
+  "free_text_alts": {},
+  "quote_possible": true,
+  "tags": [
+    "forgot_pin",
+    "weather_only",
+    "not_sold",
+    "no_sale_trap",
+    "activity_planned_only"
+  ],
+  "labeler_notes": "",
+  "review": {
+    "verdict": "approved",
+    "rounds": 2,
+    "reviewer": "claude-opus-5-5"
+  }
+}

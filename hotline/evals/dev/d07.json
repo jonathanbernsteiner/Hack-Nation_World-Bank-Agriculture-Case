@@ -1,0 +1,56 @@
+{
+  "id": "d07",
+  "is_synthetic": true,
+  "call_date": "2026-10-01",
+  "timezone": "Africa/Kampala",
+  "conversation": {
+    "agent_id": "agent_eval",
+    "conversation_id": "conv_eval_d07",
+    "status": "done",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Habari! Hii ni simu ya kompyuta, si mtu. Mazungumzo haya yanarekodiwa ili kutunza rekodi ya shamba lako. Je, unakubali?",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 0,
+        "source_medium": null
+      },
+      {
+        "role": "user",
+        "message": "Hapana, sitaki mazungumzo yarekodiwe. Nilikuwa nimeuza kilo mia moja jana, lakini sitaki kurekodiwa.",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 9,
+        "source_medium": "audio"
+      },
+      {
+        "role": "agent",
+        "message": "Sawa, hatutaendelea na rekodi. Asante kwa kupiga simu. Kwaheri!",
+        "tool_calls": [],
+        "tool_results": [],
+        "time_in_call_secs": 18,
+        "source_medium": null
+      }
+    ],
+    "metadata": {
+      "start_time_unix_secs": 1790838900,
+      "call_duration_secs": 27
+    }
+  },
+  "gold": {
+    "consent": "no",
+    "entries": []
+  },
+  "free_text_alts": {},
+  "quote_possible": false,
+  "tags": [
+    "declined_consent"
+  ],
+  "labeler_notes": "",
+  "review": {
+    "verdict": "approved",
+    "rounds": 2,
+    "reviewer": "claude-opus-5-5"
+  }
+}

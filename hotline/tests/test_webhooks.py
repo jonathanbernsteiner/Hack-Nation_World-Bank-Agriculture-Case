@@ -246,3 +246,158 @@ def test_db_in_call_row_keeps_farmer_and_identified_by(rollback_store):
     ).fetchone()
     assert row == (farmer_id, "pin", "received", True, True)
     assert _count(rollback_store) == 1
+
+
+# ---- review regression tests (PR #84, cycle 1) ----
+
+PIN = "4831"
+PIN_WORDS_SW = "nne, nane, tatu, moja"
+FARMER_PHRASE = "Nimeuza kilo hamsini"
+PIN_REDACTION_PENDING = pytest.mark.xfail(
+    strict=True,
+    reason="PR #84 review: PINs are stored unredacted until the #57 transcript helpers are used",
+)
+
+
+def _with_new_pin(data: dict) -> dict:
+    """A registration call: the tool answers with a new PIN, the agent reads it back in
+    Kiswahili words and digits, and the farmer types it."""
+    data = copy.deepcopy(data)
+    turns = data["transcript"]
+    turns[2]["tool_calls"] = [
+        {"request_id": "r1", "tool_name": "register_farmer", "type": "webhook",
+         "tool_has_been_called": True,
+         "params_as_json": json.dumps({"first_name": "Mukasa", "district": "Masaka"})}
+    ]
+    turns[2]["tool_results"] = [
+        {"request_id": "r1", "tool_name": "register_farmer", "is_error": False,
+         "tool_has_been_called": True,
+         "result_value": json.dumps({"status": "registered", "pin": PIN, "pin_digits_sw": PIN_WORDS_SW})}
+    ]
+    turns[4]["message"] = f"Namba yako mpya ya siri ni {PIN_WORDS_SW}. Narudia: {PIN}."
+    turns[5]["message"] = PIN
+    return data
+
+
+@PIN_REDACTION_PENDING
+def test_tool_results_never_store_a_new_pin():
+    params = webhooks._row_params("conv_x", _with_new_pin(_payload()["data"]))
+    assert PIN not in params["tool_results"]
+    assert PIN_WORDS_SW not in params["tool_results"]
+
+
+@PIN_REDACTION_PENDING
+@pytest.mark.parametrize("field", ["lines", "transcript_sw"])
+def test_stored_transcript_never_holds_a_pin(field):
+    params = webhooks._row_params("conv_x", _with_new_pin(_payload()["data"]))
+    assert PIN not in params[field]
+    assert PIN_WORDS_SW not in params[field]
+
+
+def test_signature_covers_the_raw_bytes_as_sent(client, stub_store):
+    """Pretty-printed non-ASCII bytes verify as sent; a re-serialising receiver would 401."""
+    event = _payload()
+    event["data"]["transcript"][1]["message"] = "Habari — nataka kuuza kahawa yangu."
+    body = json.dumps(event, indent=2, ensure_ascii=False).encode()
+    assert _post(client, body).json() == {"status": "stored"}
+
+
+def test_signature_of_equivalent_json_is_401(client, stub_store):
+    compact = json.dumps(_payload(), separators=(",", ":")).encode()
+    pretty = json.dumps(_payload(), indent=2).encode()
+    assert _post(client, pretty, header=_sign(compact)).status_code == 401
+    assert stub_store == {"store": [], "process": []}
+
+
+def test_signature_with_another_secret_is_401(client, stub_store):
+    body = json.dumps(_payload()).encode()
+    assert _post(client, body, header=_sign(body, secret="whsec_other")).status_code == 401
+    assert stub_store == {"store": [], "process": []}
+
+
+def test_timestamp_inside_the_30_minute_tolerance_is_accepted(client, stub_store):
+    body = json.dumps(_payload()).encode()
+    recent = _sign(body, timestamp=int(time.time()) - 29 * 60)
+    assert _post(client, body, header=recent).json() == {"status": "stored"}
+
+
+@pytest.mark.parametrize(
+    "body", [b"not json", json.dumps({"type": "post_call_audio"}).encode(), b"[]"]
+)
+def test_unsigned_requests_are_401_before_any_parsing(client, stub_store, body):
+    response = _post(client, body, header=None)
+    assert response.status_code == 401
+    assert stub_store == {"store": [], "process": []}
+
+
+def test_unset_secret_writes_nothing(monkeypatch, stub_store):
+    monkeypatch.setattr(
+        config, "settings", dataclasses.replace(config.settings, elevenlabs_webhook_secret=None)
+    )
+    assert _post(TestClient(app), _payload()).status_code == 401
+    assert stub_store == {"store": [], "process": []}
+
+
+def test_ignored_event_schedules_nothing(client, stub_store):
+    assert _post(client, _payload() | {"type": "post_call_audio"}).json() == {"status": "ignored"}
+    assert stub_store["process"] == []
+
+
+@pytest.mark.parametrize("header", ["auto", None])
+def test_request_path_never_logs_farmer_speech(client, stub_store, caplog, header):
+    with caplog.at_level(logging.DEBUG):
+        _post(client, _payload(), header=header)
+    assert FARMER_PHRASE in json.dumps(_payload(), ensure_ascii=False)
+    assert FARMER_PHRASE not in caplog.text
+
+
+def _insert_in_call_row(conn, pin_hash: str) -> int:
+    farmer_id = conn.execute(
+        "insert into farmers (name, pin_hash) values ('Test Farmer', %s) returning id", (pin_hash,)
+    ).fetchone()[0]
+    conn.execute(
+        "insert into calls (conversation_id, farmer_id, identified_by, status, source)"
+        " values (%s, %s, 'pin', 'in_call', 'elevenlabs')",
+        (CONV, farmer_id),
+    )
+    return farmer_id
+
+
+@pytest.mark.supabase
+def test_db_route_duplicate_delivery_end_to_end(client, rollback_store):
+    """Required test 5 through the HTTP route and the real SQL: stored, duplicate, one row."""
+    event = _payload()
+    event["data"]["conversation_id"] = CONV
+    assert _post(client, event).json() == {"status": "stored"}
+    assert _post(client, event).json() == {"status": "duplicate"}
+    assert _count(rollback_store) == 1
+
+
+@pytest.mark.supabase
+def test_db_retry_after_in_call_takeover_is_duplicate_and_keeps_farmer(rollback_store):
+    farmer_id = _insert_in_call_row(rollback_store, "hash-issue11-retry")
+    assert webhooks.store_call(rollback_store, CONV, _data()) == "stored"
+    assert webhooks.store_call(rollback_store, CONV, _data()) == "duplicate"
+    assert rollback_store.execute(
+        "select farmer_id, identified_by, status from calls where conversation_id = %s", (CONV,)
+    ).fetchone() == (farmer_id, "pin", "received")
+
+
+@pytest.mark.supabase
+def test_db_received_at_is_the_call_start(rollback_store):
+    data = _data()
+    started = data["metadata"]["start_time_unix_secs"]
+    webhooks.store_call(rollback_store, CONV, data)
+    assert rollback_store.execute(
+        "select received_at = to_timestamp(%s) from calls where conversation_id = %s", (started, CONV)
+    ).fetchone() == (True,)
+
+
+@pytest.mark.supabase
+def test_db_missing_start_time_falls_back_to_now(rollback_store):
+    data = _data()
+    del data["metadata"]["start_time_unix_secs"]
+    assert webhooks.store_call(rollback_store, CONV, data) == "stored"
+    assert rollback_store.execute(
+        "select received_at = now() from calls where conversation_id = %s", (CONV,)
+    ).fetchone() == (True,)

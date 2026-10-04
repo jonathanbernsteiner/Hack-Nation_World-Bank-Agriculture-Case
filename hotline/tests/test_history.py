@@ -14,11 +14,11 @@ BORER = "black_coffee_twig_borer"
 
 def sale(day, kg, total, form="kiboko", buyer="middleman", **extra):
     return {"id": 1, "entry_date": day, "kind": "sale", "crop": "coffee", "amount_kg": kg,
-            "price_total": total, "coffee_form": form, "buyer_type": buyer, **extra}
+            "price_total": total, "currency": "UGX", "coffee_form": form, "buyer_type": buyer, **extra}
 
 
 def harvest(day, kg):
-    return {"entry_date": day, "kind": "harvest", "crop": "coffee", "yield_amount": kg}
+    return {"entry_date": day, "kind": "harvest", "crop": "coffee", "yield_amount": kg, "unit": "kg"}
 
 
 def obs(farmer, day=date(2026, 9, 20), likely=BORER, symptom="wilting", parish="Kitovu",
@@ -332,14 +332,12 @@ def test_history_sql_resolves_dates_in_kampala_time():
     assert "coalesce(e.date_sold, (c.received_at at time zone 'Africa/Kampala')::date)" in sql
 
 
-@pytest.mark.xfail(strict=True, reason="review cycle 1, finding 1: early October drops the older coffee year")
 def test_early_october_still_shows_two_coffee_years():
     # Demo day is 2026-10-04; the synthetic history covers 2024/25 and 2025/26 and nothing yet in 2026/27.
     rows = [sale(date(2024, 11, 5), 300, 1_500_000), sale(date(2025, 11, 5), 400, 2_400_000)]
     assert [y["year"] for y in coffee_years(rows, date(2026, 10, 3))] == ["2025/26", "2024/25"]
 
 
-@pytest.mark.xfail(strict=True, reason="review cycle 1, finding 2: harvests in bags are summed as kg")
 def test_harvest_in_bags_is_not_counted_as_kg():
     rows = [harvest(date(2025, 11, 5), 1180) | {"unit": "kg"},
             harvest(date(2026, 5, 5), 12) | {"unit": "bag"}]
@@ -350,7 +348,6 @@ def test_harvest_in_bags_is_not_counted_as_kg():
     assert "e.unit" in conn.queries[0][0]
 
 
-@pytest.mark.xfail(strict=True, reason="review cycle 1, finding 3: location-login entries are review-queue rows")
 def test_location_login_entries_excluded_from_history_and_nearby():
     conn = FakeConn([], [])
     history.load_history(conn, 42, AS_OF)
@@ -358,7 +355,6 @@ def test_location_login_entries_excluded_from_history_and_nearby():
     assert all("identified_by" in sql for sql, _ in conn.queries)
 
 
-@pytest.mark.xfail(strict=True, reason="review cycle 1, finding 4: non-UGX sales feed ugx_per_kg")
 def test_non_ugx_sale_does_not_feed_ugx_prices():
     usd = sale(date(2025, 12, 1), 100, 500, currency="USD")
     (year,) = coffee_years([usd], AS_OF)

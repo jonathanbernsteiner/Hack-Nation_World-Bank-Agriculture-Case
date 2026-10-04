@@ -30,11 +30,13 @@ Row = dict[str, Any]
 
 # The date rule matches the coffee_sale_prices view (#42).
 _ENTRY_DATE_SQL = "coalesce(e.date_sold, (c.received_at at time zone 'Africa/Kampala')::date)"
-_REVIEWED_SQL = "e.quote_verified is not false and coalesce(e.confidence, 1) >= 0.6"
+# Location-login calls go to the review queue (spec 6, 7.9), so they stay out of history.
+_REVIEWED_SQL = ("e.quote_verified is not false and coalesce(e.confidence, 1) >= 0.6 "
+                 "and c.identified_by is distinct from 'location'")
 
 _HISTORY_SQL = f"""
 select e.id, {_ENTRY_DATE_SQL} as entry_date, e.kind, e.crop, e.amount_kg, e.price_total,
-       e.coffee_form, e.buyer_type, e.yield_amount, e.symptom, e.likely_disease
+       e.coffee_form, e.buyer_type, e.yield_amount, e.unit, e.currency, e.symptom, e.likely_disease
 from public.entries e join public.calls c on c.id = e.call_id
 where e.farmer_id = %(farmer_id)s
   and {_REVIEWED_SQL}
@@ -72,16 +74,21 @@ def _round_price(value: float) -> int:
     return int(round(value / PRICE_ROUNDING_UGX) * PRICE_ROUNDING_UGX)
 
 
+def _is_ugx(row: Row) -> bool:
+    return row.get("currency") == "UGX"
+
+
 def _positive(value: Any) -> float | None:
     return float(value) if value is not None and float(value) > 0 else None
 
 
 def _year_summary(start: int, rows: list[Row]) -> Row:
     harvest_kg = sum(float(r["yield_amount"]) for r in rows
-                     if r["kind"] == "harvest" and r.get("yield_amount") is not None)
+                     if r["kind"] == "harvest" and r.get("unit") == "kg"
+                     and r.get("yield_amount") is not None)
     kg_sales = [r for r in rows if r["kind"] == "sale" and _positive(r.get("amount_kg"))]
     sold_kg = sum(float(r["amount_kg"]) for r in kg_sales)
-    priced = [r for r in kg_sales if r.get("price_total") is not None]
+    priced = [r for r in kg_sales if r.get("price_total") is not None and _is_ugx(r)]
     priced_kg = sum(float(r["amount_kg"]) for r in priced)
     avg = _round_price(sum(float(r["price_total"]) for r in priced) / priced_kg) if priced_kg else None
     return {
@@ -93,15 +100,16 @@ def _year_summary(start: int, rows: list[Row]) -> Row:
 
 
 def coffee_years(rows: list[Row], as_of: date) -> list[Row]:
-    """The 2 most recent coffee years (Oct-Sep) that have data, newest first."""
+    """The 2 newest coffee years (Oct-Sep) with data among current, current-1 and current-2."""
     current = _coffee_year_start(as_of)
-    starts = [current - offset for offset in range(COFFEE_YEARS_SHOWN)]
+    starts = [current - offset for offset in range(COFFEE_YEARS_SHOWN + 1)]
     by_year: dict[int, list[Row]] = defaultdict(list)
     for row in rows:
         start = _coffee_year_start(row["entry_date"])
         if _is_coffee(row) and start in starts and row["entry_date"] <= as_of:
             by_year[start].append(row)
-    return [_year_summary(start, by_year[start]) for start in starts if by_year[start]]
+    with_data = [start for start in starts if by_year[start]]
+    return [_year_summary(start, by_year[start]) for start in with_data[:COFFEE_YEARS_SHOWN]]
 
 
 def _newest_first(rows: list[Row]) -> list[Row]:
@@ -118,7 +126,7 @@ def last_sales(rows: list[Row], n: int = DEFAULT_LIST_LENGTH) -> list[Row]:
             "date": r["entry_date"].isoformat(),
             "form": r.get("coffee_form"),
             "kg": round(kg) if kg else None,
-            "ugx_per_kg": _round_price(float(price) / kg) if kg and price is not None else None,
+            "ugx_per_kg": _round_price(float(price) / kg) if kg and price is not None and _is_ugx(r) else None,
             "buyer": r.get("buyer_type"),  # type only, never buyer_name
         })
     return out

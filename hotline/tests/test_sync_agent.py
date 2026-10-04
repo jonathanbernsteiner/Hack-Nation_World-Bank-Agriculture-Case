@@ -79,11 +79,9 @@ def merge(base, patch):
 
 def test_tools_json_matches_spec_names_and_wiring():
     configs = sa.build_tool_configs(TOOLS, sa.PRODUCTION_BASE_URL, "sec_1")
-    assert [c["name"] for c in configs] == ["identify_farmer", "find_farmer_by_location", "register_farmer", "get_weather_forecast"]
+    assert [c["name"] for c in configs] == ["identify_farmer", "get_weather_forecast"]
     fields = {
         "identify_farmer": {"pin"},
-        "find_farmer_by_location": {"first_name", "district", "village", "parish", "sub_county"},
-        "register_farmer": {"first_name", "district", "sub_county", "parish", "village", "coffee_type"},
         "get_weather_forecast": {"district"},
     }
     for config in configs:
@@ -146,9 +144,9 @@ def test_dry_client_refuses_writes():
 def test_apply_then_second_run_makes_no_posts():
     api = FakeApi()
     log = sa.sync(api.client(dry_run=False), ENV, apply=True)
-    assert len(api.tools) == 4 and api.webhooks[0]["retry_enabled"] is True
+    assert len(api.tools) == 2 and api.webhooks[0]["retry_enabled"] is True
     patch = api.agent["conversation_config"]["agent"]
-    assert patch["language"] == "sw" and patch["prompt"]["llm"] == "claude-sonnet-5-5"
+    assert patch["language"] == "en" and patch["prompt"]["llm"] == "claude-sonnet-5-5"
     assert api.agent["conversation_config"]["conversation"]["dtmf_input_settings"]["redact_input"] is True
     assert api.agent["platform_settings"]["workspace_overrides"]["webhooks"]["events"] == ["transcript"]
     assert SECRET_VALUE not in "\n".join(log)
@@ -156,7 +154,7 @@ def test_apply_then_second_run_makes_no_posts():
     sa.sync(api.client(dry_run=False), ENV, apply=True)
     assert "POST" not in {m for m, _ in api.requests}
     assert ("PATCH", "/v1/convai/agents/agent_1") not in api.requests
-    assert len(api.tools) == 4
+    assert len(api.tools) == 2
 
 
 def test_missing_env_fails():
@@ -179,7 +177,7 @@ def test_apply_pushes_repo_prompt_first_message_tools_and_webhook():
     agent = api.agent["conversation_config"]["agent"]
     expected_prompt = sa.build_prompt((HOTLINE_DIR / "agent" / "prompt.md").read_text(), sa.KNOWLEDGE_PATH.read_text())
     assert agent["prompt"]["prompt"] == expected_prompt
-    assert agent["first_message"] == (HOTLINE_DIR / "agent" / "first_message_sw.txt").read_text().strip()
+    assert agent["first_message"] == (HOTLINE_DIR / "agent" / "first_message_en.txt").read_text().strip()
     assert agent["prompt"]["tool_ids"] == [t["id"] for t in api.tools]
     assert api.agent["platform_settings"]["workspace_overrides"]["webhooks"]["post_call_webhook_id"] == "wh_1"
 

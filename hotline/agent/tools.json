@@ -24,55 +24,6 @@
     },
     {
       "type": "webhook",
-      "name": "find_farmer_by_location",
-      "description": "Find a caller who forgot their PIN by first name, district and village. Returns status found, ambiguous (with ask) or not_found.",
-      "response_timeout_secs": 10,
-      "api_schema": {
-        "url": "__BASE_URL__/api/tools/find_farmer_by_location",
-        "method": "POST",
-        "request_headers": {"X-Hotline-Tool-Secret": {"secret_id": "__SECRET_ID__"}},
-        "request_body_schema": {
-          "type": "object",
-          "required": ["first_name", "district", "village"],
-          "properties": {
-            "first_name": {"type": "string", "description": "The caller's first name."},
-            "district": {"type": "string", "description": "The caller's district."},
-            "village": {"type": "string", "description": "The caller's village."},
-            "parish": {"type": "string", "description": "The caller's parish, only if the tool asked for it."},
-            "sub_county": {"type": "string", "description": "The caller's sub-county, only if known."},
-            "conversation_id": {"type": "string", "dynamic_variable": "system__conversation_id"},
-            "call_sid": {"type": "string", "dynamic_variable": "system__call_sid"}
-          }
-        }
-      }
-    },
-    {
-      "type": "webhook",
-      "name": "register_farmer",
-      "description": "Register a new caller and get a new four-digit PIN. Returns status registered (with pin and pin_digits_sw), possible_duplicate or need_district.",
-      "response_timeout_secs": 10,
-      "api_schema": {
-        "url": "__BASE_URL__/api/tools/register_farmer",
-        "method": "POST",
-        "request_headers": {"X-Hotline-Tool-Secret": {"secret_id": "__SECRET_ID__"}},
-        "request_body_schema": {
-          "type": "object",
-          "required": ["first_name", "district", "village"],
-          "properties": {
-            "first_name": {"type": "string", "description": "The caller's first name."},
-            "district": {"type": "string", "description": "The caller's district."},
-            "sub_county": {"type": "string", "description": "The caller's sub-county."},
-            "parish": {"type": "string", "description": "The caller's parish."},
-            "village": {"type": "string", "description": "The caller's village."},
-            "coffee_type": {"type": "string", "description": "robusta or arabica, if the caller says."},
-            "conversation_id": {"type": "string", "dynamic_variable": "system__conversation_id"},
-            "call_sid": {"type": "string", "dynamic_variable": "system__call_sid"}
-          }
-        }
-      }
-    },
-    {
-      "type": "webhook",
       "name": "get_weather_forecast",
       "description": "Get the 7-day rain and temperature forecast for the caller's district. Returns status ok, unknown_location or unavailable.",
       "response_timeout_secs": 10,

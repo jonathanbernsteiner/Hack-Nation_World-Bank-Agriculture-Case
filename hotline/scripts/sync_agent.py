@@ -79,6 +79,10 @@ def desired_agent_patch(
             "conversation": {"dtmf_input_settings": agent_cfg["dtmf_input_settings"]},
         }
     }
+    if "temperature" in agent_cfg:
+        patch["conversation_config"]["agent"]["prompt"]["temperature"] = agent_cfg["temperature"]
+    if "tts" in agent_cfg:
+        patch["conversation_config"]["tts"] = agent_cfg["tts"]
     if webhook_id:
         patch["platform_settings"] = {
             "workspace_overrides": {
@@ -205,7 +209,7 @@ def sync(client: Client, env: dict, apply: bool, attach_webhook: bool = True) ->
     tools_spec = json.loads((AGENT_DIR / "tools.json").read_text(encoding="utf-8"))
     agent_cfg = json.loads((AGENT_DIR / "agent.json").read_text(encoding="utf-8"))
     prompt = build_prompt((AGENT_DIR / "prompt.md").read_text(encoding="utf-8"), KNOWLEDGE_PATH.read_text(encoding="utf-8"))
-    first_message = (AGENT_DIR / "first_message_sw.txt").read_text(encoding="utf-8").strip()
+    first_message = (AGENT_DIR / "first_message_en.txt").read_text(encoding="utf-8").strip()
 
     log = [f"mode: {'APPLY' if apply else 'dry-run'}", f"tools base url: {base_url}", f"prompt: {len(prompt)} chars (knowledge inlined once)"]
     secret_id = plan_secret(client, tools_spec["secret_name"], env["HOTLINE_TOOL_SECRET"], apply, log)

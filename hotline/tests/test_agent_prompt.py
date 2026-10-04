@@ -88,3 +88,14 @@ def test_prompt_handles_every_tool_status(prompt, status):
 
 def test_prices_come_from_word_fields(prompt):
     assert "median_words_sw" in prompt and "pin_digits_sw" in prompt
+
+
+def test_first_message_offers_keypad_and_spoken_pin(first_message):
+    # Spec §8: "press or say your four-digit PIN". Keypad delivery on the imported
+    # Twilio number is unverified (#39), so the spoken fallback must be announced.
+    assert "bonyeza" in first_message and "taja" in first_message
+
+
+def test_sample_lines_carry_no_canned_money_figures(prompt):
+    # Guardrail 6: a concrete figure in a sample line can be parroted when a tool fails.
+    assert re.findall(r"\b(?:elfu|laki|milioni)\b", prompt, flags=re.IGNORECASE) == []

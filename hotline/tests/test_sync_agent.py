@@ -171,3 +171,24 @@ def test_main_returns_nonzero_on_bad_url(monkeypatch, capsys):
     monkeypatch.setenv("PUBLIC_BASE_URL", "http://localhost:8000")
     assert sa.main([]) == sa.EXIT_USAGE
     assert SECRET_VALUE not in capsys.readouterr().out
+
+
+def test_apply_pushes_repo_prompt_first_message_tools_and_webhook():
+    api = FakeApi()
+    sa.sync(api.client(dry_run=False), ENV, apply=True)
+    agent = api.agent["conversation_config"]["agent"]
+    expected_prompt = sa.build_prompt((HOTLINE_DIR / "agent" / "prompt.md").read_text(), sa.KNOWLEDGE_PATH.read_text())
+    assert agent["prompt"]["prompt"] == expected_prompt
+    assert agent["first_message"] == (HOTLINE_DIR / "agent" / "first_message_sw.txt").read_text().strip()
+    assert agent["prompt"]["tool_ids"] == [t["id"] for t in api.tools]
+    assert api.agent["platform_settings"]["workspace_overrides"]["webhooks"]["post_call_webhook_id"] == "wh_1"
+
+
+def test_no_webhook_skips_attach_and_retry_patch():
+    api = FakeApi()
+    env = {k: v for k, v in ENV.items() if k != "ELEVENLABS_WEBHOOK_ID"}
+    log = sa.sync(api.client(dry_run=False), env, apply=True, attach_webhook=False)
+    assert "platform_settings" not in api.agent
+    assert not any(path.startswith("/v1/workspace/webhooks") for _, path in api.requests)
+    assert api.webhooks[0]["retry_enabled"] is False
+    assert "webhook: skipped (--no-webhook)" in log

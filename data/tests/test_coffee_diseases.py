@@ -492,5 +492,70 @@ class ReadmeParsingSelfTest(unittest.TestCase):
             readme_number(self, r"(\d+) farmer-style phrases", "32 phrases, reworded")
 
 
+# --- Uganda rows (#45) ---------------------------------------------------------
+UGANDA_IDS = {
+    "black_coffee_twig_borer": "pest",
+    "low_soil_fertility": "disorder",
+    "old_unpruned_trees": "disorder",
+    "weed_competition": "disorder",
+    "poor_harvest_practice": "disorder",
+}
+
+
+class UgandaRowsTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.rows = load_rows()
+        cls.by_id = {row["id"]: row for row in cls.rows}
+        _, cls.eval_rows = load_eval_rows()
+
+    def test_new_ids_exist_with_the_right_kind_and_not_sure_stays_last(self):
+        for row_id, kind in UGANDA_IDS.items():
+            with self.subTest(row=row_id):
+                self.assertEqual(self.by_id[row_id]["kind"], kind)
+                self.assertFalse(self.by_id[row_id]["in_bracol"])
+        self.assertEqual(self.rows[-1]["id"], FALLBACK_ID)
+
+    def test_twig_borer_signs_urgency_and_look_alikes(self):
+        row = self.by_id["black_coffee_twig_borer"]
+        self.assertEqual(row["scientific_name"], "Xylosandrus compactus")
+        self.assertEqual(row["urgency"], "soon")
+        self.assertIn("underside", row["tell_apart_question"])
+        self.assertIn("below the hole", row["farmer_advice_en"])
+        self.assertTrue({"coffee_wilt_disease", "overbearing_dieback"} <= set(row["look_alikes"]))
+        self.assertIn("black_coffee_twig_borer", self.by_id["coffee_wilt_disease"]["look_alikes"])
+        self.assertIn("black_coffee_twig_borer", self.by_id["overbearing_dieback"]["look_alikes"])
+
+    def test_back_links_are_reciprocal(self):
+        pairs = [
+            ("overbearing_dieback", "old_unpruned_trees"),
+            ("nitrogen_deficiency", "low_soil_fertility"),
+            ("brown_eye_spot", "bacterial_blight"),
+            ("coffee_root_mealybug", "armillaria_root_rot"),
+        ]
+        for a, b in pairs:
+            with self.subTest(a=a, b=b):
+                self.assertIn(b, self.by_id[a]["look_alikes"])
+        for a, b in (("bacterial_blight", "brown_eye_spot"), ("armillaria_root_rot", "coffee_root_mealybug")):
+            with self.subTest(a=a, b=b):
+                self.assertIn(b, self.by_id[a]["look_alikes"])
+
+    def test_practice_rows_are_routine_and_name_no_swahili_without_a_source(self):
+        for row_id in UGANDA_IDS:
+            row = self.by_id[row_id]
+            with self.subTest(row=row_id):
+                self.assertIsNone(row["swahili_name"])
+                if row_id != "black_coffee_twig_borer":
+                    self.assertEqual(row["urgency"], "routine")
+
+    def test_eval_phrases_cover_every_new_id(self):
+        covered = {row["expected_id"] for row in self.eval_rows}
+        self.assertTrue(set(UGANDA_IDS) <= covered)
+        new_rows = [row for row in self.eval_rows if row["expected_id"] in UGANDA_IDS]
+        self.assertGreaterEqual(len(new_rows), 10)
+        self.assertTrue(any("wilting" == r["symptom"] and r["not_sure_ok"] == "true" for r in self.eval_rows
+                            if r["expected_id"] in UGANDA_IDS or "borer" in r["note"]))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -224,7 +224,8 @@
       "drought_stress",
       "armillaria_root_rot",
       "fusarium_bark_disease",
-      "white_stem_borer"
+      "white_stem_borer",
+      "black_coffee_twig_borer"
     ],
     "tell_apart_question": "If you scrape away a little bark near the bottom of the stem, is the wood underneath stained blue-black?",
     "conditions": "Can strike trees of any age. A soil-borne fungus that enters through roots and through wounds near the base of the stem, for example from hoes, machetes or livestock. Spread by wind, rain splash, flood or runoff water, moving soil, seedlings, husks and firewood from sick trees, and dirty tools. Spore-bearing bodies form on the bark towards the end of the rainy season. In East Africa the strain on arabica is found in Ethiopia; the strain in Uganda, DRC and Tanzania attacks robusta only.",
@@ -382,7 +383,8 @@
       "coffee_leaf_rust",
       "phoma_leaf_blight",
       "coffee_berry_disease",
-      "nitrogen_deficiency"
+      "nitrogen_deficiency",
+      "bacterial_blight"
     ],
     "tell_apart_question": "Do the spots have a pale grey or whitish centre, like an eye?",
     "conditions": "Warm, humid conditions; spores spread by wind and rain splash, and fallen leaves are a key source of infection at the end of the dry season. Worse on stressed plants: low nitrogen and potassium, too little shade, full sun, compacted soil, drought or poor management. More common at lower altitudes and in nurseries. Berry blotch is linked to sun scorch.",
@@ -1324,7 +1326,8 @@
       "drought_stress",
       "coffee_wilt_disease",
       "coffee_nematodes",
-      "white_stem_borer"
+      "white_stem_borer",
+      "armillaria_root_rot"
     ],
     "tell_apart_question": "If you scrape away the soil at the base of a sick tree, do you see white insects or a crusty fungus coating the roots?",
     "conditions": "Worse in dry conditions. Old, weak, poorly fed or drought-stressed trees are most at risk, as are poorly established young coffee and soils low in potassium and calcium with pH below 5.0. Long heavy rain reduces numbers.",
@@ -1631,6 +1634,67 @@
     ]
   },
   {
+    "id": "black_coffee_twig_borer",
+    "kind": "pest",
+    "common_name": "Black coffee twig borer (BCTB), ambrosia beetle",
+    "scientific_name": "Xylosandrus compactus",
+    "swahili_name": null,
+    "plant_parts": [
+      "stem"
+    ],
+    "symptom_categories": [
+      "wilting",
+      "pests"
+    ],
+    "farmer_words": [
+      "small branches are drying and turning black",
+      "the leaves on one branch are wilting",
+      "I see a tiny hole under the dry branch",
+      "the branches that carry the berries are dying",
+      "my robusta branches dry up one by one"
+    ],
+    "key_signs": [
+      "A tiny pin-sized entry hole on the underside of a twig or thin branch",
+      "The twig wilts and dries beyond the hole, so the leaves and berries on it die",
+      "It attacks the crop-bearing primary branches, and thin soft stems, of robusta coffee",
+      "Damage is worse in the dry season, under shade trees, and in crowded or unpruned coffee"
+    ],
+    "look_alikes": [
+      "coffee_wilt_disease",
+      "overbearing_dieback"
+    ],
+    "tell_apart_question": "Is there a pin-sized hole on the underside of the drying twig?",
+    "conditions": "Mainly robusta, in all robusta-growing areas of Uganda. All ages of coffee are attacked; young coffee of 2-3 years was hit hardest in a 2022 survey. The beetle breeds more under shade, in crowded coffee and in coffee that is not pruned or de-suckered, and it also lives in many other trees, for example musizi, musambya, cocoa and avocado.",
+    "urgency": "soon",
+    "farmer_advice_en": "Cut the infested twig off below the hole, chop it up and burn it as soon as you see it, so the beetles inside cannot fly on to other branches. Look over your coffee regularly for more dry twigs with a hole underneath. Prune and de-sucker so the bush is open to light and air, thin heavy shade, and do not plant musizi or musambya as shade trees. Feed the soil with manure or compost, because weak, hungry trees are attacked more. The beetles fly between farms, so ask your neighbours to do the same. If many branches are drying, or you cannot find a hole, call the extension officer.",
+    "officer_note_en": "UCDA Robusta Handbook: female beetle bores into the underside of twigs and lays eggs; the gallery blocks water and nutrient flow; up to 50% yield loss if not controlled; the male stays in the gallery; life cycle about one month; females disperse at least 200 m and can reproduce without mating, so a few females can start an infestation; moving infested plant parts spreads it over long distances. Control: cut, chop and burn infested parts; avoid musizi, musambya, avocado and Albizia chinensis as shade or intercrop; use pest-free seedlings from certified nurseries only; avoid bushiness by correct spacing, pruning and de-suckering; improve soil fertility and moisture (highest infestation where phosphorus is limiting); NaCORI ethanol-baited bottle trap, which needs the whole community to use it; biological agents (Beauveria bassiana, Metarhizium anisopliae, predator ants). The handbook also describes a chemical option after cutting and burning, for heavy infestation only: take product and rate from the current national registered list, not from this file. NaCORI 2022 survey (Kyalo et al. 2024): on average 9.4% of primary branches infested, highest in Eastern (17.2%) and Western (12.4%) regions; BCTB and coffee wilt disease are the two main biological constraints to robusta in Uganda. Sources do not say how far below the hole to cut: ask the officer to demonstrate.",
+    "escalate_when": "Many branches are drying, the twigs are drying but you cannot find a hole (it may be coffee wilt disease), or the whole tree is wilting.",
+    "regions": [
+      "Uganda (all robusta-growing areas; highest damage in Busoga/Eastern and Western regions)"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Robusta Coffee Handbook (6.1 Black Coffee Twig Borer; 3.1.4 shade trees)",
+        "url": "https://www.ugandacoffee.go.ug/file-download/download/public/42",
+        "year": 2019
+      },
+      {
+        "publisher": "Coffee Department, Ministry of Agriculture (formerly UCDA)",
+        "title": "Manage the Black Coffee Twig Borer with these easy steps",
+        "url": "https://www.ugandacoffee.go.ug/node/580",
+        "year": null
+      },
+      {
+        "publisher": "National Coffee Research Institute (NaCORI), NARO; Journal of Agricultural Science",
+        "title": "Incidence, Damage and Management of the Major Pests and Diseases of Robusta Coffee in Uganda (Kyalo et al., abstract)",
+        "url": "https://researchspace.naro.go.ug/items/033ab680-f857-464c-b3f7-d03884dd9d77/full",
+        "year": 2024
+      }
+    ]
+  },
+  {
     "id": "nitrogen_deficiency",
     "kind": "disorder",
     "common_name": "Nitrogen deficiency",
@@ -1661,7 +1725,8 @@
       "coffee_leaf_rust",
       "coffee_wilt_disease",
       "armillaria_root_rot",
-      "coffee_mealybug"
+      "coffee_mealybug",
+      "low_soil_fertility"
     ],
     "tell_apart_question": "Is the whole leaf evenly pale or yellow, with no orange powder on its underside?",
     "conditions": "poor or exhausted soil (e.g. one weak row); heavy crop year, when developing berries draw on the tree's nitrogen; years of harvesting without returning manure, compost or fertiliser; wet spells or porous soils where nutrients leach",
@@ -1722,7 +1787,8 @@
     ],
     "look_alikes": [
       "coffee_leaf_rust",
-      "brown_eye_spot"
+      "brown_eye_spot",
+      "low_soil_fertility"
     ],
     "tell_apart_question": "On the older leaves, do the veins stay green while the leaf between them turns yellow?",
     "conditions": "poor or very acidic soil; heavy use of potash (excess K blocks Mg uptake; also excess Na, Mn); long-term mulching (UCDA: mulches may reduce Zn and Mg availability)",
@@ -1786,7 +1852,8 @@
     "look_alikes": [
       "brown_eye_spot",
       "bacterial_blight",
-      "coffee_lace_bug"
+      "coffee_lace_bug",
+      "low_soil_fertility"
     ],
     "tell_apart_question": "Do the older leaves die from the tip and edges inwards while the strip along the main vein stays green?",
     "conditions": "poor or leached soil; heavy crop (K is needed for berry filling and ripening); soils low in K and Ca with pH below 5 (CABI: such trees are also more prone to mealybug)",
@@ -2070,7 +2137,9 @@
       "coffee_leaf_rust",
       "coffee_wilt_disease",
       "coffee_berry_disease",
-      "bacterial_blight"
+      "bacterial_blight",
+      "black_coffee_twig_borer",
+      "old_unpruned_trees"
     ],
     "tell_apart_question": "Did this tree carry a much heavier crop than usual this season?",
     "conditions": "after a big crop (the 'on' year of biennial bearing); unshaded trees in full sun; low nitrogen or poor soil fertility; drought during fruit filling; heavy leaf loss from coffee leaf rust",
@@ -2177,6 +2246,223 @@
         "title": "Bacterial halo blight of coffee crop: aggressiveness and genetic diversity of strains (Maciel et al.)",
         "url": "https://www.redalyc.org/journal/908/90859320009/html/",
         "year": 2018
+      }
+    ]
+  },
+  {
+    "id": "low_soil_fertility",
+    "kind": "disorder",
+    "common_name": "Low soil fertility (hungry soil, no manure or fertiliser for years)",
+    "scientific_name": null,
+    "swahili_name": null,
+    "plant_parts": [
+      "leaves",
+      "whole_tree"
+    ],
+    "symptom_categories": [
+      "yellowing_leaves",
+      "stunted_growth",
+      "other"
+    ],
+    "farmer_words": [
+      "the whole field is pale and the leaves are small",
+      "the coffee gives less every year",
+      "I have not put manure for many years",
+      "the soil is tired",
+      "the trees look weak and hungry"
+    ],
+    "key_signs": [
+      "All trees in the field look evenly pale or yellow, not just one tree or one spot",
+      "Small leaves, weak growth and low yield that gets worse over the years",
+      "No manure, compost or fertiliser has been given for years, and the harvest takes nutrients out of the soil every season"
+    ],
+    "look_alikes": [
+      "nitrogen_deficiency",
+      "magnesium_deficiency",
+      "potassium_deficiency",
+      "weed_competition"
+    ],
+    "tell_apart_question": "Have you put manure, compost or fertiliser on these trees in the last two or three years?",
+    "conditions": "Old fields that have been harvested for years without manure, compost or fertiliser; bare soil without mulch; weedy fields where weeds take the nutrients.",
+    "urgency": "routine",
+    "farmer_advice_en": "Feed the soil: put well-rotted manure or compost around the trees every year, and spread mulch of dry grass, maize stalks or bean haulms under them, keeping the mulch about 30 cm away from the stem. Ask the extension officer how to take a soil test, so you know what your soil is missing before you buy anything. If the trees stay pale after feeding, call the extension officer.",
+    "officer_note_en": "UCDA Robusta Handbook: without added nutrients in some form, yields keep declining as nutrients leave with the harvested beans; soil and leaf analysis at least once a year is advised, through extension workers; animal manure and compost are key organic sources (poultry manure is the richest in nitrogen and phosphate; cattle manure should be composted under cover); maize-stalk mulch supplies potassium; the handbook treats poor fertility management as one reason to rehabilitate by stumping. Fertiliser type and rate must come from a soil or leaf test and the current national guidance, not from this file. Treat nitrogen, magnesium and potassium deficiency as separate rows once a test points to a specific nutrient.",
+    "escalate_when": "Trees stay pale or small after a season of manure or compost, a few trees are very different from their neighbours (then it is probably not the soil), or you want a soil test.",
+    "regions": [
+      "Uganda (UCDA handbooks)"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Robusta Coffee Handbook (5.0 Introduction; 5.1 Soil analysis; 5.4.2 Farmyard manure; 3.2.2 Mulching)",
+        "url": "https://www.ugandacoffee.go.ug/file-download/download/public/42",
+        "year": 2019
+      },
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Arabica Coffee Handbook (5.0 Introduction; 5.1 Soil analysis; 5.4.2 Farmyard manure)",
+        "url": "https://www.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      }
+    ]
+  },
+  {
+    "id": "old_unpruned_trees",
+    "kind": "disorder",
+    "common_name": "Old, unpruned or overgrown trees",
+    "scientific_name": null,
+    "swahili_name": null,
+    "plant_parts": [
+      "whole_tree",
+      "stem"
+    ],
+    "symptom_categories": [
+      "stunted_growth",
+      "other"
+    ],
+    "farmer_words": [
+      "my coffee trees are very old and tall",
+      "many thin branches but few berries",
+      "the stems are too tall to pick",
+      "the bush is crowded and dark inside",
+      "I have never pruned my coffee"
+    ],
+    "key_signs": [
+      "Old, tall trees with many stems or suckers and a crowded canopy",
+      "Many unproductive or dead branches, small berries and few of them",
+      "Low bearing heads, tall stems that are hard to pick, and a field that has not been pruned or stumped for years"
+    ],
+    "look_alikes": [
+      "overbearing_dieback",
+      "low_soil_fertility"
+    ],
+    "tell_apart_question": "Have these trees gone more than a few years without pruning, de-suckering or cutting back the old stems?",
+    "conditions": "Fields planted a long time ago and never pruned, de-suckered or stumped; crowded planting; heavy shade. UCDA says robusta is due for stumping about 10 years after planting, then every 7 years, and that trees past 40-50 years are no longer worth rehabilitating.",
+    "urgency": "routine",
+    "farmer_advice_en": "After the main harvest, prune: take out dead, broken and unproductive branches and the extra suckers, and keep only 3 or at most 4 good stems per tree. Clean your cutting tool between trees, and burn the cut branches where they were cut instead of dragging them through the farm. Old trees that give few, small berries may need stumping, which means cutting back the old stems so young shoots take over. Plan this with the extension officer rather than doing it alone, and ask the officer when to start.",
+    "officer_note_en": "UCDA Robusta Handbook: prune at the end of the main harvest; keep 3, at most 4, stems; remove suckers and weak lower primaries, and branches close to the ground (a route for pests and disease); prune infested branches in place and do not drag them through the farm (coffee wilt disease); sanitise pruning tools between trees. Stumping (cycle conversion): when the tree is 10 years from planting, bearing heads are under 1 m, yield is under 2 kg of cherry and stems are too tall to pick; then renew every 7 years; keep one vigorous stem (the breather) to nurse the new suckers; trees over 40 years usually need replanting instead. Poor practice (weedy abandoned coffee, poor fertility) is also listed as a reason to rejuvenate by stumping. Back-up for the officer: check soil fertility and weed pressure before blaming age.",
+    "escalate_when": "You want to stump or replant, the trees have dead branches with holes or blue-black wood (then see coffee wilt disease and the twig borer), or yields stay low after pruning.",
+    "regions": [
+      "Uganda (UCDA handbooks)"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Robusta Coffee Handbook (3.2.6 Pruning and de-suckering; 4.1 Rationale for rehabilitating old trees; 4.2 Coffee stumping practices)",
+        "url": "https://www.ugandacoffee.go.ug/file-download/download/public/42",
+        "year": 2019
+      },
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Arabica Coffee Handbook (3.11.7 Pruning and de-suckering; 4.2 Coffee stumping practices)",
+        "url": "https://www.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      }
+    ]
+  },
+  {
+    "id": "weed_competition",
+    "kind": "disorder",
+    "common_name": "Weeds and grass competing with the coffee",
+    "scientific_name": null,
+    "swahili_name": null,
+    "plant_parts": [
+      "whole_tree"
+    ],
+    "symptom_categories": [
+      "stunted_growth",
+      "other"
+    ],
+    "farmer_words": [
+      "grass has grown over my coffee",
+      "the weeds are taller than the young coffee",
+      "the young trees are small and not growing",
+      "I left the shamba without weeding",
+      "the coffee is lost in the bush"
+    ],
+    "key_signs": [
+      "Grass or weeds covering the ground between and under the coffee, sometimes taller than young trees",
+      "Young trees are small, pale or slow, and older trees give low yield or poor beans",
+      "Worse where weeding stopped at the end of the rains"
+    ],
+    "look_alikes": [
+      "low_soil_fertility",
+      "drought_stress"
+    ],
+    "tell_apart_question": "Is the ground under and around the stunted trees covered by grass or weeds?",
+    "conditions": "Fields not weeded or mulched; weeds left to seed; weeding stopped during the dry spell; young coffee that is not kept clean. Weeds take water and nutrients from the coffee.",
+    "urgency": "routine",
+    "farmer_advice_en": "Weed by hand or slash the weeds before they flower and seed, and keep young coffee especially clean. Do clean weeding at the end of the rains, because weeds then take the little water that is left, and keep it clean until the next rains. Do not weed with a hoe in the rainy season, because it washes the soil away, and take care not to cut the coffee roots. Spread mulch of dry grass, maize stalks or bean haulms to keep weeds down, about 30 cm away from the stem. If the trees stay small or pale after weeding, call the extension officer.",
+    "officer_note_en": "UCDA Robusta Handbook: weeds compete with coffee for water and nutrients and lead to reduced growth, low yield, poor beans and lost income; control before weeds seed; hand weeding, mulching, close spacing or cover crops are cultural options; hoeing or slashing are mechanical options (use a forked hoe, not a regular hoe, on hard soil in mature coffee, to spare roots); the handbook lists chemical weed control only as a last resort and advises avoiding it until coffee is at least two years old. This file gives no weed-killer names or rates: the officer should advise from the current national registered list. Mulch 5-15 cm deep, at least 15 cm from a young stem and 30 cm from a mature stem, rotating material (prolonged elephant grass or swamp straw mulch can harm coffee). Abandoning coffee under weedy conditions is one reason the handbook gives for stumping.",
+    "escalate_when": "Trees stay stunted or pale after the field has been cleared and mulched, or weeds are too heavy for the family to clear.",
+    "regions": [
+      "Uganda (UCDA handbooks)"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Robusta Coffee Handbook (3.2.1 Weed control; 3.2.2 Mulching; 4.1 Rationale)",
+        "url": "https://www.ugandacoffee.go.ug/file-download/download/public/42",
+        "year": 2019
+      },
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Arabica Coffee Handbook (3.11.1 Weed control)",
+        "url": "https://www.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
+      }
+    ]
+  },
+  {
+    "id": "poor_harvest_practice",
+    "kind": "disorder",
+    "common_name": "Poor harvest and drying practice (quality and price loss)",
+    "scientific_name": null,
+    "swahili_name": null,
+    "plant_parts": [
+      "berries"
+    ],
+    "symptom_categories": [
+      "other"
+    ],
+    "farmer_words": [
+      "the buyer paid me less because of green beans",
+      "my coffee smells mouldy",
+      "I dried it on the ground and the rain wet it",
+      "I stripped all the cherries at once",
+      "the dried coffee is black and mixed"
+    ],
+    "key_signs": [
+      "Green, unripe or over-ripe cherries mixed with red ones, often from stripping the branch",
+      "Coffee dried on bare ground, left in layers that are too thick, or wetted again by rain or dew",
+      "Mouldy, musty or smoky smell; low price at the buyer. This is mainly a quality and price loss, not a plant disease"
+    ],
+    "look_alikes": [],
+    "tell_apart_question": "Did you pick green and red cherries together, or dry the coffee on bare ground or leave it uncovered when it rained?",
+    "conditions": "Strip picking, picking from the ground, late picking, drying on bare ground, no cover at night or in the rain, damp storage or storing in plastic bags.",
+    "urgency": "routine",
+    "farmer_advice_en": "Pick only red ripe cherries by hand and come back to the green ones about 6 to 8 days later; do not strip the branch. Spread a clean tarpaulin or sack under the tree while picking, and do not pick up cherries from the ground. Dry the coffee on a tarpaulin, a mat or a raised rack instead of bare ground, spread it thin, turn it, and cover it at night and before rain so it does not get wet again. Store it dry in clean sisal bags, raised off the floor and away from the wall. If you smell mould or are not sure it is dry, ask the extension officer or your cooperative before you sell.",
+    "officer_note_en": "UCDA Robusta Handbook: selective picking of red ripe cherries gives the best quality; unripe beans are left 6-8 days to mature; strip picking mixes green, damaged and over-ripe cherries into the lot and damages leaves and bearing nodes, lowering the next season's yield; cherries from the ground are often contaminated with ochratoxin A from mould; start drying right after picking; kiboko drying takes 14-30 days to 13-14% moisture, on cement floor, tarpaulin, raised table or raised wire mesh, thin layers (not over 4 cm) in the first 2-3 days, turned and covered at night and in rain; store in sisal, never woven poly bags, on pallets at least 15 cm high and 30 cm from the walls, away from fuel, fertiliser and chemicals. Mould and ochratoxin risk is a food-safety and export-quality issue: refer suspect lots to the cooperative or UCDA quality staff.",
+    "escalate_when": "The coffee smells mouldy or musty, it was wetted again many times, or you are unsure whether it is dry enough to sell.",
+    "regions": [
+      "Uganda (UCDA handbooks)"
+    ],
+    "in_bracol": false,
+    "sources": [
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Robusta Coffee Handbook (8.2 Harvesting best practices; 8.3.2 Dry processing; 8.4 Storage)",
+        "url": "https://www.ugandacoffee.go.ug/file-download/download/public/42",
+        "year": 2019
+      },
+      {
+        "publisher": "Uganda Coffee Development Authority (UCDA)",
+        "title": "Arabica Coffee Handbook (harvesting and drying best practices; 8.5 Coffee storage best practices)",
+        "url": "https://www.ugandacoffee.go.ug/file-download/download/public/43",
+        "year": 2019
       }
     ]
   },

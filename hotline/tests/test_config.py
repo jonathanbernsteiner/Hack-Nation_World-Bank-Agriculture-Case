@@ -71,13 +71,33 @@ def test_fresh_import_of_main_with_empty_env_is_closed():
 
 @pytest.mark.parametrize(
     ("raw", "expected"),
-    [(None, True), ("", True), ("true", True), ("false", False), ("FALSE", False)],
+    [
+        (None, True),
+        ("", True),
+        ("true", True),
+        ("false", False),
+        ("FALSE", False),
+        ("0", False),
+        ("no", False),
+        ("off", False),
+        (" false ", False),
+        ("1", True),
+    ],
 )
 def test_price_include_synthetic_defaults_true(monkeypatch, raw, expected):
     if raw is None:
         monkeypatch.delenv("PRICE_INCLUDE_SYNTHETIC", raising=False)
     else:
         monkeypatch.setenv("PRICE_INCLUDE_SYNTHETIC", raw)
+    assert config.load_settings().price_include_synthetic is expected
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [(" Off ", False), ("No", False), ("\tFALSE\n", False), (" 0 ", False), ("   ", True), ("yes", True)],
+)
+def test_price_include_synthetic_is_case_and_space_insensitive(monkeypatch, raw, expected):
+    monkeypatch.setenv("PRICE_INCLUDE_SYNTHETIC", raw)
     assert config.load_settings().price_include_synthetic is expected
 
 

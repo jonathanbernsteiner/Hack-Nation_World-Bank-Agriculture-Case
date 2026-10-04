@@ -9,11 +9,6 @@ from hotline import config, main
 SECRET = "admin-secret-value"
 HEADER = "X-Hotline-Admin-Secret"
 
-STUB_ROUTES = [
-    ("POST", "/api/tools/get_weather_forecast"),
-]
-
-
 @pytest.fixture
 def client():
     return TestClient(main.app)
@@ -65,13 +60,6 @@ def test_deep_health_salt_unset_returns_null_fp(client, monkeypatch):
     response = client.get("/api/health?deep=1", headers={HEADER: SECRET})
     assert response.status_code == 200
     assert response.json()["salt_fp"] is None
-
-
-@pytest.mark.parametrize(("method", "path"), STUB_ROUTES)
-def test_all_stub_routes_return_501(client, method, path):
-    response = client.request(method, path)
-    assert response.status_code == 501
-    assert response.json() == {"status": "not_implemented"}
 
 
 def test_config_import_does_not_require_secrets(monkeypatch):

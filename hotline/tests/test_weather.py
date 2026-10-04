@@ -1,6 +1,7 @@
 import dataclasses
 import os
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 import httpx
 import pytest
@@ -207,3 +208,112 @@ def test_live_open_meteo_smoke():
     weather.set_client(None)
     result = weather.forecast(-0.33, 31.73)
     assert result is not None and len(result["days"]) == 7
+
+
+# --- Review regressions (cycle 1) -------------------------------------------------
+
+
+def test_failed_fetch_is_not_cached(api):
+    """A cached failure would silence the forecast for a whole hour after one bad answer."""
+    install(FakeOpenMeteo(status=500))
+    assert api.post(URL, json=MASAKA, headers=HEADERS).json() == {"status": "unavailable"}
+    healthy = install(FakeOpenMeteo())
+    assert api.post(URL, json=MASAKA, headers=HEADERS).json()["status"] == "ok"
+    assert len(healthy.requests) == 1
+
+
+def test_timed_out_fetch_is_not_cached(monkeypatch):
+    monkeypatch.setattr(weather, "TIMEOUT_S", 0.2)
+    install(FakeOpenMeteo(delay=0.6))
+    assert weather.forecast(-0.33, 31.73) is None
+    healthy = install(FakeOpenMeteo())
+    assert weather.forecast(-0.33, 31.73) is not None
+    assert len(healthy.requests) == 1
+
+
+def test_deadline_holds_when_every_worker_is_busy(monkeypatch):
+    """More slow calls than workers: queued calls must still give up at the deadline."""
+    deadline = 0.3
+    pool = ThreadPoolExecutor(max_workers=2)
+    monkeypatch.setattr(weather, "_executor", pool)
+    monkeypatch.setattr(weather, "TIMEOUT_S", deadline)
+    install(FakeOpenMeteo(delay=1.5))
+
+    def timed(i: int):
+        started = time.monotonic()
+        return weather.forecast(0.1 * i, 32.0), time.monotonic() - started
+
+    try:
+        with ThreadPoolExecutor(max_workers=5) as callers:
+            results = list(callers.map(timed, range(5)))
+    finally:
+        pool.shutdown(wait=False, cancel_futures=True)
+    assert [result for result, _ in results] == [None] * 5
+    assert max(elapsed for _, elapsed in results) < deadline + 0.5
+
+
+@pytest.mark.parametrize("payload", [{}, {"daily": None}, [], {"daily": "oops"}])
+def test_malformed_open_meteo_payload_is_unavailable_not_500(api, payload):
+    weather.set_client(httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(200, json=payload))))
+    response = api.post(URL, json=MASAKA, headers=HEADERS)
+    assert response.status_code == 200 and response.json() == {"status": "unavailable"}
+
+
+class RecordingConnection:
+    """Stands in for `db.connect()`: records the SQL and parameters, returns one row."""
+
+    def __init__(self, row):
+        self.row, self.calls = row, []
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def execute(self, sql, params):
+        self.calls.append((sql, params))
+        return self
+
+    def fetchone(self):
+        return self.row
+
+
+def test_route_farmer_lookup_binds_conversation_id_and_returns_place_only(api, monkeypatch):
+    """Real route wiring: the id is a bound parameter, and only the place label leaves the server."""
+    from hotline import db as hotline_db
+
+    fake = install(FakeOpenMeteo())
+    connection = RecordingConnection(("Kyabakuza", "Masaka", -0.31, 31.74))
+    monkeypatch.setattr(route, "farmer_place", REAL_FARMER_PLACE)
+    monkeypatch.setattr(hotline_db, "connect", lambda: connection)
+    hostile_id = "conv_1' or '1'='1"
+    body = api.post(URL, json={"conversation_id": hostile_id, "district": "Gulu"}, headers=HEADERS).json()
+
+    sql, params = connection.calls[0]
+    assert params == (hostile_id,) and hostile_id not in sql
+    select_list = sql.lower().split("from")[0]
+    for column in ("farmer_id", "pin", "name", "phone"):
+        assert column not in select_list
+    assert set(body) == {"status", "place", "source", "days", "summary"}
+    assert body["place"] == "Kyabakuza, Masaka"
+    assert dict(fake.requests[0].url.params)["latitude"] == "-0.31"
+
+
+def test_unconfigured_database_falls_back_to_request_district(api, monkeypatch):
+    """No DATABASE_URL (e.g. a misconfigured deploy) must not turn into a 500."""
+    monkeypatch.setattr(route, "farmer_place", REAL_FARMER_PLACE)
+    monkeypatch.setattr(config, "settings", dataclasses.replace(config.settings, database_url=None))
+    install(FakeOpenMeteo())
+    response = api.post(URL, json=MASAKA, headers=HEADERS)
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok" and response.json()["place"] == "Masaka"
+
+
+@pytest.mark.xfail(strict=True, reason="review cycle 1, finding 1: a missing temperature is reported as 0 degrees C")
+def test_missing_temperature_is_not_reported_as_zero_degrees(api):
+    daily = {**DAILY, "temperature_2m_max": [*DAILY["temperature_2m_max"][:6], None],
+             "temperature_2m_min": [*DAILY["temperature_2m_min"][:6], None]}
+    install(FakeOpenMeteo(daily=daily))
+    last = api.post(URL, json=MASAKA, headers=HEADERS).json()["days"][6]
+    assert last.get("tmin_c") != 0 and last.get("tmax_c") != 0

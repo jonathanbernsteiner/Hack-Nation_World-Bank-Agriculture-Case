@@ -69,8 +69,8 @@ def test_refusal_goes_to_needs_review(fake_db, monkeypatch):
 
     monkeypatch.setattr(process, "run_call", boom)
     assert process.process_call("conv-1") == "needs_review"
-    status, error, bump = fake_db["finished"][0]
-    assert (status, bump) == ("needs_review", 0) and "secret" not in error
+    status, error = fake_db["finished"][0]
+    assert status == "needs_review" and "secret" not in error
 
 
 def test_generic_error_fails_with_class_name_only(fake_db, monkeypatch):
@@ -79,8 +79,8 @@ def test_generic_error_fails_with_class_name_only(fake_db, monkeypatch):
 
     monkeypatch.setattr(process, "run_call", boom)
     assert process.process_call("conv-1") == "failed"
-    status, error, bump = fake_db["finished"][0]
-    assert (status, bump) == ("failed", 1) and error == "RuntimeError" and len(error) <= 500
+    status, error = fake_db["finished"][0]
+    assert status == "failed" and error == "RuntimeError" and len(error) <= 500
 
 
 def test_lost_claim_is_reported(fake_db, monkeypatch):
@@ -109,6 +109,14 @@ def test_process_pending_runs_each_claim(fake_db, monkeypatch):
     monkeypatch.setattr(process, "run_call", lambda *a, **k: result())
     assert process.process_pending(5) == ["processed", "processed"]
     assert process.process_pending(5) == []
+
+
+def test_claim_consumes_an_attempt_and_finish_does_not():
+    # A run killed by maxDuration never reaches _finish; if only _finish counted attempts, the
+    # sweeper would reclaim that stale call every 5 minutes forever (and pay Anthropic each time).
+    claim_sql = " ".join(process._CLAIM_SQL.split())
+    assert "attempts = c.attempts + 1" in claim_sql
+    assert "attempts" not in process._FINISH_SQL
 
 
 def test_entry_params_only_known_columns():
@@ -185,6 +193,8 @@ def test_claim_semantics_on_real_db(db):
     assert process._claim(db, "t-fresh") is None
     claimed = process._claim(db, "t-stale")
     assert claimed["is_synthetic"] is True
+    attempts = db.execute("select attempts from calls where id = %s", (claimed["id"],)).fetchone()[0]
+    assert attempts == 1  # the reclaim of a crashed run counts as an attempt
     assert process._save(db, claimed, result()) is True
     assert process._save(db, claimed, result()) is False  # claim consumed: a second save is refused
     db.execute("update calls set status = 'failed' where id = %s", (claimed["id"],))

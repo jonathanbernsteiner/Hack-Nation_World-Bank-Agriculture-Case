@@ -16,7 +16,7 @@ ENGLISH_SPEAKERS = {"agent": "Agent", "farmer": "Farmer"}
 
 @dataclass(frozen=True)
 class RunResult:
-    lines_en: list[dict]  # {i, role, sw, en}
+    lines_en: list[dict]  # the stored lines ({i, role, sw, t}) plus en
     transcript_en: str
     extraction: dict  # raw model output, kept for audit
     consent: str
@@ -50,14 +50,20 @@ def _default_extractor(lines_en: list[dict], call_date: date) -> Any:
     return extract.extract_entries(lines_en, call_date)
 
 
-def _default_verifier(extraction: Any, **kwargs: Any) -> Any:
+def _default_verifier(
+    extraction: Any, *, lines: list[dict], call_date: date, tool_results: list[dict], identified_by: str | None
+) -> Any:
+    """verify.verify(extraction, lines_en, call_date, *, tool_results, identified_by, reask) from #59;
+    its reask takes only the error list, so the lines, date and previous answer are bound here."""
     from hotline.pipeline import extract, verify
 
-    lines_en, call_date = kwargs["lines_en"], kwargs["call_date"]
     return verify.verify(
         extraction,
-        reask=lambda errors: extract.reask(lines_en, call_date, extraction, errors),
-        **kwargs,
+        lines,
+        call_date,
+        tool_results=tool_results,
+        identified_by=identified_by,
+        reask=lambda errors: extract.reask(lines, call_date, extraction, errors),
     )
 
 
@@ -66,10 +72,8 @@ def _render(lines_en: list[dict]) -> str:
 
 
 def _numbered(lines: list[dict]) -> list[dict]:
-    return [
-        {"i": line.get("i", position), "role": line["role"], "sw": line["sw"]}
-        for position, line in enumerate(lines)
-    ]
+    """Copies of the stored lines (keeping t and any other key) with i filled in."""
+    return [{**line, "i": line.get("i", position)} for position, line in enumerate(lines)]
 
 
 def run_call(
@@ -91,14 +95,18 @@ def run_call(
     raw = (extractor or _default_extractor)(lines_en, call_date)
     verified = (verifier or _default_verifier)(
         raw,
-        lines_en=lines_en,
+        lines=lines_en,
         call_date=call_date,
         tool_results=tool_results or [],
         identified_by=identified_by,
     )
-    entries = [_as_dict(entry) for entry in _field(verified, "entries", [])]
     consent = _field(verified, "consent") or _field(raw, "consent") or "unclear"
-    needs_review = bool(_field(verified, "needs_review")) or any(entry.get("needs_review") for entry in entries)
+    # Spec section 7 Verify step 8: consent "no" means no entries, and the call is still processed.
+    entries = [] if consent == "no" else [_as_dict(entry) for entry in _field(verified, "entries", [])]
+    # verify.py flags review on the result (location id, low confidence, unverified quote).
+    needs_review = consent != "no" and (
+        bool(_field(verified, "needs_review")) or any(entry.get("needs_review") for entry in entries)
+    )
     return RunResult(
         lines_en=lines_en,
         transcript_en=_render(lines_en),

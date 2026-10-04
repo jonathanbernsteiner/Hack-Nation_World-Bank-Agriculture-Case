@@ -52,7 +52,8 @@ with picked as (
     for update skip locked
 )
 update calls c
-   set status = 'processing', processing_started_at = now(), last_error = null
+   set status = 'processing', processing_started_at = now(), attempts = c.attempts + 1,
+       last_error = null
   from picked
  where c.id = picked.id
 returning c.id, c.conversation_id, c.farmer_id, c.identified_by, c.received_at,
@@ -69,7 +70,7 @@ update calls set status = %(status)s, transcript_en = %(transcript_en)s,
 returning id
 """
 _FINISH_SQL = """
-update calls set status = %(status)s, last_error = %(error)s, attempts = attempts + %(bump)s
+update calls set status = %(status)s, last_error = %(error)s
  where id = %(id)s and status = 'processing' and processing_started_at = %(claimed_at)s
 """
 
@@ -123,27 +124,26 @@ def _save(conn: psycopg.Connection, call: dict, result: RunResult) -> bool:
     return True
 
 
-def _finish(conn: psycopg.Connection, call: dict, status: str, error: str, bump: int) -> None:
+def _finish(conn: psycopg.Connection, call: dict, status: str, error: str) -> None:
     conn.execute(
         _FINISH_SQL,
         {
             "status": status,
             "error": error[:MAX_LAST_ERROR_CHARS],
-            "bump": bump,
             "id": call["id"],
             "claimed_at": call["processing_started_at"],
         },
     )
 
 
-def _error_status(exc: BaseException) -> tuple[str, str, int]:
-    """(status, last_error, attempts increment). Class names only: messages can echo payloads."""
+def _error_status(exc: BaseException) -> tuple[str, str]:
+    """(status, last_error). Class names only: messages can echo payloads."""
     names = {cls.__name__ for cls in type(exc).__mro__}
     category = getattr(exc, "category", None)
     label = type(exc).__name__ + (f" ({category})" if category else "")
     if names & REVIEW_ERRORS:
-        return "needs_review", label, 0
-    return "failed", label, 1
+        return "needs_review", label
+    return "failed", label
 
 
 def _run_claimed(call: dict) -> str:
@@ -156,10 +156,10 @@ def _run_claimed(call: dict) -> str:
             identified_by=call["identified_by"],
         )
     except Exception as exc:  # noqa: BLE001 - every failure must land in the row
-        status, error, bump = _error_status(exc)
+        status, error = _error_status(exc)
         logger.error("processing %s failed: %s", call["conversation_id"], error)
         with db.transaction() as conn:
-            _finish(conn, call, status, error, bump)
+            _finish(conn, call, status, error)
         return status
     with db.transaction() as conn:
         saved = _save(conn, call, result)
